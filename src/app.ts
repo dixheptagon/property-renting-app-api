@@ -31,16 +31,14 @@ app.get('/', (req: Request, res: Response) => {
 
 // import routers
 
-// import authRouter from './routers/auth/auth.route';
+import authRouter from './routers/auth/auth.route';
 
-// // use user router
+// use user router
 
-// const routers = [
-//   authRouter,
-// ];
-// routers.forEach((router) => {
-//   app.use('/api', router);
-// });
+const routers = [authRouter];
+routers.forEach((router) => {
+  app.use('/api', router);
+});
 
 // setup error handler middleware
 app.use(errorMiddleware);
