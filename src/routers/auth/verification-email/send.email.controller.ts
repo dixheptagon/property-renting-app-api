@@ -52,6 +52,14 @@ export const SendEmailVerificationController = async (
 
     // Expiry in 15 minutes for email verification
     const verificationExpiry = new Date(Date.now() + 15 * 60 * 1000);
+    // convert to Locale for casting
+    const expireTimeStamp = verificationExpiry.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
     // Store or update email verification data
     await database.emailVerification.upsert({
@@ -73,8 +81,8 @@ export const SendEmailVerificationController = async (
       },
     });
 
-    // Create verification link
-    const verificationLink = `http://localhost:3000/verify-email?token=${verificationToken}`;
+    // Create verification link ( NEED TO CHANGE )
+    const verificationLink = `http://localhost:8000/verify-email?verification_token=${verificationToken}`;
 
     // Generate timestamp
     const currentTimestamp = new Date().toLocaleDateString('en-US', {
@@ -86,10 +94,7 @@ export const SendEmailVerificationController = async (
     });
 
     // Send email verification
-    const templateHtmlDir = path.resolve(
-      __dirname,
-      '../../lib/template/accountActivation',
-    );
+    const templateHtmlDir = path.resolve(__dirname, '../../../lib/template');
     const templateHtmlFile = 'account.activation.html';
     const templateHtmlPath = path.join(templateHtmlDir, templateHtmlFile);
 
@@ -101,6 +106,7 @@ export const SendEmailVerificationController = async (
       verification_code: verificationCode,
       verification_link: verificationLink,
       expire_minutes: 15,
+      expire_timestamp: expireTimeStamp,
       email_timestamp: currentTimestamp,
       current_year: new Date().getFullYear(),
     });

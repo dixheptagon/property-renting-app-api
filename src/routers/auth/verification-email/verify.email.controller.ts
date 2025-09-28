@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
-import { VerifyEmailSchema } from './verify.email.validation';
+import { VerifyOtpSchema, VerifyTokenSchema } from './verify.email.validation';
 import database from '../../../lib/config/prisma.client';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
 
@@ -11,23 +11,27 @@ export const VerifyEmailController = async (
   next: NextFunction,
 ) => {
   try {
-    const { email, verification_code, verification_token } =
-      await VerifyEmailSchema.validate(req.body, { abortEarly: false });
+    let whereClause: any = { is_used: false, used_at: null };
+    let email: string | undefined;
 
-    // Find verification record
-    let whereClause: {
-      email: string;
-      is_used: boolean;
-      used_at: Date | null;
-      verification_code?: string;
-      verification_token?: string;
-    } = { email, is_used: false, used_at: null };
-
-    if (verification_code) {
-      whereClause.verification_token = verification_code;
+    // cek kalau ada token di query → link verification
+    if (req.query.verification_token) {
+      const { verification_token } = await VerifyTokenSchema.validate(
+        req.query,
+        { abortEarly: false },
+      );
+      whereClause.verification_token = verification_token;
     } else {
-      whereClause.verification_code = verification_token;
+      // kalau OTP, ambil dari body
+      const { email: bodyEmail, verification_code } =
+        await VerifyOtpSchema.validate(req.body, { abortEarly: false });
+
+      email = bodyEmail;
+      whereClause.email = bodyEmail;
+      whereClause.verification_code = verification_code;
     }
+
+    console.log(whereClause);
 
     const emailVerification = await database.emailVerification.findFirst({
       where: whereClause,
@@ -37,7 +41,7 @@ export const VerifyEmailController = async (
       throw new CustomError(
         HttpRes.status.BAD_REQUEST,
         HttpRes.message.BAD_REQUEST,
-        'Invalid or expired verification code/verification token',
+        'Invalid or expired verification code/ verification token',
       );
     }
 
@@ -64,7 +68,7 @@ export const VerifyEmailController = async (
         HttpRes.message.OK +
           ' : Email verified successfully. Please complete your registration.',
         {
-          email: email,
+          email: email ?? emailVerification.email, // if using OTP give email, if using link get email from database
           verified: true,
           canProceedToRegister: true,
         },

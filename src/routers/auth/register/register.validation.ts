@@ -17,5 +17,5 @@ export const RegisterSchema = Yup.object().shape({
     ),
   role: Yup.mixed<UserRole>()
     .oneOf([UserRole.guest, UserRole.tenant], 'Invalid role')
-    .required('Role is required'),
+    .optional(),
 });

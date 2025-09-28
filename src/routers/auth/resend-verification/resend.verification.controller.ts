@@ -19,7 +19,7 @@ export const ResendVerificationController = async (
     const recentVerification = await database.emailVerification.findFirst({
       where: {
         email,
-        created_at: {
+        updated_at: {
           gte: new Date(Date.now() - 1 * 60 * 1000), // 1 minute ago
         },
       },

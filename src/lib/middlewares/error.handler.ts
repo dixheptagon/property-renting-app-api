@@ -42,7 +42,7 @@ export const errorMiddleware = (
     .json(
       ResponseHandler.error(
         HttpRes.message.INTERNAL_SERVER_ERROR,
-        HttpRes.details.INTERNAL_SERVER_ERROR + `: ${(err as Error).message}` ||
+        `An internal server error occurred ` + `: ${(err as Error).message}` ||
           'Unknown error',
       ),
     );

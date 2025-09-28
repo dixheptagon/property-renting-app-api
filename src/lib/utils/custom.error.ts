@@ -7,6 +7,6 @@ export class CustomError extends Error {
   constructor(status: number, message: string, err?: string) {
     super(message);
     this.status = status;
-    this.details = err || HttpRes.details.INTERNAL_SERVER_ERROR;
+    this.details = err || `An internal server error occurred.`;
   }
 }
