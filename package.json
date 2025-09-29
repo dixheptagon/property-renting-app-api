@@ -14,8 +14,12 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "ts-node prisma/seed.ts",
     "prepare": "husky install",
     "migrate:dev": "dotenv -e .env.development -- npx prisma migrate dev"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
