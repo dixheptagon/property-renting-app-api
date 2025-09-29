@@ -213,7 +213,6 @@ model Room {
   beds                  Int
   highlight             Json? // room privalage // keunggulan kamar // kalau mau buat others juga bisa
 
-  booked_count          Int // berapa unit yang sudah kebooking, harus <= total_units
   total_units           Int
 
   created_at            DateTime             @default(now())
