@@ -19,6 +19,8 @@ export interface Config {
   //   CLOUD_API_KEY: string;
   //   CLOUD_API_SECRET: string;
   // CLOUD_EVENT_IMAGE_FOLDER_PATH: string;
+  MIDTRANS_SERVER_KEY: string;
+  MIDTRANS_CLIENT_KEY: string;
 }
 
 // create schema for validation
@@ -44,6 +46,8 @@ const schema = Yup.object().shape({
   //   CLOUD_EVENT_IMAGE_FOLDER_PATH: Yup.string().required(
   //     'CLOUD_EVENT_IMAGE_FOLDER_PATH is required',
   //   ),
+  MIDTRANS_SERVER_KEY: Yup.string().required('MIDTRANS_SERVER_KEY is required'),
+  MIDTRANS_CLIENT_KEY: Yup.string().required('MIDTRANS_CLIENT_KEY is required'),
 });
 
 // validate config
