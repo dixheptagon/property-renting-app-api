@@ -5,7 +5,6 @@ import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import GetTotalPriceOrder from '../utils/get.total.price.order';
 import snap from '../../../lib/config/midtrans.client';
-import { Decimal } from '@prisma/client/runtime/library';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
 
 export const CreateOrderController = async (
@@ -48,6 +47,9 @@ export const CreateOrderController = async (
         check_out_date: {
           gte: check_in_date,
         },
+        status: {
+          not: 'cancelled',
+        },
       },
     });
 
@@ -67,14 +69,14 @@ export const CreateOrderController = async (
     );
 
     // START TRANSACTIONS
-    const uid = 'BOOKING-' + crypto.randomUUID();
+    const uid = 'ORDER-' + crypto.randomUUID();
 
     // payment deadline 2 Hours after booking
     const payment_deadline = new Date();
     payment_deadline.setHours(payment_deadline.getHours() + 2);
 
     //2. Create Booking Order in database
-    const booking = await database.booking.create({
+    const order = await database.booking.create({
       data: {
         uid,
         user_id,
@@ -94,6 +96,9 @@ export const CreateOrderController = async (
       },
     });
 
+    // Separate Fullname to First and Last Name
+    const [firstName, lastName] = fullname.split(' ');
+
     // 3. Preparing Send Data : Make Parameter for Midtrans Transaction
     const transactionDetails = {
       transaction_details: {
@@ -101,9 +106,28 @@ export const CreateOrderController = async (
         gross_amount: total_price,
       },
       customer_details: {
-        fullname: booking.fullname,
-        email: booking.email,
-        phone: booking.phone_number,
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        phone: phone_number,
+      },
+      enabled_payments: [
+        'credit_card',
+        'cimb_clicks',
+        'bca_klikbca',
+        'bca_klikpay',
+        'bri_epay',
+        'bca_va',
+        'bni_va',
+        'bri_va',
+        'other_va',
+        'gopay',
+        'indomaret',
+        'other_qris',
+      ],
+      expiry: {
+        unit: 'hours',
+        duration: 2,
       },
     };
 
@@ -112,7 +136,7 @@ export const CreateOrderController = async (
 
     // 5. update booking with midtrans token
     await database.booking.update({
-      where: { id: booking.id },
+      where: { id: order.id },
       data: { transaction_id: transactionToken.token },
     });
 
@@ -122,7 +146,7 @@ export const CreateOrderController = async (
       .json(
         ResponseHandler.success(
           `${HttpRes.message.CREATED} : Order created successfully`,
-          { booking, transaction_token: transactionToken },
+          { order, transaction_token: transactionToken },
         ),
       );
   } catch (error) {
