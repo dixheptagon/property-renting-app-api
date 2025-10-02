@@ -15,10 +15,11 @@ export interface Config {
   ACTIVATION_ACCOUNT_URL: string;
   NODEMAILER_APP_EMAIL: string;
   NODEMAILER_APP_PASSWORD: string;
-  //   CLOUD_NAME: string;
-  //   CLOUD_API_KEY: string;
-  //   CLOUD_API_SECRET: string;
+  CLOUD_NAME: string;
+  CLOUD_API_KEY: string;
+  CLOUD_API_SECRET: string;
   // CLOUD_EVENT_IMAGE_FOLDER_PATH: string;
+  CLOUD_PAYMENT_PROOF_FOLDER_PATH: string;
   MIDTRANS_SERVER_KEY: string;
   MIDTRANS_CLIENT_KEY: string;
 }
@@ -40,12 +41,15 @@ const schema = Yup.object().shape({
   NODEMAILER_APP_PASSWORD: Yup.string().required(
     'NODEMAILER_APP_PASSWORD is required',
   ),
-  //   CLOUD_NAME: Yup.string().required('CLOUD_NAME is required'),
-  //   CLOUD_API_KEY: Yup.string().required('CLOUD_API_KEY is required'),
-  //   CLOUD_API_SECRET: Yup.string().required('CLOUD_API_SECRET is required'),
-  //   CLOUD_EVENT_IMAGE_FOLDER_PATH: Yup.string().required(
-  //     'CLOUD_EVENT_IMAGE_FOLDER_PATH is required',
-  //   ),
+  CLOUD_NAME: Yup.string().required('CLOUD_NAME is required'),
+  CLOUD_API_KEY: Yup.string().required('CLOUD_API_KEY is required'),
+  CLOUD_API_SECRET: Yup.string().required('CLOUD_API_SECRET is required'),
+  // CLOUD_EVENT_IMAGE_FOLDER_PATH: Yup.string().required(
+  //   'CLOUD_EVENT_IMAGE_FOLDER_PATH is required',
+  // ),
+  CLOUD_PAYMENT_PROOF_FOLDER_PATH: Yup.string().required(
+    'CLOUD_PAYMENT_PROOF_FOLDER_PATH is required',
+  ),
   MIDTRANS_SERVER_KEY: Yup.string().required('MIDTRANS_SERVER_KEY is required'),
   MIDTRANS_CLIENT_KEY: Yup.string().required('MIDTRANS_CLIENT_KEY is required'),
 });
