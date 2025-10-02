@@ -48,7 +48,7 @@ export const CreateOrderController = async (
           gte: check_in_date,
         },
         status: {
-          not: 'cancelled',
+          notIn: ['cancelled', 'completed'],
         },
       },
     });

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { CreateOrderController } from './create-order/create.order.controller';
 import { OrderNotificationController } from './order-notification/order.notification.controller';
 import { GetBookingController } from './get-booking/get.booking.controller';
+import { CancelOrderController } from './cancel-order/cancel.order.controller';
 
 const bookingRouter = Router();
 
@@ -11,5 +12,7 @@ bookingRouter.post('/booking/create-order', CreateOrderController);
 bookingRouter.post('/booking/order-notification', OrderNotificationController);
 // 3. Get Booking Details
 bookingRouter.get('/booking/:orderId', GetBookingController);
+// 4. Cancel Booking Order
+bookingRouter.post('/booking/:orderId/cancel-order', CancelOrderController);
 
 export default bookingRouter;

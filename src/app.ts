@@ -41,6 +41,10 @@ routers.forEach((router) => {
   app.use('/api', router);
 });
 
+// Initialize auto-cancel cron job
+import { AutoCancelOrder } from './routers/booking/auto-cancel-order/auto.cancel.order.controller';
+AutoCancelOrder();
+
 // setup error handler middleware
 app.use(errorMiddleware);
 
