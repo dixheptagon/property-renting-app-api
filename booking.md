@@ -62,7 +62,7 @@ Handles Midtrans payment notifications. Verifies signature and updates booking s
 
 ### 3. Get Booking Status
 
-**GET** `/api/booking/:orderId?user_id=1`
+**GET** `/api/booking/get-booking/:orderId?user_id=1`
 
 Retrieves booking details. Accessible only by booking owner or admin (tenant role).
 

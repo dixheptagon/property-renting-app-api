@@ -3,6 +3,7 @@ import database from '../../../lib/config/prisma.client';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
+import { CancelOrderSchema } from './cancel.order.validation';
 
 export const CancelOrderController = async (
   req: Request,
@@ -13,6 +14,10 @@ export const CancelOrderController = async (
     const { orderId } = req.params;
 
     const { user_id } = req.query; // Assuming user_id passed as query param for auth
+
+    const { cancellation_reason } = await CancelOrderSchema.validate(req.body, {
+      abortEarly: false,
+    });
 
     if (!user_id || typeof user_id !== 'string') {
       throw new CustomError(
@@ -74,6 +79,7 @@ export const CancelOrderController = async (
         id: updatedBooking.id,
         uid: updatedBooking.uid,
         status: updatedBooking.status,
+        cancellation_reason,
       }),
     );
   } catch (error) {
