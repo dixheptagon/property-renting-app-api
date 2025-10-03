@@ -1,0 +1,18 @@
+[
+  {
+    "booking_uid": "booking-1",
+    "user_uid": "guest-1",
+    "property_uid": "property-1-1",
+    "rating": 4.5,
+    "comment": "Great stay! The room was clean and comfortable.",
+    "is_public": true
+  },
+  {
+    "booking_uid": "booking-2",
+    "user_uid": "guest-2",
+    "property_uid": "property-2-2",
+    "rating": 5.0,
+    "comment": "Excellent experience. Highly recommend!",
+    "is_public": true
+  }
+]

@@ -32,13 +32,18 @@ app.get('/', (req: Request, res: Response) => {
 // import routers
 
 import authRouter from './routers/auth/auth.route';
+import bookingRouter from './routers/booking/booking.route';
 
 // use user router
 
-const routers = [authRouter];
+const routers = [authRouter, bookingRouter];
 routers.forEach((router) => {
   app.use('/api', router);
 });
+
+// Initialize auto-cancel cron job
+import { AutoCancelOrder } from './routers/booking/auto-cancel-order/auto.cancel.order.controller';
+AutoCancelOrder();
 
 // setup error handler middleware
 app.use(errorMiddleware);

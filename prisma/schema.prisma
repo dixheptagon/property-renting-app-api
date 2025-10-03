@@ -27,6 +27,7 @@ enum PropertyStatus {
 enum BookingStatus {
   pending_payment
   processing
+  confirmed
   cancelled
   completed
 }
