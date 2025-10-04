@@ -46,6 +46,10 @@ routers.forEach((router) => {
 import { AutoCancelOrder } from './routers/booking/auto-cancel-order/auto.cancel.order.controller';
 AutoCancelOrder();
 
+// Initialize auto order reminder cron job
+import { AutoOrderReminderController } from './routers/tenant-transactions/auto-order-reminder/auto.order.reminder.controller';
+AutoOrderReminderController();
+
 // setup error handler middleware
 app.use(errorMiddleware);
 
