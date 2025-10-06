@@ -6,8 +6,6 @@ import { HttpRes } from '../constant/http.response';
 export const uploadPaymentProof = () => {
   const storage = multer.memoryStorage();
 
-  console.log('Upload Multer successfully >>>> ');
-
   return multer({
     storage: storage,
     limits: { fileSize: 1 * 1024 * 1024 }, // limit file size 1MB

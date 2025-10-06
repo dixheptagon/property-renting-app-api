@@ -33,10 +33,11 @@ app.get('/', (req: Request, res: Response) => {
 
 import authRouter from './routers/auth/auth.route';
 import bookingRouter from './routers/booking/booking.route';
+import tenantRouter from './routers/tenant-transactions/tenant.route';
 
 // use user router
 
-const routers = [authRouter, bookingRouter];
+const routers = [authRouter, bookingRouter, tenantRouter];
 routers.forEach((router) => {
   app.use('/api', router);
 });
@@ -44,6 +45,10 @@ routers.forEach((router) => {
 // Initialize auto-cancel cron job
 import { AutoCancelOrder } from './routers/booking/auto-cancel-order/auto.cancel.order.controller';
 AutoCancelOrder();
+
+// Initialize auto order reminder cron job
+import { AutoOrderReminderController } from './routers/tenant-transactions/auto-order-reminder/auto.order.reminder.controller';
+AutoOrderReminderController();
 
 // setup error handler middleware
 app.use(errorMiddleware);

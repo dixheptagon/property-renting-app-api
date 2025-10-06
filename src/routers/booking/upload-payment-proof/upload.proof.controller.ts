@@ -73,6 +73,7 @@ export const UploadPaymentProofController = async (
         payment_proof: uploadResult.secure_url,
         status: 'processing',
         paid_at: new Date(),
+        payment_method: 'bank_transfer',
       },
     });
 
