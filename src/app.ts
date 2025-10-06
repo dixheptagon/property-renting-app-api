@@ -50,6 +50,10 @@ AutoCancelOrder();
 import { AutoOrderReminderController } from './routers/tenant-transactions/auto-order-reminder/auto.order.reminder.controller';
 AutoOrderReminderController();
 
+// Initialize auto complete order cron job
+import { AutoCompleteOrderController } from './routers/tenant-transactions/auto-complete-order/auto.complete.order.controller';
+AutoCompleteOrderController();
+
 // setup error handler middleware
 app.use(errorMiddleware);
 
