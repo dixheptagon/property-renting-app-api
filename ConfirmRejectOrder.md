@@ -30,7 +30,7 @@ Replace the `id` with a valid tenant user ID from your database.
 
 ## URL Parameters
 
-- `orderId` (required): The booking UID (string) to confirm or reject. Format: ORDER-xxxxx (e.g., ORDER-858f1f8e-2305-42bd-816c-942b47d461c6)
+- `orderId` (required): The booking UID (string) to confirm or reject. Format: ORDER-xxxxx (e.g., ORDER-123)
 
 ## Request Body
 
