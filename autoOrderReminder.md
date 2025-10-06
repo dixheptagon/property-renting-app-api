@@ -25,61 +25,22 @@ The Auto Order Reminder feature automatically sends email reminders to guests 1 
 
 **File**: `src/routers/tenant-transactions/auto-order-reminder/auto.order.reminder.controller.ts`
 
-Contains both the cron scheduling and the reminder logic:
-
-```typescript
-export const AutoOrderReminderController = () => {
-  cron.schedule('0 0 * * *', async () => {
-    try {
-      // Calculate tomorrow's date
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowDate = tomorrow.toISOString().split('T')[0];
-
-      // Query bookings with check_in_date = tomorrow and status in ['confirmed', 'processing']
-      const bookings = await database.booking.findMany({
-        where: {
-          check_in_date: { equals: new Date(tomorrowDate) },
-          status: { in: ['confirmed', 'processing'] },
-        },
-        include: { property: true, room: true },
-      });
-
-      // Send reminder emails
-      const emailPromises = bookings.map(async (booking) => {
-        try {
-          await BookingEmailService.sendBookingReminderEmail(booking.id);
-        } catch (error) {
-          console.error(
-            `Failed to send reminder email for booking ID: ${booking.id}`,
-            error,
-          );
-        }
-      });
-
-      await Promise.all(emailPromises);
-    } catch (error) {
-      console.error('Error in auto order reminder cron job:', error);
-    }
-  });
-};
-```
-
 - Sets up daily cron job at 00:00 server time
 - Queries database for bookings with `check_in_date = tomorrow` and eligible status
-- Sends reminder emails using `BookingEmailService.sendBookingReminderEmail()`
+- Sends reminder emails using `SendReminderService.sendBookingReminderEmail()`
 - Handles errors gracefully (continues with other emails if one fails)
 - Minimal logging (only errors)
 
-#### 3. BookingEmailService Extension
+#### 3. SendReminderService
 
-**File**: `src/routers/tenant-transactions/utils/booking.email.service.ts`
+**File**: `src/routers/tenant-transactions/auto-order-reminder/send.reminder.service.ts`
 
-Added `sendBookingReminderEmail(bookingId: number)` method that:
+Contains `SendReminderService` class with `sendBookingReminderEmail(bookingId: number)` method that:
 
 - Fetches booking with property and room details
 - Formats dates and currency
 - Sends email using `order.reminder.html` template
+- Includes private `sendEmail` utility method for email sending
 
 ### Email Template
 
@@ -207,7 +168,7 @@ WHERE check_in_date = DATEADD(day, 1, GETDATE())
 ## Implementation Notes
 
 - Follows existing codebase patterns and architecture
-- Reuses `BookingEmailService` for consistency
+- Uses dedicated `SendReminderService` for email functionality
 - Integrated into app startup like other cron jobs
 - No API endpoints (background job only)
 - Error-resilient design with comprehensive logging

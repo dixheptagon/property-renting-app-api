@@ -160,7 +160,9 @@ Both endpoints do not require a request body.
 
 - **Confirm Controller**: `ConfirmOrderController` in `src/routers/tenant-transactions/confirm-order/confirm.order.controller.ts`
 - **Reject Controller**: `RejectOrderController` in `src/routers/tenant-transactions/reject-order/reject.order.controller.ts`
-- **Email Service**: `BookingEmailService` in `src/routers/tenant-transactions/utils/booking.email.service.ts`
+- **Email Services**:
+  - **Confirmation**: `SendConfirmationService` in `src/routers/tenant-transactions/confirm-order/send.confirmation.service.ts`
+  - **Rejection**: `SendRejectionService` in `src/routers/tenant-transactions/reject-order/send.rejection.service.ts`
 - Uses Prisma ORM for database operations.
 - Follows clean architecture with separation of concerns.
 - Email templates use Handlebars for dynamic content rendering.

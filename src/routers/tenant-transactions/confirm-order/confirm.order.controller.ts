@@ -4,7 +4,7 @@ import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
 import { AuthRequest } from '../../../lib/middlewares/dummy.verify.role';
-import { BookingEmailService } from '../utils/booking.email.service';
+import { SendConfirmationService } from './send.confirmation.service';
 
 export const ConfirmOrderController = async (
   req: AuthRequest,
@@ -89,7 +89,9 @@ export const ConfirmOrderController = async (
 
     // Send confirmation email (don't fail the request if email fails)
     try {
-      await BookingEmailService.sendBookingConfirmationEmail(updatedBooking.id);
+      await SendConfirmationService.sendBookingConfirmationEmail(
+        updatedBooking.id,
+      );
     } catch (emailError) {
       console.error('Failed to send confirmation email:', emailError);
       // Continue with success response, email failure shouldn't block the confirmation

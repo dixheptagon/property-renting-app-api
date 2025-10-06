@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import database from '../../../lib/config/prisma.client';
-import { BookingEmailService } from '../utils/booking.email.service';
+import { SendReminderService } from './send.reminder.service';
 
 export const AutoOrderReminderController = () => {
   // Run daily at 00:00 server time to send reminder emails for tomorrow's check-ins
@@ -30,7 +30,7 @@ export const AutoOrderReminderController = () => {
       // Send reminder emails
       const emailPromises = bookings.map(async (booking) => {
         try {
-          await BookingEmailService.sendBookingReminderEmail(booking.id);
+          await SendReminderService.sendBookingReminderEmail(booking.id);
         } catch (error) {
           console.error(
             `Failed to send reminder email for booking ID: ${booking.id}`,

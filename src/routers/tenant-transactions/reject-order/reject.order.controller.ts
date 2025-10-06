@@ -4,7 +4,7 @@ import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
 import { AuthRequest } from '../../../lib/middlewares/dummy.verify.role';
-import { BookingEmailService } from '../utils/booking.email.service';
+import { SendRejectionService } from './send.rejection.service';
 
 export const RejectOrderController = async (
   req: AuthRequest,
@@ -95,7 +95,7 @@ export const RejectOrderController = async (
 
     // Send rejection email (don't fail the request if email fails)
     try {
-      await BookingEmailService.sendBookingRejectionEmail(updatedBooking.id);
+      await SendRejectionService.sendBookingRejectionEmail(updatedBooking.id);
     } catch (emailError) {
       console.error('Failed to send rejection email:', emailError);
       // Continue with success response, email failure shouldn't block the rejection
