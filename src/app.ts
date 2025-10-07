@@ -34,10 +34,11 @@ app.get('/', (req: Request, res: Response) => {
 import authRouter from './routers/auth/auth.route';
 import bookingRouter from './routers/booking/booking.route';
 import tenantRouter from './routers/tenant-transactions/tenant.route';
+import reviewRoute from './routers/review/review.route';
 
 // use user router
 
-const routers = [authRouter, bookingRouter, tenantRouter];
+const routers = [authRouter, bookingRouter, tenantRouter, reviewRoute];
 routers.forEach((router) => {
   app.use('/api', router);
 });
