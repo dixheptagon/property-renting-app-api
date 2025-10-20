@@ -11,7 +11,7 @@ export const CheckEmailController = async (
   next: NextFunction,
 ) => {
   try {
-    const { email } = await CheckEmailSchema.validate(req.query, {
+    const { email } = await CheckEmailSchema.validate(req.body, {
       abortEarly: false,
     });
 

@@ -9,7 +9,8 @@ export interface Config {
   PORT: number;
   NODE_ENV: string;
   DIRECT_URL: string;
-  //   JWT_SECRET: string;
+  ACCESS_SECRET: string;
+  REFRESH_SECRET: string;
   //   DATABASE_URL: string;
   //   DOMAIN_URL: string;
   ACTIVATION_ACCOUNT_URL: string;
@@ -29,7 +30,8 @@ const schema = Yup.object().shape({
   PORT: Yup.number().default(2000).required(),
   NODE_ENV: Yup.string().default('development').required(),
   DIRECT_URL: Yup.string().required('DIRECT_URL is required'),
-  //   JWT_SECRET: Yup.string().required('JWT_SECRET is required'),
+  ACCESS_SECRET: Yup.string().required('ACCESS_SECRET is required'),
+  REFRESH_SECRET: Yup.string().required('REFRESH_SECRET is required'),
   //   DATABASE_URL: Yup.string().required('DATABASE_URL is required'),
   //   DOMAIN_URL: Yup.string().required('DOMAIN_URL is required'),
   ACTIVATION_ACCOUNT_URL: Yup.string().required(

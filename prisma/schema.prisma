@@ -55,6 +55,8 @@ model User {
   is_verified       Boolean              @default(false)
 
   password          String? // optional if user register with Oauth 
+  refresh_token     String?
+
   first_name        String
   last_name         String?
   display_name      String?              @unique
