@@ -1,4 +1,6 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import env from '../../../env';
 import { RegisterSchema } from './register.validation';
 import { UserRole } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
@@ -89,7 +91,35 @@ export const RegisterController = async (
         where: { email },
       });
 
-      return { user };
+      // Create JWT token
+      const accessToken = jwt.sign(
+        { uid: user.uid, email: user.email, role: user.role },
+        env.JWT_ACCESS_SECRET,
+        { expiresIn: '15m' },
+      );
+
+      // Create refresh token
+      const refreshToken = jwt.sign(
+        { uid: user.uid, email: user.email, role: user.role },
+        env.JWT_REFRESH_SECRET,
+        { expiresIn: '7d' },
+      );
+
+      await tx.user.update({
+        where: { id: user.id },
+        data: { refresh_token: refreshToken },
+      });
+
+      return { user, accessToken, refreshToken };
+    });
+
+    // Send refresh token via HTTP-Only cookie
+    res.cookie('refresh_token', transaction.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days EXP
     });
 
     const fullname = `${transaction.user.first_name} ${transaction.user.last_name}`;
@@ -99,7 +129,7 @@ export const RegisterController = async (
       .json(
         ResponseHandler.success(
           `${HttpRes.message.CREATED} : Registration completed successfully! Welcome ${fullname}`,
-          { ...transaction.user },
+          { ...transaction.user, access_token: transaction.accessToken },
         ),
       );
   } catch (error) {

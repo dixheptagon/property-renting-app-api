@@ -31,8 +31,6 @@ export const VerifyEmailController = async (
       whereClause.verification_code = verification_code;
     }
 
-    console.log(whereClause);
-
     const emailVerification = await database.emailVerification.findFirst({
       where: whereClause,
     });
