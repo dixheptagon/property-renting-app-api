@@ -9,7 +9,12 @@ import { errorMiddleware } from './lib/middlewares/error.handler';
 const app: Application = express();
 
 // setup middleware : CORS
-app.use(cors()); // Semua client dapat mengakses API kita
+app.use(
+  cors({
+    origin: 'http://localhost:3000', // FE lo
+    credentials: true, // kalau pake cookies
+  }),
+); // Semua client dapat mengakses API kita
 
 // setup middleware: body parser
 app.use(bodyParser.json());

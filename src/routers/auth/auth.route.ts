@@ -5,6 +5,7 @@ import { SendEmailVerificationController } from './verification-email/send.email
 import { ResendVerificationController } from './resend-verification/resend.verification.controller';
 import { VerifyEmailController } from './verification-email/verify.email.controller';
 import { TenantRegisterController } from './register/tenant.register.controller';
+import { LoginController } from './login/login.controller';
 
 const authRouter = Router();
 
@@ -23,5 +24,8 @@ authRouter.post('/auth/verify-email', VerifyEmailController);
 // Step 4: Complete registration after email verification
 authRouter.post('/auth/register', RegisterController);
 authRouter.post('/auth/tenant-register', TenantRegisterController);
+
+// Step 5: Login
+authRouter.post('/auth/login', LoginController);
 
 export default authRouter;

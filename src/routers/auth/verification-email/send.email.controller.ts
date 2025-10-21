@@ -82,7 +82,8 @@ export const SendEmailVerificationController = async (
     });
 
     // Create verification link ( NEED TO CHANGE )
-    const verificationLink = `http://localhost:8000/verify-email?verification_token=${verificationToken}`;
+    // const verificationLink = `http://localhost:8000/verify-email?verification_token=${verificationToken}`;
+    const verificationLink = `${process.env.ACTIVATION_ACCOUNT_URL}?verification_token=${verificationToken}`;
 
     // Generate timestamp
     const currentTimestamp = new Date().toLocaleDateString('en-US', {

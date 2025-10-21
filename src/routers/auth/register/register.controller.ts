@@ -26,6 +26,19 @@ export const RegisterController = async (
       abortEarly: false,
     });
 
+    // Check if user already exists
+    const existingUser = await database.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new CustomError(
+        HttpRes.status.CONFLICT,
+        HttpRes.message.CONFLICT,
+        'User already registered. Please login.',
+      );
+    }
+
     // Check if email was verified
     const emailVerification = await database.emailVerification.findFirst({
       where: {
@@ -40,19 +53,6 @@ export const RegisterController = async (
         HttpRes.status.BAD_REQUEST,
         HttpRes.message.BAD_REQUEST,
         'Email not verified. Please verify your email first.',
-      );
-    }
-
-    // Check if user already exists
-    const existingUser = await database.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      throw new CustomError(
-        HttpRes.status.CONFLICT,
-        HttpRes.message.CONFLICT,
-        'User already registered. Please login.',
       );
     }
 
