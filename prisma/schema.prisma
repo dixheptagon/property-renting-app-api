@@ -101,9 +101,6 @@ model UserProvider {
   provider           String    // example: 'google', 'facebook', 'github'
   provider_user_id   String    // ID unique from provider
 
-  access_token       String?
-  refresh_token      String?
-
   created_at         DateTime  @default(now())
   updated_at         DateTime? @updatedAt
   deleted_at         DateTime?

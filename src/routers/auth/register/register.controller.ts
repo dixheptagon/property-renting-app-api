@@ -129,7 +129,7 @@ export const RegisterController = async (
       .json(
         ResponseHandler.success(
           `${HttpRes.message.CREATED} : Registration completed successfully! Welcome ${fullname}`,
-          { ...transaction.user, access_token: transaction.accessToken },
+          { user: transaction.user, access_token: transaction.accessToken },
         ),
       );
   } catch (error) {

@@ -6,6 +6,8 @@ import { ResendVerificationController } from './resend-verification/resend.verif
 import { VerifyEmailController } from './verification-email/verify.email.controller';
 import { TenantRegisterController } from './register/tenant.register.controller';
 import { LoginController } from './login/login.controller';
+import { SocialLoginController } from './login/social.login.controller';
+import { RefreshTokenController } from './refresh-token/refresh.token.controller';
 
 const authRouter = Router();
 
@@ -25,7 +27,13 @@ authRouter.post('/auth/verify-email', VerifyEmailController);
 authRouter.post('/auth/register', RegisterController);
 authRouter.post('/auth/tenant-register', TenantRegisterController);
 
-// Step 5: Login
+// Step 5a: Login
 authRouter.post('/auth/login', LoginController);
+
+// Step 5b: Social Login
+authRouter.post('/auth/social-login', SocialLoginController);
+
+// step 6: Refresh token
+authRouter.post('/auth/refresh-token', RefreshTokenController);
 
 export default authRouter;
