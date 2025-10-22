@@ -55,6 +55,8 @@ model User {
   is_verified       Boolean              @default(false)
 
   password          String? // optional if user register with Oauth 
+  refresh_token     String?
+
   first_name        String
   last_name         String?
   display_name      String?              @unique
@@ -98,9 +100,6 @@ model UserProvider {
 
   provider           String    // example: 'google', 'facebook', 'github'
   provider_user_id   String    // ID unique from provider
-
-  access_token       String?
-  refresh_token      String?
 
   created_at         DateTime  @default(now())
   updated_at         DateTime? @updatedAt

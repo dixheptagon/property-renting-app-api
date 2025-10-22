@@ -9,7 +9,7 @@ import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
 
-export const RegisterController = async (
+export const TenantRegisterController = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -21,23 +21,10 @@ export const RegisterController = async (
       last_name,
       email,
       password,
-      role = 'guest',
+      role = 'tenant',
     } = await RegisterSchema.validate(req.body, {
       abortEarly: false,
     });
-
-    // Check if user already exists
-    const existingUser = await database.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      throw new CustomError(
-        HttpRes.status.CONFLICT,
-        HttpRes.message.CONFLICT,
-        'User already registered. Please login.',
-      );
-    }
 
     // Check if email was verified
     const emailVerification = await database.emailVerification.findFirst({
@@ -53,6 +40,19 @@ export const RegisterController = async (
         HttpRes.status.BAD_REQUEST,
         HttpRes.message.BAD_REQUEST,
         'Email not verified. Please verify your email first.',
+      );
+    }
+
+    // Check if user already exists
+    const existingUser = await database.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new CustomError(
+        HttpRes.status.CONFLICT,
+        HttpRes.message.CONFLICT,
+        'User already registered. Please login.',
       );
     }
 
@@ -129,7 +129,7 @@ export const RegisterController = async (
       .json(
         ResponseHandler.success(
           `${HttpRes.message.CREATED} : Registration completed successfully! Welcome ${fullname}`,
-          { user: transaction.user, access_token: transaction.accessToken },
+          { ...transaction.user, access_token: transaction.accessToken },
         ),
       );
   } catch (error) {
