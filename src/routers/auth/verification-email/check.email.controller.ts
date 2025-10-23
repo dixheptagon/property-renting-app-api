@@ -11,7 +11,7 @@ export const CheckEmailController = async (
   next: NextFunction,
 ) => {
   try {
-    const { email } = await CheckEmailSchema.validate(req.query, {
+    const { email } = await CheckEmailSchema.validate(req.body, {
       abortEarly: false,
     });
 
@@ -28,10 +28,16 @@ export const CheckEmailController = async (
     });
 
     if (existingUser) {
-      throw new CustomError(
-        HttpRes.status.CONFLICT,
-        HttpRes.message.CONFLICT,
-        'Email already exists, Please login to continue.',
+      return res.status(HttpRes.status.OK).json(
+        ResponseHandler.success(
+          HttpRes.message.CONFLICT +
+            ' Email already exists, Please login to continue.',
+          {
+            exists: true,
+            email: email,
+            canProceed: false,
+          },
+        ),
       );
     }
 

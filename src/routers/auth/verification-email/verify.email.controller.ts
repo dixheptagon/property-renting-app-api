@@ -31,8 +31,6 @@ export const VerifyEmailController = async (
       whereClause.verification_code = verification_code;
     }
 
-    console.log(whereClause);
-
     const emailVerification = await database.emailVerification.findFirst({
       where: whereClause,
     });
@@ -65,8 +63,7 @@ export const VerifyEmailController = async (
 
     return res.status(HttpRes.status.OK).json(
       ResponseHandler.success(
-        HttpRes.message.OK +
-          ' : Email verified successfully. Please complete your registration.',
+        'Email verified successfully. Please complete your registration.',
         {
           email: email ?? emailVerification.email, // if using OTP give email, if using link get email from database
           verified: true,
