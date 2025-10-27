@@ -12,9 +12,9 @@ propertiesRouter.post(
   propertyImageUploadController,
 );
 
-// DELETE /api/properties/images/:imageId
+// DELETE /api/properties/images/:imageId (single image) or DELETE /api/properties/images (group by temp_group_id)
 propertiesRouter.delete(
-  '/properties/images/:imageId',
+  '/properties/images/:imageId?',
   propertyImageDeleteController,
 );
 

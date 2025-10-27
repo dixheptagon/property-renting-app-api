@@ -18,12 +18,24 @@ export const propertyImageUploadController = async (
 
   try {
     const files = req.files as Express.Multer.File[];
+    let { temp_group_id } = req.body;
 
     if (!files || files.length === 0) {
       throw new CustomError(
         HttpRes.status.BAD_REQUEST,
         HttpRes.message.BAD_REQUEST,
         'No files uploaded',
+      );
+    }
+
+    // Generate temp_group_id if not provided
+    if (!temp_group_id) {
+      temp_group_id = crypto.randomUUID();
+    } else if (typeof temp_group_id !== 'string') {
+      throw new CustomError(
+        HttpRes.status.BAD_REQUEST,
+        HttpRes.message.BAD_REQUEST,
+        'temp_group_id must be a string',
       );
     }
 
@@ -78,6 +90,7 @@ export const propertyImageUploadController = async (
             is_main: i === 0, // First image is main
             order_index: i,
             status: 'temp',
+            temp_group_id: temp_group_id || null,
           },
         });
 
@@ -88,6 +101,7 @@ export const propertyImageUploadController = async (
           isMain: propertyImage.is_main,
           orderIndex: propertyImage.order_index,
           status: propertyImage.status,
+          tempGroupId: propertyImage.temp_group_id,
         });
       }
 

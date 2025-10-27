@@ -39,85 +39,140 @@ export const propertyImageDeleteController = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { imageId } = req.body;
+  const { imageId, temp_group_id } = req.body;
 
   try {
-    // Validate imageId
-    const id = parseInt(imageId, 10);
-    if (isNaN(id)) {
+    // Validate that either imageId or temp_group_id is provided
+    if (!imageId && !temp_group_id) {
       throw new CustomError(
         HttpRes.status.BAD_REQUEST,
         HttpRes.message.BAD_REQUEST,
-        'Invalid image ID',
+        'Either imageId or temp_group_id must be provided',
+      );
+    }
+
+    // Validate imageId if provided
+    let id: number | null = null;
+    if (imageId) {
+      id = parseInt(imageId, 10);
+      if (isNaN(id)) {
+        throw new CustomError(
+          HttpRes.status.BAD_REQUEST,
+          HttpRes.message.BAD_REQUEST,
+          'Invalid image ID',
+        );
+      }
+    }
+
+    // Validate temp_group_id if provided
+    if (temp_group_id && typeof temp_group_id !== 'string') {
+      throw new CustomError(
+        HttpRes.status.BAD_REQUEST,
+        HttpRes.message.BAD_REQUEST,
+        'temp_group_id must be a string',
       );
     }
 
     // Use Prisma transaction for atomic operations
     const result = await database.$transaction(async (tx) => {
-      // Find the image
-      const image = await tx.propertyImage.findUnique({
-        where: { id },
-      });
+      let imagesToDelete: any[] = [];
+      let deletedImages: any[] = [];
 
-      if (!image) {
-        throw new CustomError(
-          HttpRes.status.NOT_FOUND,
-          HttpRes.message.NOT_FOUND,
-          'Image not found',
-        );
-      }
-
-      // Extract public_id from URL
-      let publicId: string;
-      try {
-        publicId = extractPublicIdFromUrl(image.url);
-      } catch (error) {
-        throw new CustomError(
-          HttpRes.status.INTERNAL_SERVER_ERROR,
-          HttpRes.message.INTERNAL_SERVER_ERROR,
-          'Invalid image URL format',
-        );
-      }
-
-      // Delete from database
-      await tx.propertyImage.delete({
-        where: { id },
-      });
-
-      // Delete from Cloudinary
-      try {
-        await cloudinaryDeletePropertyImage(publicId);
-      } catch (cloudinaryError) {
-        // Log the error but don't throw since DB transaction is committed
-        console.error(
-          'Failed to delete image from Cloudinary:',
-          cloudinaryError,
-        );
-      }
-
-      // If the deleted image was main, set another image as main
-      if (image.is_main && image.property_id) {
-        const nextMainImage = await tx.propertyImage.findFirst({
-          where: {
-            property_id: image.property_id,
-            status: { not: 'deleted' },
-            id: { not: id }, // Exclude the deleted one
-          },
-          orderBy: { order_index: 'asc' },
+      if (id) {
+        // Single image deletion
+        const image = await tx.propertyImage.findUnique({
+          where: { id },
         });
 
-        if (nextMainImage) {
-          await tx.propertyImage.update({
-            where: { id: nextMainImage.id },
-            data: { is_main: true },
+        if (!image) {
+          throw new CustomError(
+            HttpRes.status.NOT_FOUND,
+            HttpRes.message.NOT_FOUND,
+            'Image not found',
+          );
+        }
+
+        imagesToDelete = [image];
+      } else if (temp_group_id) {
+        // Group deletion by temp_group_id
+        imagesToDelete = await tx.propertyImage.findMany({
+          where: { temp_group_id },
+        });
+
+        if (imagesToDelete.length === 0) {
+          throw new CustomError(
+            HttpRes.status.NOT_FOUND,
+            HttpRes.message.NOT_FOUND,
+            'No images found for the specified temp_group_id',
+          );
+        }
+      }
+
+      // Process each image for deletion
+      for (const image of imagesToDelete) {
+        // Extract public_id from URL
+        let publicId: string;
+        try {
+          publicId = extractPublicIdFromUrl(image.url);
+        } catch (error) {
+          throw new CustomError(
+            HttpRes.status.INTERNAL_SERVER_ERROR,
+            HttpRes.message.INTERNAL_SERVER_ERROR,
+            'Invalid image URL format',
+          );
+        }
+
+        // Delete from database
+        await tx.propertyImage.delete({
+          where: { id: image.id },
+        });
+
+        // Delete from Cloudinary
+        try {
+          await cloudinaryDeletePropertyImage(publicId);
+        } catch (cloudinaryError) {
+          // Log the error but don't throw since DB transaction is committed
+          console.error(
+            'Failed to delete image from Cloudinary:',
+            cloudinaryError,
+          );
+        }
+
+        deletedImages.push({
+          id: image.id,
+          publicId,
+          tempGroupId: image.temp_group_id,
+        });
+      }
+
+      // Handle main image reassignment for single deletion
+      if (id && imagesToDelete.length === 1) {
+        const image = imagesToDelete[0];
+        if (image.is_main && image.property_id) {
+          const nextMainImage = await tx.propertyImage.findFirst({
+            where: {
+              property_id: image.property_id,
+              status: { not: 'deleted' },
+              id: { not: image.id }, // Exclude the deleted one
+            },
+            orderBy: { order_index: 'asc' },
           });
+
+          if (nextMainImage) {
+            await tx.propertyImage.update({
+              where: { id: nextMainImage.id },
+              data: { is_main: true },
+            });
+          }
         }
       }
 
       return {
-        message: 'Image deleted successfully',
-        deletedImageId: id,
-        publicId,
+        message: id
+          ? 'Image deleted successfully'
+          : 'Images deleted successfully',
+        deletedImages,
+        totalDeleted: deletedImages.length,
       };
     });
 
