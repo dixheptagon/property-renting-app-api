@@ -24,6 +24,13 @@ enum PropertyStatus {
   deleted
 }
 
+enum ImageStatus {
+  temp
+  draft
+  active
+  deleted
+}
+
 enum BookingStatus {
   pending_payment
   processing
@@ -183,18 +190,20 @@ model Property {
 
 model PropertyImage {
   id          Int       @id @default(autoincrement())
-  property_id Int
+  property_id Int?
 
   url         String
   is_main     Boolean   @default(false) // main  image
   order_index Int       @default(0)     // urutan gambar yang ditampilkan
+  
+  status                ImageStatus
 
   created_at  DateTime  @default(now())
   updated_at  DateTime? @updatedAt
   deleted_at  DateTime?
 
   // Relations
-  property Property @relation(fields: [property_id], references: [id])
+  property Property? @relation(fields: [property_id], references: [id])
 }
 
 model Room {
@@ -229,18 +238,20 @@ model Room {
 
 model RoomImage {
   id          Int       @id @default(autoincrement())
-  room_id     Int
+  room_id     Int?
 
   url         String
   is_main     Boolean   @default(false)  // main image
   order_index Int       @default(0) // urutan gambar yang ditampilkan
+
+  status                ImageStatus
 
   created_at  DateTime  @default(now())
   updated_at  DateTime? @updatedAt
   deleted_at  DateTime?
 
   // Relations
-  room Room @relation(fields: [room_id], references: [id])
+  room Room? @relation(fields: [room_id], references: [id])
 }
 
 model RoomUnavailability {
