@@ -39,7 +39,7 @@ export const propertyImageDeleteController = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { imageId, temp_group_id } = req.body;
+  const { imageId, temp_group_id } = req.params;
 
   try {
     // Validate that either imageId or temp_group_id is provided

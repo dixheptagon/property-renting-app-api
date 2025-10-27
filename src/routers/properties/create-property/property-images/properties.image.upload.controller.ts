@@ -28,6 +28,14 @@ export const propertyImageUploadController = async (
       );
     }
 
+    if (!files || files.length < 5) {
+      throw new CustomError(
+        HttpRes.status.BAD_REQUEST,
+        HttpRes.message.BAD_REQUEST,
+        'You must upload at least 5 images.',
+      );
+    }
+
     // Generate temp_group_id if not provided
     if (!temp_group_id) {
       temp_group_id = crypto.randomUUID();
@@ -40,73 +48,76 @@ export const propertyImageUploadController = async (
     }
 
     // Use Prisma transaction for atomic operations
-    const uploadResults = await database.$transaction(async (tx) => {
-      const results = [];
+    const uploadResults = await database.$transaction(
+      async (tx) => {
+        const results = [];
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
 
-        // Validate MIME type
-        const allowedMimes = [
-          'image/jpeg',
-          'image/png',
-          'image/jpg',
-          'image/webp',
-        ];
-        if (!allowedMimes.includes(file.mimetype)) {
-          throw new CustomError(
-            HttpRes.status.BAD_REQUEST,
-            HttpRes.message.BAD_REQUEST,
-            `Invalid file type: ${file.mimetype}. Only JPEG, PNG, JPG, and WebP are allowed.`,
-          );
+          // Validate MIME type
+          const allowedMimes = [
+            'image/jpeg',
+            'image/png',
+            'image/jpg',
+            'image/webp',
+          ];
+          if (!allowedMimes.includes(file.mimetype)) {
+            throw new CustomError(
+              HttpRes.status.BAD_REQUEST,
+              HttpRes.message.BAD_REQUEST,
+              `Invalid file type: ${file.mimetype}. Only JPEG, PNG, JPG, and WebP are allowed.`,
+            );
+          }
+
+          // Validate file size (5MB max)
+          if (file.size > 5 * 1024 * 1024) {
+            throw new CustomError(
+              HttpRes.status.BAD_REQUEST,
+              HttpRes.message.BAD_REQUEST,
+              'File size must be less than 5MB',
+            );
+          }
+
+          // Generate UUID for public_id
+          const uuid = crypto.randomUUID();
+          const publicId = uuid;
+
+          // Upload to Cloudinary with custom public_id
+          const uploadResult = (await cloudinaryUploadTempPropertyImage(
+            file.buffer,
+            { public_id: publicId },
+          )) as UploadApiResponse;
+
+          // Track uploaded public IDs for cleanup on failure
+          uploadedPublicIds.push(uploadResult.public_id);
+
+          // Save to database with status 'temp' and set first image as main
+          const propertyImage = await tx.propertyImage.create({
+            data: {
+              url: uploadResult.secure_url,
+              is_main: i === 0, // First image is main
+              order_index: i,
+              status: 'temp',
+              temp_group_id: temp_group_id || null,
+            },
+          });
+
+          results.push({
+            id: propertyImage.id,
+            publicId: uploadResult.public_id,
+            secureUrl: uploadResult.secure_url,
+            isMain: propertyImage.is_main,
+            orderIndex: propertyImage.order_index,
+            status: propertyImage.status,
+            tempGroupId: propertyImage.temp_group_id,
+          });
         }
 
-        // Validate file size (5MB max)
-        if (file.size > 5 * 1024 * 1024) {
-          throw new CustomError(
-            HttpRes.status.BAD_REQUEST,
-            HttpRes.message.BAD_REQUEST,
-            'File size must be less than 5MB',
-          );
-        }
-
-        // Generate UUID for public_id
-        const uuid = crypto.randomUUID();
-        const publicId = `temp/${uuid}`;
-
-        // Upload to Cloudinary with custom public_id
-        const uploadResult = (await cloudinaryUploadTempPropertyImage(
-          file.buffer,
-          { public_id: publicId },
-        )) as UploadApiResponse;
-
-        // Track uploaded public IDs for cleanup on failure
-        uploadedPublicIds.push(uploadResult.public_id);
-
-        // Save to database with status 'temp' and set first image as main
-        const propertyImage = await tx.propertyImage.create({
-          data: {
-            url: uploadResult.secure_url,
-            is_main: i === 0, // First image is main
-            order_index: i,
-            status: 'temp',
-            temp_group_id: temp_group_id || null,
-          },
-        });
-
-        results.push({
-          id: propertyImage.id,
-          publicId: uploadResult.public_id,
-          secureUrl: uploadResult.secure_url,
-          isMain: propertyImage.is_main,
-          orderIndex: propertyImage.order_index,
-          status: propertyImage.status,
-          tempGroupId: propertyImage.temp_group_id,
-        });
-      }
-
-      return results;
-    });
+        return results;
+      },
+      { timeout: 30 * 1000 }, // Set transaction timeout to 30 seconds
+    );
 
     res
       .status(HttpRes.status.CREATED)

@@ -3,7 +3,7 @@ import { CustomError } from '../utils/custom.error';
 import { HttpRes } from '../constant/http.response';
 
 export interface AuthRequest extends Request {
-  user?: { id: number; email: string; role: string };
+  user?: { id: number; email: string; role: string; uid: string };
 }
 
 export const dummyUserMiddleware = (

@@ -6,7 +6,7 @@ import { setPropertiesMainImageController } from './create-property/property-ima
 
 const propertiesRouter = Router();
 
-// POST /api/properties/create-properties/temp-images
+// POST /api/properties/create-properties/upload-property-images
 propertiesRouter.post(
   '/properties/upload-property-images',
   uploadPropertyImage().array('images', 10), // Allow up to 10 images
@@ -15,7 +15,7 @@ propertiesRouter.post(
 
 // DELETE /api/properties/images/:imageId (single image) or DELETE /api/properties/images (group by temp_group_id)
 propertiesRouter.delete(
-  '/properties/images/:imageId?',
+  '/properties/images/:imageId',
   propertyImageDeleteController,
 );
 
