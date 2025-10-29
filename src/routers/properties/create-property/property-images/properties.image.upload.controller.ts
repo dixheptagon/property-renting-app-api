@@ -20,9 +20,6 @@ export const propertyImageUploadController = async (
     const files = req.files as Express.Multer.File[];
     let { temp_group_id } = req.body;
 
-    console.log('temp_group_id:', temp_group_id);
-    console.log('files:', files);
-
     if (!files || files.length === 0) {
       throw new CustomError(
         HttpRes.status.BAD_REQUEST,
@@ -78,11 +75,11 @@ export const propertyImageUploadController = async (
           }
 
           // Validate file size (3MB max)
-          if (file.size > 3 * 1024 * 1024) {
+          if (file.size > 2 * 1024 * 1024) {
             throw new CustomError(
               HttpRes.status.BAD_REQUEST,
               HttpRes.message.BAD_REQUEST,
-              'File size must be less than 3MB',
+              'File size must be less than 2MB',
             );
           }
 
@@ -99,11 +96,22 @@ export const propertyImageUploadController = async (
           // Track uploaded public IDs for cleanup on failure
           uploadedPublicIds.push(uploadResult.public_id);
 
-          // Save to database with status 'temp' and set first image as main
+          // Check if there's already a main image for this temp_group_id
+          const existingMainImage = await tx.propertyImage.findFirst({
+            where: {
+              temp_group_id,
+              is_main: true,
+            },
+          });
+
+          // Set is_main: true only if no existing main image
+          const isMain = !existingMainImage;
+
+          // Save to database with status 'temp'
           const propertyImage = await tx.propertyImage.create({
             data: {
               url: uploadResult.secure_url,
-              is_main: i === 0, // First image is main
+              is_main: isMain,
               order_index: i,
               status: 'temp',
               temp_group_id: temp_group_id || null,
