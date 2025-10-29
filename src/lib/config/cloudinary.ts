@@ -51,6 +51,8 @@ export const cloudinaryUploadTempPropertyImage = (
 
 export const cloudinaryDeleteTempPropertyImage = async (publicId: string) => {
   try {
+    // Prepare File Path to Delete
+
     const result = await cloudinary.uploader.destroy(publicId, {
       resource_type: 'image',
     });

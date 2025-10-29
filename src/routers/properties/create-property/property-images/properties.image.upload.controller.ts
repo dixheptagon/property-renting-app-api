@@ -20,19 +20,14 @@ export const propertyImageUploadController = async (
     const files = req.files as Express.Multer.File[];
     let { temp_group_id } = req.body;
 
+    console.log('temp_group_id:', temp_group_id);
+    console.log('files:', files);
+
     if (!files || files.length === 0) {
       throw new CustomError(
         HttpRes.status.BAD_REQUEST,
         HttpRes.message.BAD_REQUEST,
         'No files uploaded',
-      );
-    }
-
-    if (!files || files.length < 5) {
-      throw new CustomError(
-        HttpRes.status.BAD_REQUEST,
-        HttpRes.message.BAD_REQUEST,
-        'You must upload at least 5 images.',
       );
     }
 
@@ -44,6 +39,18 @@ export const propertyImageUploadController = async (
         HttpRes.status.BAD_REQUEST,
         HttpRes.message.BAD_REQUEST,
         'temp_group_id must be a string',
+      );
+    }
+
+    const totalImages = await database.propertyImage.count({
+      where: { temp_group_id },
+    });
+
+    if (totalImages >= 10) {
+      throw new CustomError(
+        HttpRes.status.BAD_REQUEST,
+        HttpRes.message.BAD_REQUEST,
+        `You have already uploaded ${totalImages} images, you can only upload a maximum of 10 images per property`,
       );
     }
 
@@ -70,12 +77,12 @@ export const propertyImageUploadController = async (
             );
           }
 
-          // Validate file size (5MB max)
-          if (file.size > 5 * 1024 * 1024) {
+          // Validate file size (3MB max)
+          if (file.size > 3 * 1024 * 1024) {
             throw new CustomError(
               HttpRes.status.BAD_REQUEST,
               HttpRes.message.BAD_REQUEST,
-              'File size must be less than 5MB',
+              'File size must be less than 3MB',
             );
           }
 
@@ -116,12 +123,14 @@ export const propertyImageUploadController = async (
 
         return results;
       },
-      { timeout: 30 * 1000 }, // Set transaction timeout to 30 seconds
+      { timeout: 60 * 1000 }, // Set transaction timeout to 60 seconds
     );
 
     res
       .status(HttpRes.status.CREATED)
-      .json(ResponseHandler.success(HttpRes.message.CREATED, uploadResults));
+      .json(
+        ResponseHandler.success('Images uploaded successfully', uploadResults),
+      );
   } catch (error) {
     // Cleanup uploaded Cloudinary images on failure
     if (uploadedPublicIds.length > 0) {

@@ -4,34 +4,23 @@ import { HttpRes } from '../../../../lib/constant/http.response';
 import { CustomError } from '../../../../lib/utils/custom.error';
 import database from '../../../../lib/config/prisma.client';
 import { cloudinaryDeleteTempPropertyImage } from '../../../../lib/config/cloudinary';
-import { v2 as cloudinary } from 'cloudinary';
 
 // Helper function to extract public_id from Cloudinary URL
 const extractPublicIdFromUrl = (url: string): string => {
+  const parsed = new URL(url);
+
   // Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{folder}/{public_id}.{ext}
-  const urlParts = url.split('/');
-  const uploadIndex = urlParts.findIndex((part) => part === 'upload');
+  const pathParts = parsed.pathname.split('/');
+  const uploadIndex = pathParts.findIndex((p) => p === 'upload');
   if (uploadIndex === -1) throw new Error('Invalid Cloudinary URL');
 
   // Get everything after 'upload/' until the extension
-  const pathAfterUpload = urlParts.slice(uploadIndex + 1).join('/');
-  const publicIdWithExt = pathAfterUpload.split('.')[0]; // Remove extension
-  return publicIdWithExt;
-};
+  const pathAfterUpload = pathParts.slice(uploadIndex + 2).join('/');
 
-const cloudinaryDeletePropertyImage = async (publicId: string) => {
-  try {
-    const result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: 'image',
-    });
-    return result;
-  } catch (error) {
-    throw new CustomError(
-      HttpRes.status.INTERNAL_SERVER_ERROR,
-      HttpRes.message.INTERNAL_SERVER_ERROR,
-      'Failed to delete image from Cloudinary',
-    );
-  }
+  const publicIdWithExt = pathAfterUpload.split('.')[0]; // Remove extension
+
+  console.log(publicIdWithExt);
+  return publicIdWithExt;
 };
 
 export const propertyImageDeleteController = async (
@@ -114,6 +103,8 @@ export const propertyImageDeleteController = async (
         let publicId: string;
         try {
           publicId = extractPublicIdFromUrl(image.url);
+
+          console.log('Public ID:', publicId);
         } catch (error) {
           throw new CustomError(
             HttpRes.status.INTERNAL_SERVER_ERROR,
@@ -129,7 +120,7 @@ export const propertyImageDeleteController = async (
 
         // Delete from Cloudinary
         try {
-          await cloudinaryDeletePropertyImage(publicId);
+          await cloudinaryDeleteTempPropertyImage(publicId);
         } catch (cloudinaryError) {
           // Log the error but don't throw since DB transaction is committed
           console.error(

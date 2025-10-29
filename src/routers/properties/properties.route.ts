@@ -18,6 +18,11 @@ propertiesRouter.delete(
   '/properties/images/:imageId',
   propertyImageDeleteController,
 );
+// DELETE /api/properties/images/:imageId/:temp_group_id
+propertiesRouter.delete(
+  '/properties/images/:imageId/:temp_group_id',
+  propertyImageDeleteController,
+);
 
 // PUT /api/properties/images/:imageId/set-main
 propertiesRouter.put(
