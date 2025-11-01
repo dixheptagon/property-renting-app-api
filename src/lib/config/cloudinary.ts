@@ -66,3 +66,20 @@ export const cloudinaryDeleteTempPropertyImage = async (publicId: string) => {
     );
   }
 };
+
+export const cloudinaryMoveImage = async (
+  fromPublicId: string,
+  toPublicId: string,
+) => {
+  try {
+    // Rename the image to move it to a new folder
+    const result = await cloudinary.uploader.rename(fromPublicId, toPublicId);
+    return result;
+  } catch (error) {
+    throw new CustomError(
+      HttpRes.status.INTERNAL_SERVER_ERROR,
+      HttpRes.message.INTERNAL_SERVER_ERROR,
+      'Failed to move image in Cloudinary',
+    );
+  }
+};

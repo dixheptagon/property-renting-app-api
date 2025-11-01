@@ -3,6 +3,8 @@ import { uploadPropertyImage } from '../../lib/middlewares/upload.multer';
 import { propertyImageUploadController } from './create-property/property-images/properties.image.upload.controller';
 import { propertyImageDeleteController } from './create-property/property-images/properties.image.delete.controller';
 import { setPropertiesMainImageController } from './create-property/property-images/set.properties.main.image.controller';
+import { uploadPropertyController } from './create-property/upload-property-form/upload.property.controller';
+import { verifyToken } from '../../lib/middlewares/verify.token';
 
 const propertiesRouter = Router();
 
@@ -28,6 +30,13 @@ propertiesRouter.delete(
 propertiesRouter.put(
   '/properties/images/:imageId/set-main',
   setPropertiesMainImageController,
+);
+
+// POST /api/properties/upload-property
+propertiesRouter.post(
+  '/properties/upload-property',
+  verifyToken,
+  uploadPropertyController,
 );
 
 export default propertiesRouter;
