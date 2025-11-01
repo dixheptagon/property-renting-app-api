@@ -8,448 +8,250 @@
   <body
     style="
       margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      box-sizing: border-box;
+      font-family:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+        Cantarell, sans-serif;
       background-color: #f5f5f5;
+      line-height: 1.5;
     "
   >
-    <table
-      role="presentation"
-      style="width: 100%; border-collapse: collapse; background-color: #f5f5f5"
+    <div
+      style="
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      "
     >
-      <tr>
-        <td style="padding: 20px 0">
-          <table
-            role="presentation"
+      <div style="background: #28a745; height: 4px"></div>
+
+      <div
+        style="
+          padding: 30px 40px 20px 40px;
+          border-bottom: 1px solid #e5e5e5;
+          text-align: center;
+        "
+      >
+        <img
+          src="https://res.cloudinary.com/dzpcr6tzh/image/upload/v1759043682/Staysia_Logo_-_Property_Renting_App_CROP_t8n2dj.png"
+          alt="logo Staysia.id"
+          style="display: block; margin: 0 auto; max-width: 180px"
+        />
+      </div>
+
+      <div style="padding: 40px 40px 0 40px; text-align: left">
+        <h1
+          style="
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 30px 0;
+          "
+        >
+          🎉 Property Created Successfully!
+        </h1>
+
+        <p style="font-size: 16px; color: #333; margin: 0 0 15px 0">
+          Dear
+          <a
+            href="mailto:{{email}}"
+            style="color: #0078d4; text-decoration: none"
+            >{{email}}</a
+          >,
+        </p>
+
+        <p
+          style="
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin: 0 0 25px 0;
+          "
+        >
+          Congratulations! Your property has been successfully created and is
+          now available for bookings.
+        </p>
+
+        <div style="margin-bottom: 35px">
+          <p style="font-size: 16px; color: #666; margin: 0 0 15px 0">
+            Property details:
+          </p>
+          <div
             style="
-              width: 100%;
-              max-width: 600px;
-              margin: 0 auto;
-              background-color: #ffffff;
+              background-color: #f8f9fa;
+              border: 1px solid #e9ecef;
               border-radius: 8px;
-              overflow: hidden;
-              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+              padding: 20px;
             "
           >
-            <!-- Header -->
-            <tr>
-              <td
-                style="
-                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                  padding: 40px 30px;
-                  text-align: center;
-                "
-              >
-                <h1
+            <table
+              width="100%"
+              cellpadding="0"
+              cellspacing="0"
+              border="0"
+              style="border-collapse: collapse"
+            >
+              <tr>
+                <td
                   style="
-                    margin: 0;
-                    color: #ffffff;
-                    font-size: 28px;
+                    padding: 8px 0;
+                    color: #666666;
+                    font-size: 14px;
+                    width: 40%;
+                  "
+                >
+                  Property ID:
+                </td>
+                <td
+                  style="
+                    padding: 8px 0;
+                    color: #333333;
+                    font-size: 14px;
                     font-weight: 600;
                   "
                 >
-                  🎉 Property Created Successfully!
-                </h1>
-                <p
+                  {{property_uid}}
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666666; font-size: 14px">
+                  Title:
+                </td>
+                <td
                   style="
-                    margin: 10px 0 0 0;
-                    color: #ffffff;
-                    font-size: 14px;
-                    opacity: 0.9;
-                  "
-                >
-                  Your property listing is now live
-                </p>
-              </td>
-            </tr>
-
-            <!-- Content -->
-            <tr>
-              <td style="padding: 40px 30px">
-                <!-- Greeting -->
-                <p
-                  style="
-                    margin: 0 0 20px 0;
+                    padding: 8px 0;
                     color: #333333;
-                    font-size: 16px;
-                    line-height: 1.5;
-                  "
-                >
-                  Hi <strong style="color: #667eea">${tenant.name}</strong>,
-                </p>
-
-                <p
-                  style="
-                    margin: 0 0 30px 0;
-                    color: #666666;
                     font-size: 14px;
-                    line-height: 1.6;
+                    font-weight: 600;
                   "
                 >
-                  Congratulations! Your property has been successfully created
-                  and is now available for bookings.
-                </p>
-
-                <!-- Property Details Card -->
-                <table
-                  role="presentation"
-                  style="
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 30px;
-                    border: 1px solid #e0e0e0;
-                    border-radius: 8px;
-                    overflow: hidden;
-                  "
-                >
-                  <tr>
-                    <td
-                      style="
-                        background-color: #f8f9fa;
-                        padding: 15px 20px;
-                        border-bottom: 1px solid #e0e0e0;
-                      "
-                    >
-                      <h2
-                        style="
-                          margin: 0;
-                          color: #333333;
-                          font-size: 18px;
-                          font-weight: 600;
-                        "
-                      >
-                        Property Details
-                      </h2>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 20px">
-                      <table
-                        role="presentation"
-                        style="width: 100%; border-collapse: collapse"
-                      >
-                        <tr>
-                          <td
-                            style="
-                              padding: 8px 0;
-                              color: #666666;
-                              font-size: 14px;
-                              width: 40%;
-                            "
-                          >
-                            Property ID:
-                          </td>
-                          <td
-                            style="
-                              padding: 8px 0;
-                              color: #333333;
-                              font-size: 14px;
-                              font-weight: 600;
-                            "
-                          >
-                            ${property.uid}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td
-                            style="
-                              padding: 8px 0;
-                              color: #666666;
-                              font-size: 14px;
-                            "
-                          >
-                            Title:
-                          </td>
-                          <td
-                            style="
-                              padding: 8px 0;
-                              color: #333333;
-                              font-size: 14px;
-                              font-weight: 600;
-                            "
-                          >
-                            ${property.title}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td
-                            style="
-                              padding: 8px 0;
-                              color: #666666;
-                              font-size: 14px;
-                            "
-                          >
-                            Category:
-                          </td>
-                          <td style="padding: 8px 0">
-                            <span
-                              style="
-                                display: inline-block;
-                                padding: 4px 12px;
-                                background-color: #667eea;
-                                color: #ffffff;
-                                font-size: 12px;
-                                border-radius: 12px;
-                                font-weight: 500;
-                              "
-                              >${property.category}</span
-                            >
-                          </td>
-                        </tr>
-                        <tr>
-                          <td
-                            style="
-                              padding: 8px 0;
-                              color: #666666;
-                              font-size: 14px;
-                            "
-                          >
-                            Location:
-                          </td>
-                          <td
-                            style="
-                              padding: 8px 0;
-                              color: #333333;
-                              font-size: 14px;
-                            "
-                          >
-                            ${property.address}, ${property.city},
-                            ${property.country} ${property.postal_code}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td
-                            style="
-                              padding: 8px 0;
-                              color: #666666;
-                              font-size: 14px;
-                            "
-                          >
-                            Base Price:
-                          </td>
-                          <td
-                            style="
-                              padding: 8px 0;
-                              color: #28a745;
-                              font-size: 16px;
-                              font-weight: 700;
-                            "
-                          >
-                            Rp
-                            ${Number(property.base_price).toLocaleString('id-ID')}
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-
-                <!-- Rooms -->
-                ${property.rooms && property.rooms.length > 0 ? `
-                <div style="margin-bottom: 30px">
-                  <h3
+                  {{property_title}}
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666666; font-size: 14px">
+                  Category:
+                </td>
+                <td style="padding: 8px 0">
+                  <span
                     style="
-                      margin: 0 0 15px 0;
-                      color: #333333;
-                      font-size: 16px;
-                      font-weight: 600;
+                      display: inline-block;
+                      padding: 4px 12px;
+                      background-color: #28a745;
+                      color: #ffffff;
+                      font-size: 12px;
+                      border-radius: 12px;
+                      font-weight: 500;
                     "
+                    >{{property_category}}</span
                   >
-                    Rooms (${property.rooms.length})
-                  </h3>
-
-                  ${property.rooms.map(room => `
-                  <table
-                    role="presentation"
-                    style="
-                      width: 100%;
-                      border-collapse: collapse;
-                      margin-bottom: 20px;
-                      border: 1px solid #e0e0e0;
-                      border-radius: 8px;
-                      overflow: hidden;
-                    "
-                  >
-                    <tr>
-                      <td
-                        style="
-                          background-color: #f8f9fa;
-                          padding: 12px 15px;
-                          border-bottom: 1px solid #e0e0e0;
-                        "
-                      >
-                        <h4
-                          style="
-                            margin: 0;
-                            color: #333333;
-                            font-size: 15px;
-                            font-weight: 600;
-                          "
-                        >
-                          ${room.name}
-                        </h4>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style="padding: 15px">
-                        <table
-                          role="presentation"
-                          style="width: 100%; border-collapse: collapse"
-                        >
-                          <tr>
-                            <td
-                              style="
-                                padding: 5px 0;
-                                color: #666666;
-                                font-size: 13px;
-                                width: 35%;
-                              "
-                            >
-                              Room ID:
-                            </td>
-                            <td
-                              style="
-                                padding: 5px 0;
-                                color: #333333;
-                                font-size: 13px;
-                                font-weight: 600;
-                              "
-                            >
-                              ${room.uid}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td
-                              style="
-                                padding: 5px 0;
-                                color: #666666;
-                                font-size: 13px;
-                              "
-                            >
-                              Price:
-                            </td>
-                            <td
-                              style="
-                                padding: 5px 0;
-                                color: #28a745;
-                                font-size: 14px;
-                                font-weight: 700;
-                              "
-                            >
-                              Rp
-                              ${Number(room.base_price).toLocaleString('id-ID')}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td
-                              style="
-                                padding: 5px 0;
-                                color: #666666;
-                                font-size: 13px;
-                              "
-                            >
-                              Capacity:
-                            </td>
-                            <td
-                              style="
-                                padding: 5px 0;
-                                color: #333333;
-                                font-size: 13px;
-                              "
-                            >
-                              👥 ${room.max_guest} guests | 🛏️ ${room.bedrooms}
-                              bedrooms | 🛁 ${room.bathrooms} bathrooms | 🛌
-                              ${room.beds} beds
-                            </td>
-                          </tr>
-                          <tr>
-                            <td
-                              style="
-                                padding: 5px 0;
-                                color: #666666;
-                                font-size: 13px;
-                              "
-                            >
-                              Total Units:
-                            </td>
-                            <td
-                              style="
-                                padding: 5px 0;
-                                color: #333333;
-                                font-size: 13px;
-                                font-weight: 600;
-                              "
-                            >
-                              ${room.total_units} units
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
-                  </table>
-                  `).join('')}
-                </div>
-                ` : ''}
-
-                <!-- Footer Note -->
-                <div
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666666; font-size: 14px">
+                  Location:
+                </td>
+                <td style="padding: 8px 0; color: #333333; font-size: 14px">
+                  {{property_address}}, {{property_city}}, {{property_country}}
+                  {{property_postal_code}}
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666666; font-size: 14px">
+                  Base Price:
+                </td>
+                <td
                   style="
-                    padding: 20px;
-                    background-color: #f8f9fa;
-                    border-radius: 8px;
-                    text-align: center;
+                    padding: 8px 0;
+                    color: #28a745;
+                    font-size: 16px;
+                    font-weight: 700;
                   "
                 >
-                  <p
-                    style="
-                      margin: 0 0 10px 0;
-                      color: #666666;
-                      font-size: 13px;
-                      line-height: 1.5;
-                    "
-                  >
-                    Your property is now visible to potential guests. Make sure
-                    all information is accurate and up-to-date.
-                  </p>
-                  <p style="margin: 0; color: #999999; font-size: 12px">
-                    Created on: ${new
-                    Date(property.created_at).toLocaleDateString('id-ID', {
-                    year: 'numeric', month: 'long', day: 'numeric' })}
-                  </p>
-                </div>
-              </td>
-            </tr>
+                  Rp {{property_base_price}}
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
 
-            <!-- Footer -->
-            <tr>
-              <td
-                style="
-                  background-color: #f8f9fa;
-                  padding: 30px;
-                  text-align: center;
-                  border-top: 1px solid #e0e0e0;
-                "
-              >
-                <p
-                  style="
-                    margin: 0 0 10px 0;
-                    color: #999999;
-                    font-size: 12px;
-                    line-height: 1.5;
-                  "
-                >
-                  If you have any questions, feel free to contact our support
-                  team.
-                </p>
-                <p style="margin: 0; color: #999999; font-size: 11px">
-                  © 2025 Staysia Property Management Platform. All rights
-                  reserved.
-                </p>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
+        <table
+          width="100%"
+          cellpadding="0"
+          cellspacing="0"
+          border="0"
+          style="margin: 25px 0"
+        >
+          <tr>
+            <td
+              style="
+                background-color: #d4edda;
+                border: 1px solid #c3e6cb;
+                padding: 15px;
+                border-radius: 5px;
+              "
+            >
+              <p style="margin: 0; font-size: 14px; color: #155724">
+                <strong>✅ Success:</strong> Your property is now live and
+                visible to potential guests. Make sure all information is
+                accurate and up-to-date.
+              </p>
+            </td>
+          </tr>
+        </table>
+
+        <a
+          href="{{dashboard_link}}"
+          style="
+            background: linear-gradient(135deg, #ff6600 0%, #e55a00 100%);
+            color: white;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            min-width: 200px;
+            margin: 0 auto 25px auto;
+            text-align: center;
+          "
+        >
+          View Property ›
+        </a>
+      </div>
+
+      <div
+        style="
+          background-color: #f8f9fa;
+          padding: 25px 40px;
+          border-top: 1px solid #e9ecef;
+          text-align: center;
+        "
+      >
+        <div style="font-size: 15px; color: #888; margin-top: 10px">
+          Email sent on: {{email_timestamp}}
+        </div>
+        <div
+          style="font-size: 14px; color: #888; line-height: 1.5; margin: 15px 0"
+        >
+          <span style="color: #6c757d; font-size: 18px; flex-shrink: 0 margin-t"
+            >🛈</span
+          >
+          <span>
+            Please ignore this email if you did not register an account through
+            Staysia App.
+          </span>
+        </div>
+        <p style="font-size: 14px; color: #888; margin: 0">
+          © {{current_year}} Staysia.id All rights reserved.
+        </p>
+      </div>
+    </div>
   </body>
 </html>
