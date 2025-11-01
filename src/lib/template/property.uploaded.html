@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Property Created Successfully</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+    "
+  >
+    <table
+      role="presentation"
+      style="width: 100%; border-collapse: collapse; background-color: #f5f5f5"
+    >
+      <tr>
+        <td style="padding: 20px 0">
+          <table
+            role="presentation"
+            style="
+              width: 100%;
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            "
+          >
+            <!-- Header -->
+            <tr>
+              <td
+                style="
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  padding: 40px 30px;
+                  text-align: center;
+                "
+              >
+                <h1
+                  style="
+                    margin: 0;
+                    color: #ffffff;
+                    font-size: 28px;
+                    font-weight: 600;
+                  "
+                >
+                  🎉 Property Created Successfully!
+                </h1>
+                <p
+                  style="
+                    margin: 10px 0 0 0;
+                    color: #ffffff;
+                    font-size: 14px;
+                    opacity: 0.9;
+                  "
+                >
+                  Your property listing is now live
+                </p>
+              </td>
+            </tr>
+
+            <!-- Content -->
+            <tr>
+              <td style="padding: 40px 30px">
+                <!-- Greeting -->
+                <p
+                  style="
+                    margin: 0 0 20px 0;
+                    color: #333333;
+                    font-size: 16px;
+                    line-height: 1.5;
+                  "
+                >
+                  Hi <strong style="color: #667eea">${tenant.name}</strong>,
+                </p>
+
+                <p
+                  style="
+                    margin: 0 0 30px 0;
+                    color: #666666;
+                    font-size: 14px;
+                    line-height: 1.6;
+                  "
+                >
+                  Congratulations! Your property has been successfully created
+                  and is now available for bookings.
+                </p>
+
+                <!-- Property Details Card -->
+                <table
+                  role="presentation"
+                  style="
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 30px;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 8px;
+                    overflow: hidden;
+                  "
+                >
+                  <tr>
+                    <td
+                      style="
+                        background-color: #f8f9fa;
+                        padding: 15px 20px;
+                        border-bottom: 1px solid #e0e0e0;
+                      "
+                    >
+                      <h2
+                        style="
+                          margin: 0;
+                          color: #333333;
+                          font-size: 18px;
+                          font-weight: 600;
+                        "
+                      >
+                        Property Details
+                      </h2>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 20px">
+                      <table
+                        role="presentation"
+                        style="width: 100%; border-collapse: collapse"
+                      >
+                        <tr>
+                          <td
+                            style="
+                              padding: 8px 0;
+                              color: #666666;
+                              font-size: 14px;
+                              width: 40%;
+                            "
+                          >
+                            Property ID:
+                          </td>
+                          <td
+                            style="
+                              padding: 8px 0;
+                              color: #333333;
+                              font-size: 14px;
+                              font-weight: 600;
+                            "
+                          >
+                            ${property.uid}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td
+                            style="
+                              padding: 8px 0;
+                              color: #666666;
+                              font-size: 14px;
+                            "
+                          >
+                            Title:
+                          </td>
+                          <td
+                            style="
+                              padding: 8px 0;
+                              color: #333333;
+                              font-size: 14px;
+                              font-weight: 600;
+                            "
+                          >
+                            ${property.title}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td
+                            style="
+                              padding: 8px 0;
+                              color: #666666;
+                              font-size: 14px;
+                            "
+                          >
+                            Category:
+                          </td>
+                          <td style="padding: 8px 0">
+                            <span
+                              style="
+                                display: inline-block;
+                                padding: 4px 12px;
+                                background-color: #667eea;
+                                color: #ffffff;
+                                font-size: 12px;
+                                border-radius: 12px;
+                                font-weight: 500;
+                              "
+                              >${property.category}</span
+                            >
+                          </td>
+                        </tr>
+                        <tr>
+                          <td
+                            style="
+                              padding: 8px 0;
+                              color: #666666;
+                              font-size: 14px;
+                            "
+                          >
+                            Location:
+                          </td>
+                          <td
+                            style="
+                              padding: 8px 0;
+                              color: #333333;
+                              font-size: 14px;
+                            "
+                          >
+                            ${property.address}, ${property.city},
+                            ${property.country} ${property.postal_code}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td
+                            style="
+                              padding: 8px 0;
+                              color: #666666;
+                              font-size: 14px;
+                            "
+                          >
+                            Base Price:
+                          </td>
+                          <td
+                            style="
+                              padding: 8px 0;
+                              color: #28a745;
+                              font-size: 16px;
+                              font-weight: 700;
+                            "
+                          >
+                            Rp
+                            ${Number(property.base_price).toLocaleString('id-ID')}
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Rooms -->
+                ${property.rooms && property.rooms.length > 0 ? `
+                <div style="margin-bottom: 30px">
+                  <h3
+                    style="
+                      margin: 0 0 15px 0;
+                      color: #333333;
+                      font-size: 16px;
+                      font-weight: 600;
+                    "
+                  >
+                    Rooms (${property.rooms.length})
+                  </h3>
+
+                  ${property.rooms.map(room => `
+                  <table
+                    role="presentation"
+                    style="
+                      width: 100%;
+                      border-collapse: collapse;
+                      margin-bottom: 20px;
+                      border: 1px solid #e0e0e0;
+                      border-radius: 8px;
+                      overflow: hidden;
+                    "
+                  >
+                    <tr>
+                      <td
+                        style="
+                          background-color: #f8f9fa;
+                          padding: 12px 15px;
+                          border-bottom: 1px solid #e0e0e0;
+                        "
+                      >
+                        <h4
+                          style="
+                            margin: 0;
+                            color: #333333;
+                            font-size: 15px;
+                            font-weight: 600;
+                          "
+                        >
+                          ${room.name}
+                        </h4>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 15px">
+                        <table
+                          role="presentation"
+                          style="width: 100%; border-collapse: collapse"
+                        >
+                          <tr>
+                            <td
+                              style="
+                                padding: 5px 0;
+                                color: #666666;
+                                font-size: 13px;
+                                width: 35%;
+                              "
+                            >
+                              Room ID:
+                            </td>
+                            <td
+                              style="
+                                padding: 5px 0;
+                                color: #333333;
+                                font-size: 13px;
+                                font-weight: 600;
+                              "
+                            >
+                              ${room.uid}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td
+                              style="
+                                padding: 5px 0;
+                                color: #666666;
+                                font-size: 13px;
+                              "
+                            >
+                              Price:
+                            </td>
+                            <td
+                              style="
+                                padding: 5px 0;
+                                color: #28a745;
+                                font-size: 14px;
+                                font-weight: 700;
+                              "
+                            >
+                              Rp
+                              ${Number(room.base_price).toLocaleString('id-ID')}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td
+                              style="
+                                padding: 5px 0;
+                                color: #666666;
+                                font-size: 13px;
+                              "
+                            >
+                              Capacity:
+                            </td>
+                            <td
+                              style="
+                                padding: 5px 0;
+                                color: #333333;
+                                font-size: 13px;
+                              "
+                            >
+                              👥 ${room.max_guest} guests | 🛏️ ${room.bedrooms}
+                              bedrooms | 🛁 ${room.bathrooms} bathrooms | 🛌
+                              ${room.beds} beds
+                            </td>
+                          </tr>
+                          <tr>
+                            <td
+                              style="
+                                padding: 5px 0;
+                                color: #666666;
+                                font-size: 13px;
+                              "
+                            >
+                              Total Units:
+                            </td>
+                            <td
+                              style="
+                                padding: 5px 0;
+                                color: #333333;
+                                font-size: 13px;
+                                font-weight: 600;
+                              "
+                            >
+                              ${room.total_units} units
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                  `).join('')}
+                </div>
+                ` : ''}
+
+                <!-- Footer Note -->
+                <div
+                  style="
+                    padding: 20px;
+                    background-color: #f8f9fa;
+                    border-radius: 8px;
+                    text-align: center;
+                  "
+                >
+                  <p
+                    style="
+                      margin: 0 0 10px 0;
+                      color: #666666;
+                      font-size: 13px;
+                      line-height: 1.5;
+                    "
+                  >
+                    Your property is now visible to potential guests. Make sure
+                    all information is accurate and up-to-date.
+                  </p>
+                  <p style="margin: 0; color: #999999; font-size: 12px">
+                    Created on: ${new
+                    Date(property.created_at).toLocaleDateString('id-ID', {
+                    year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  background-color: #f8f9fa;
+                  padding: 30px;
+                  text-align: center;
+                  border-top: 1px solid #e0e0e0;
+                "
+              >
+                <p
+                  style="
+                    margin: 0 0 10px 0;
+                    color: #999999;
+                    font-size: 12px;
+                    line-height: 1.5;
+                  "
+                >
+                  If you have any questions, feel free to contact our support
+                  team.
+                </p>
+                <p style="margin: 0; color: #999999; font-size: 11px">
+                  © 2025 Staysia Property Management Platform. All rights
+                  reserved.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -29,13 +29,13 @@ export const cloudinaryUploadPaymentProof = (file: Buffer) => {
 
 export const cloudinaryUploadTempPropertyImage = (
   file: Buffer,
-  options: { public_id?: string } = {},
+  options: { public_id?: string; temp_group_id?: string } = {},
 ) => {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
         {
-          folder: env.CLOUD_TEMP_PROPERTIES_IMAGE_FOLDER_PATH, // 👈 folder Cloudinary for property image
+          folder: `${env.CLOUD_TEMP_PROPERTIES_IMAGE_FOLDER_PATH}/${options.temp_group_id}`, // 👈 folder Cloudinary for property image
           ...options,
         },
         (error, uploadResult) => {

@@ -65,12 +65,13 @@ export const propertyImageUploadController = async (
             'image/png',
             'image/jpg',
             'image/webp',
+            'image/avif',
           ];
           if (!allowedMimes.includes(file.mimetype)) {
             throw new CustomError(
               HttpRes.status.BAD_REQUEST,
               HttpRes.message.BAD_REQUEST,
-              `Invalid file type: ${file.mimetype}. Only JPEG, PNG, JPG, and WebP are allowed.`,
+              `Invalid file type: ${file.mimetype}. Only JPEG, PNG, JPG, AVIF, and WebP are allowed.`,
             );
           }
 
@@ -90,7 +91,7 @@ export const propertyImageUploadController = async (
           // Upload to Cloudinary with custom public_id
           const uploadResult = (await cloudinaryUploadTempPropertyImage(
             file.buffer,
-            { public_id: publicId },
+            { public_id: publicId, temp_group_id },
           )) as UploadApiResponse;
 
           // Track uploaded public IDs for cleanup on failure

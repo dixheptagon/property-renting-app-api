@@ -164,7 +164,9 @@ model Property {
   map_url               String?              // optional direct link
 
   amenities             Json?
+  custom_amenities      Json?
   rules                 Json?
+  custom_rules          Json?
 
   rating_avg            Decimal?             @db.Decimal(2, 1)
   rating_count          Int?
@@ -196,7 +198,7 @@ model PropertyImage {
   is_main       Boolean   @default(false) // main  image
   order_index   Int       @default(0)     // urutan gambar yang ditampilkan
 
-
+  public_id     String?
   temp_group_id String?   
   status                  ImageStatus
 
@@ -222,7 +224,9 @@ model Room {
   bedrooms              Int
   bathrooms             Int
   beds                  Int
+
   highlight             Json? // room privalage // keunggulan kamar // kalau mau buat others juga bisa
+  custom_highlight      Json?
 
   total_units           Int
 
@@ -246,6 +250,7 @@ model RoomImage {
   is_main     Boolean   @default(false)  // main image
   order_index Int       @default(0) // urutan gambar yang ditampilkan
 
+  public_id     String?
   temp_group_id String?   
   status                ImageStatus
 
