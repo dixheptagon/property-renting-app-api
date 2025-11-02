@@ -37,7 +37,19 @@ export const verifyToken = (
       );
     }
 
+    console.log(authHeader);
+
     const token = authHeader.substring(7);
+
+    console.log(token);
+
+    if (!token || token === 'null' || token === 'undefined') {
+      throw new CustomError(
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        'Access token is required',
+      );
+    }
 
     const decodedToken = jwt.verify(
       token!,
@@ -47,6 +59,14 @@ export const verifyToken = (
     req.user = decodedToken;
     next();
   } catch (error) {
+    if (error instanceof Error) {
+      throw new CustomError(
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        error.message,
+      );
+    }
+
     next(error);
   }
 };

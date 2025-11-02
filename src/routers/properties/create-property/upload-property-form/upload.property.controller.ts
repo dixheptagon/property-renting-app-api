@@ -23,7 +23,9 @@ export const uploadPropertyController = async (
     });
 
     // Get tenant ID from middleware
-    const tenantId = (req as any).user?.id;
+    const tenantId = (req as any).user?.uid;
+
+    console.log(req.user);
     if (!tenantId) {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,
@@ -34,8 +36,8 @@ export const uploadPropertyController = async (
 
     // Get tenant email for notifications
     const tenant = await database.user.findUnique({
-      where: { id: tenantId },
-      select: { email: true },
+      where: { uid: tenantId },
+      select: { email: true, id: true },
     });
 
     if (!tenant) {
@@ -49,7 +51,7 @@ export const uploadPropertyController = async (
     tenantEmail = tenant.email;
 
     // Call service
-    const result = await uploadPropertyService(validatedData as any, tenantId);
+    const result = await uploadPropertyService(validatedData as any, tenant.id);
     propertyId = result.propertyId;
 
     // Send success email

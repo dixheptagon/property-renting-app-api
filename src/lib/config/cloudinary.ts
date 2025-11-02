@@ -73,9 +73,13 @@ export const cloudinaryMoveImage = async (
 ) => {
   try {
     // Rename the image to move it to a new folder
-    const result = await cloudinary.uploader.rename(fromPublicId, toPublicId);
+    const result = await cloudinary.uploader.rename(fromPublicId, toPublicId, {
+      overwrite: true,
+    });
     return result;
   } catch (error) {
+    console.log(error);
+
     throw new CustomError(
       HttpRes.status.INTERNAL_SERVER_ERROR,
       HttpRes.message.INTERNAL_SERVER_ERROR,
