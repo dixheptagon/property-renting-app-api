@@ -7,6 +7,7 @@ import { ResponseHandler } from '../../../../lib/utils/response.handler';
 import { CustomError } from '../../../../lib/utils/custom.error';
 import { HttpRes } from '../../../../lib/constant/http.response';
 import database from '../../../../lib/config/prisma.client';
+import { InferType } from 'yup';
 
 export const uploadPropertyController = async (
   req: Request,
@@ -58,6 +59,7 @@ export const uploadPropertyController = async (
     await sendPropertyUploadSuccessEmail({
       email: tenantEmail,
       propertyId: propertyId,
+      payload: validatedData as any,
     });
 
     // Send success response

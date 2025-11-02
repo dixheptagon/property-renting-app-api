@@ -3,15 +3,18 @@ import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
 import transporter from '../../../../lib/config/nodemailer.transporter';
 import database from '../../../../lib/config/prisma.client';
+import { UploadPropertyPayload } from './upload.property.types';
 
 interface SendPropertyUploadSuccessEmailParams {
   email: string;
   propertyId: number;
+  payload: UploadPropertyPayload;
 }
 
 export const sendPropertyUploadSuccessEmail = async ({
   email,
   propertyId,
+  payload,
 }: SendPropertyUploadSuccessEmailParams) => {
   try {
     // Get property details with tenant info
@@ -49,6 +52,15 @@ export const sendPropertyUploadSuccessEmail = async ({
     const templateHtml = fs.readFileSync(templateHtmlPath, 'utf-8');
     const compiledTemplate = Handlebars.compile(templateHtml);
 
+    // Get the minimum base price from the property base price
+    let propertyRegularPrice = 0;
+    if (payload.rooms && payload.rooms.length > 0) {
+      const minBasePrice = Math.min(
+        ...payload.rooms.map((room) => room.base_price),
+      );
+      propertyRegularPrice = minBasePrice;
+    }
+
     const htmlToSend = compiledTemplate({
       email: email,
       property_uid: property.uid,
@@ -58,7 +70,9 @@ export const sendPropertyUploadSuccessEmail = async ({
       property_city: property.city,
       property_country: property.country,
       property_postal_code: property.postal_code,
-      property_base_price: Number(property.base_price).toLocaleString('id-ID'),
+      property_base_price: Number(
+        propertyRegularPrice || payload.rooms[0].base_price || 0,
+      ).toLocaleString('id-ID'),
       dashboard_link: `${process.env.DOMAIN_URL}/dashboard/properties/${property.id}`,
       email_timestamp: currentTimestamp,
       current_year: new Date().getFullYear(),
