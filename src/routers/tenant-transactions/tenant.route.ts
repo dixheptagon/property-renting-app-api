@@ -9,24 +9,36 @@ import { dummyUserMiddleware } from '../../lib/middlewares/dummy.verify.role';
 const tenantRouter = Router();
 
 // Apply dummy user middleware to all tenant routes
-tenantRouter.use(dummyUserMiddleware);
+tenantRouter.use(dummyUserMiddleware as any);
 
 // Get Order List by Tenant
-tenantRouter.get('/tenant/get-order-list', GetOrderListByTenantController);
+tenantRouter.get(
+  '/tenant/get-order-list',
+  GetOrderListByTenantController as any,
+);
 
 // Confirm Order by Tenant
-tenantRouter.post('/tenant/:orderId/confirm-order', ConfirmOrderController);
+tenantRouter.post(
+  '/tenant/:orderId/confirm-order',
+  ConfirmOrderController as any,
+);
 
 // Reject Order by Tenant
-tenantRouter.post('/tenant/:orderId/reject-order', RejectOrderController);
+tenantRouter.post(
+  '/tenant/:orderId/reject-order',
+  RejectOrderController as any,
+);
 
 // Cancel Order by Tenant
 tenantRouter.post(
   '/tenant/:orderId/cancel-order',
-  CancelOrderByTenantController,
+  CancelOrderByTenantController as any,
 );
 
 // Complete Order by Tenant
-tenantRouter.post('/tenant/:orderId/complete-order', CompleteOrderController);
+tenantRouter.post(
+  '/tenant/:orderId/complete-order',
+  CompleteOrderController as any,
+);
 
 export default tenantRouter;

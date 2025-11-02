@@ -1,5 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import env from '../../env';
+import { CustomError } from '../utils/custom.error';
+import { HttpRes } from '../constant/http.response';
 
 cloudinary.config({
   cloud_name: env.CLOUD_NAME,
@@ -23,4 +25,65 @@ export const cloudinaryUploadPaymentProof = (file: Buffer) => {
       )
       .end(file);
   });
+};
+
+export const cloudinaryUploadTempPropertyImage = (
+  file: Buffer,
+  options: { public_id?: string; temp_group_id?: string } = {},
+) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        {
+          folder: `${env.CLOUD_TEMP_PROPERTIES_IMAGE_FOLDER_PATH}/${options.temp_group_id}`, // 👈 folder Cloudinary for property image
+          ...options,
+        },
+        (error, uploadResult) => {
+          if (error) {
+            return reject(error);
+          }
+          return resolve(uploadResult);
+        },
+      )
+      .end(file);
+  });
+};
+
+export const cloudinaryDeleteTempPropertyImage = async (publicId: string) => {
+  try {
+    // Prepare File Path to Delete
+
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: 'image',
+    });
+
+    return result;
+  } catch (error) {
+    throw new CustomError(
+      HttpRes.status.BAD_REQUEST,
+      HttpRes.message.BAD_REQUEST,
+      'Failed to delete property image',
+    );
+  }
+};
+
+export const cloudinaryMoveImage = async (
+  fromPublicId: string,
+  toPublicId: string,
+) => {
+  try {
+    // Rename the image to move it to a new folder
+    const result = await cloudinary.uploader.rename(fromPublicId, toPublicId, {
+      overwrite: true,
+    });
+    return result;
+  } catch (error) {
+    console.log(error);
+
+    throw new CustomError(
+      HttpRes.status.INTERNAL_SERVER_ERROR,
+      HttpRes.message.INTERNAL_SERVER_ERROR,
+      'Failed to move image in Cloudinary',
+    );
+  }
 };

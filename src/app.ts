@@ -44,10 +44,17 @@ import authRouter from './routers/auth/auth.route';
 import bookingRouter from './routers/booking/booking.route';
 import tenantRouter from './routers/tenant-transactions/tenant.route';
 import reviewRoute from './routers/review/review.route';
+import propertiesRouter from './routers/properties/properties.route';
 
 // use user router
 
-const routers = [authRouter, bookingRouter, tenantRouter, reviewRoute];
+const routers = [
+  authRouter,
+  bookingRouter,
+  tenantRouter,
+  reviewRoute,
+  propertiesRouter,
+];
 routers.forEach((router) => {
   app.use('/api', router);
 });
@@ -62,6 +69,7 @@ AutoOrderReminderController();
 
 // Initialize auto complete order cron job
 import { AutoCompleteOrderController } from './routers/tenant-transactions/auto-complete-order/auto.complete.order.controller';
+
 AutoCompleteOrderController();
 
 // setup error handler middleware
