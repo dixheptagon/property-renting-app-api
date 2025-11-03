@@ -4,12 +4,14 @@ import { ConfirmOrderController } from './confirm-order/confirm.order.controller
 import { RejectOrderController } from './reject-order/reject.order.controller';
 import { CancelOrderByTenantController } from './cancel-order/cancel.order.controller';
 import { CompleteOrderController } from './complete-order/complete.order.controller';
-import { dummyUserMiddleware } from '../../lib/middlewares/dummy.verify.role';
+import { verifyToken } from '../../lib/middlewares/verify.token';
+import { verifyTenant } from '../../lib/middlewares/verify.role';
 
 const tenantRouter = Router();
 
-// Apply dummy user middleware to all tenant routes
-tenantRouter.use(dummyUserMiddleware as any);
+// Apply authentication and role verification middleware to all tenant routes
+tenantRouter.use(verifyToken);
+tenantRouter.use(verifyTenant);
 
 // Get Order List by Tenant
 tenantRouter.get(

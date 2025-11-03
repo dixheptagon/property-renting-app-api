@@ -11,6 +11,7 @@ import { GetTenantProfileController } from './tenant-profile/get.tenant.profile.
 import { TenantVerificationController } from './tenant-profile/tenant.verification.controller';
 import { uploadTenantProfileDocument } from '../../lib/middlewares/upload.multer';
 import { verifyToken } from '../../lib/middlewares/verify.token';
+import { verifyTenant } from '../../lib/middlewares/verify.role';
 
 const authRouter = Router();
 
