@@ -87,3 +87,22 @@ export const cloudinaryMoveImage = async (
     );
   }
 };
+
+export const cloudinaryUploadTenantProfileDocument = (file: Buffer) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        {
+          folder: env.CLOUD_TENANT_PROFILE_FOLDER_PATH, // 👈 folder Cloudinary for tenant profile documents
+          resource_type: 'image', // for image files (JPEG, PNG, JPG, AVIF, WebP)
+        },
+        (error, uploadResult) => {
+          if (error) {
+            return reject(error);
+          }
+          return resolve(uploadResult);
+        },
+      )
+      .end(file);
+  });
+};
