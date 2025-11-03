@@ -46,3 +46,32 @@ export const uploadPropertyImage = () => {
     },
   });
 };
+
+export const uploadTenantProfileDocument = () => {
+  const storage = multer.memoryStorage();
+
+  return multer({
+    storage: storage,
+    limits: { fileSize: 1 * 1024 * 1024 }, // limit file size 1MB
+    fileFilter: (req, file, cb) => {
+      const allowedMimes = [
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'image/avif',
+        'image/webp',
+      ];
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(
+          new CustomError(
+            HttpRes.status.BAD_REQUEST,
+            HttpRes.message.BAD_REQUEST,
+            'Invalid file type: only JPEG, PNG, JPG, AVIF, and WebP files are allowed',
+          ),
+        );
+      }
+    },
+  });
+};

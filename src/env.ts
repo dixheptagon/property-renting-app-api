@@ -22,6 +22,7 @@ export interface Config {
   // CLOUD_EVENT_IMAGE_FOLDER_PATH: string;
   CLOUD_PAYMENT_PROOF_FOLDER_PATH: string;
   CLOUD_TEMP_PROPERTIES_IMAGE_FOLDER_PATH: string;
+  CLOUD_TENANT_PROFILE_FOLDER_PATH: string;
   MIDTRANS_SERVER_KEY: string;
   MIDTRANS_CLIENT_KEY: string;
 }
@@ -55,6 +56,9 @@ const schema = Yup.object().shape({
   ),
   CLOUD_TEMP_PROPERTIES_IMAGE_FOLDER_PATH: Yup.string().required(
     'CLOUD_TEMP_PROPERTIES_IMAGE_FOLDER_PATH is required',
+  ),
+  CLOUD_TENANT_PROFILE_FOLDER_PATH: Yup.string().required(
+    'CLOUD_TENANT_PROFILE_FOLDER_PATH is required',
   ),
   MIDTRANS_SERVER_KEY: Yup.string().required('MIDTRANS_SERVER_KEY is required'),
   MIDTRANS_CLIENT_KEY: Yup.string().required('MIDTRANS_CLIENT_KEY is required'),

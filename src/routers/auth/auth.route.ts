@@ -4,10 +4,13 @@ import { CheckEmailController } from './verification-email/check.email.controlle
 import { SendEmailVerificationController } from './verification-email/send.email.controller';
 import { ResendVerificationController } from './resend-verification/resend.verification.controller';
 import { VerifyEmailController } from './verification-email/verify.email.controller';
-import { TenantRegisterController } from './register/tenant.register.controller';
 import { LoginController } from './login/login.controller';
 import { SocialLoginController } from './login/social.login.controller';
 import { RefreshTokenController } from './refresh-token/refresh.token.controller';
+import { GetTenantProfileController } from './tenant-profile/get.tenant.profile.controller';
+import { TenantVerificationController } from './tenant-profile/tenant.verification.controller';
+import { uploadTenantProfileDocument } from '../../lib/middlewares/upload.multer';
+import { verifyToken } from '../../lib/middlewares/verify.token';
 
 const authRouter = Router();
 
@@ -25,7 +28,6 @@ authRouter.post('/auth/verify-email', VerifyEmailController);
 
 // Step 4: Complete registration after email verification
 authRouter.post('/auth/register', RegisterController);
-authRouter.post('/auth/tenant-register', TenantRegisterController);
 
 // Step 5a: Login
 authRouter.post('/auth/login', LoginController);
@@ -35,5 +37,18 @@ authRouter.post('/auth/social-login', SocialLoginController);
 
 // step 6: Refresh token
 authRouter.post('/auth/refresh-token', RefreshTokenController);
+
+// Tenant Profile routes
+
+// Get Tenant Profile
+authRouter.get('/auth/tenant-profile', verifyToken, GetTenantProfileController);
+
+// Tenant Verification
+authRouter.post(
+  '/auth/tenant-profile/verification',
+  verifyToken,
+  uploadTenantProfileDocument().single('government_id_file'),
+  TenantVerificationController,
+);
 
 export default authRouter;

@@ -67,7 +67,7 @@ model User {
   first_name        String
   last_name         String?
   display_name      String?              @unique
-  role              UserRole            @default(guest)// tenant atau guest
+  role              UserRole            @default(guest)// tenant or guest
 
   image             String?
 
