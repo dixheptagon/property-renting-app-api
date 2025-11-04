@@ -6,6 +6,7 @@ import { setPropertiesMainImageController } from './create-property/property-ima
 import { uploadPropertyController } from './create-property/upload-property-form/upload.property.controller';
 import { movePropertyImagesController } from './create-property/upload-property-form/move.property.image.controller';
 import { verifyToken } from '../../lib/middlewares/verify.token';
+import { retrievePropertyListController } from './retrive-property-list/retrieve.property.list.controller';
 
 const propertiesRouter = Router();
 
@@ -45,6 +46,12 @@ propertiesRouter.put(
   '/properties/move-images/:propertyId',
   verifyToken,
   movePropertyImagesController,
+);
+
+// GET /api/properties/explore-properties
+propertiesRouter.get(
+  '/properties/explore-properties',
+  retrievePropertyListController,
 );
 
 export default propertiesRouter;
