@@ -41,8 +41,6 @@ export const verifyToken = (
 
     const token = authHeader.substring(7);
 
-    console.log(token);
-
     if (!token || token === 'null' || token === 'undefined') {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,
