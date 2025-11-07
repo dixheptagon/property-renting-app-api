@@ -145,13 +145,13 @@ export const CreateOrderController = async (
     };
 
     // 4. Create and Get Token from Midtrans
-    // const transactionToken = await snap.createTransaction(transactionDetails);
+    const transactionToken = await snap.createTransaction(transactionDetails);
 
     // 5. update booking with midtrans token
-    // await database.booking.update({
-    //   where: { id: order.id },
-    //   data: { transaction_id: transactionToken.token },
-    // });
+    await database.booking.update({
+      where: { id: order.id },
+      data: { transaction_id: transactionToken.token },
+    });
 
     // 6. Send Response
     res
@@ -159,7 +159,7 @@ export const CreateOrderController = async (
       .json(
         ResponseHandler.success(
           `${HttpRes.message.CREATED} : Order created successfully`,
-          { order, transaction_token: `Succesfull` },
+          { order, transaction_token: transactionToken },
         ),
       );
   } catch (error) {
