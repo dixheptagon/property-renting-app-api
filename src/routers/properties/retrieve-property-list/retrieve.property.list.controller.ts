@@ -10,8 +10,6 @@ export const retrievePropertyListController = async (
   next: NextFunction,
 ) => {
   try {
-    console.log('🔍 Starting property list retrieval process...');
-
     // Parse and validate query parameters
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = [12, 24, 48].includes(Number(req.query.limit))
@@ -28,18 +26,6 @@ export const retrievePropertyListController = async (
       rules,
       sortBy = 'updated_at',
     } = req.query;
-
-    console.log('📋 Query parameters received:', {
-      page,
-      limit,
-      location,
-      checkin,
-      checkout,
-      category,
-      amenities,
-      rules,
-      sortBy,
-    });
 
     // Validate page and limit
     if (page < 1) {
@@ -65,11 +51,8 @@ export const retrievePropertyListController = async (
       status: 'active', // Only show active properties
     };
 
-    console.log('🏗️ Building filter conditions...');
-
     // Location filtering (search in title, description, address, city, country)
     if (location && typeof location === 'string') {
-      console.log('📍 Applying location filter:', location);
       where.OR = [
         { title: { contains: location, mode: 'insensitive' } },
         { address: { contains: location, mode: 'insensitive' } },
@@ -89,29 +72,21 @@ export const retrievePropertyListController = async (
           `Invalid category. Must be one of: ${validCategories.join(', ')}`,
         );
       }
-      console.log('🏷️ Applying category filter:', category.toLowerCase());
+
       where.category = category.toLowerCase();
     }
 
     // Amenities filtering (JSON array contains)
     if (amenities && typeof amenities === 'string') {
       const amenityList = amenities.split(',').map((a) => a.trim());
-      console.log('🛋️ Amenities filter requested:', amenityList);
+
       // Note: This is a simplified approach. In production, you might need more complex JSON querying
       // For now, we'll assume amenities is stored as JSON array
-      where.amenities = {
-        // This would need to be adjusted based on how amenities are stored
-        // For JSON arrays, you might need raw SQL or a different approach
-      };
     }
 
     // Rules filtering (similar to amenities)
     if (rules && typeof rules === 'string') {
       const ruleList = rules.split(',').map((r) => r.trim());
-      console.log('📜 Rules filter requested:', ruleList);
-      where.rules = {
-        // Similar to amenities, this needs proper JSON querying
-      };
     }
 
     // Date availability filtering (checkin/checkout)
@@ -133,7 +108,6 @@ export const retrievePropertyListController = async (
       typeof sortBy === 'string' &&
       validSortOptions.includes(sortBy)
     ) {
-      console.log('🔄 Applying sort order:', sortBy);
       switch (sortBy) {
         case 'updated_at':
           orderBy = { updated_at: 'desc' };
@@ -161,21 +135,15 @@ export const retrievePropertyListController = async (
       );
     }
 
-    console.log('📊 Final where clause:', JSON.stringify(where, null, 2));
-    console.log('🔄 Final order by:', JSON.stringify(orderBy, null, 2));
-
     // Get total count
-    console.log('🔢 Counting total properties...');
     const total = await database.property.count({ where });
-    console.log('📈 Total properties found:', total);
 
     if (total === 0) {
-      console.log('⚠️ No properties found matching criteria');
+      console.error('⚠️ No properties found matching criteria');
       // Don't throw error for empty results, just return empty array
     }
 
     // Get properties with related data
-    console.log('🏠 Fetching properties with pagination...');
     const properties = await database.property.findMany({
       where,
       include: {
@@ -201,24 +169,12 @@ export const retrievePropertyListController = async (
       take: limit,
     });
 
-    console.log('✅ Retrieved', properties.length, 'properties');
-
     // Calculate pagination info
     const totalPages = Math.ceil(total / limit);
     const hasNext = page < totalPages;
     const hasPrev = page > 1;
 
-    console.log('📄 Pagination info:', {
-      page,
-      limit,
-      total,
-      totalPages,
-      hasNext,
-      hasPrev,
-    });
-
     // Format response data
-    console.log('📝 Formatting response data...');
     const data = properties.map((property) => ({
       uid: property.uid,
       category: property.category,
@@ -285,13 +241,6 @@ export const retrievePropertyListController = async (
         available: availableFilters,
       },
     };
-
-    console.log('🎉 Property list retrieval completed successfully');
-    console.log('📊 Response summary:', {
-      totalProperties: data.length,
-      pagination: { page, limit, total, totalPages },
-      appliedFilters: Object.keys(appliedFilters).length,
-    });
 
     res
       .status(HttpRes.status.OK)

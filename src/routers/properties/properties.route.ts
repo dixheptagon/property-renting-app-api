@@ -6,7 +6,8 @@ import { setPropertiesMainImageController } from './create-property/property-ima
 import { uploadPropertyController } from './create-property/upload-property-form/upload.property.controller';
 import { movePropertyImagesController } from './create-property/upload-property-form/move.property.image.controller';
 import { verifyToken } from '../../lib/middlewares/verify.token';
-import { retrievePropertyListController } from './retrive-property-list/retrieve.property.list.controller';
+import { retrievePropertyListController } from './retrieve-property-list/retrieve.property.list.controller';
+import { getPropertyDetailsController } from './retrieve-property-detail/property.detail.controller';
 
 const propertiesRouter = Router();
 
@@ -52,6 +53,12 @@ propertiesRouter.put(
 propertiesRouter.get(
   '/properties/explore-properties',
   retrievePropertyListController,
+);
+
+// GET /api/properties/:uid/property-details
+propertiesRouter.get(
+  '/properties/:uid/property-details',
+  getPropertyDetailsController,
 );
 
 export default propertiesRouter;

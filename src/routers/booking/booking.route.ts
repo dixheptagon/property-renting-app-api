@@ -6,11 +6,13 @@ import { CancelOrderController } from './cancel-order/cancel.order.controller';
 import { GetOrderListController } from './get-order-list/get.order.list.controller';
 import { UploadPaymentProofController } from './upload-payment-proof/upload.proof.controller';
 import { uploadPaymentProof } from '../../lib/middlewares/upload.multer';
+import { verifyToken } from '../../lib/middlewares/verify.token';
 
 const bookingRouter = Router();
 
 // 1. Create Booking Order
-bookingRouter.post('/booking/create-order', CreateOrderController);
+bookingRouter.post('/booking/create-order', verifyToken, CreateOrderController);
+
 // 2.a Webhook Callback from Midtrans to update booking status
 bookingRouter.post('/booking/order-notification', OrderNotificationController);
 // 2.b Upload Payment Proof

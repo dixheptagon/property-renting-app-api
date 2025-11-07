@@ -37,8 +37,6 @@ export const verifyToken = (
       );
     }
 
-    console.log(authHeader);
-
     const token = authHeader.substring(7);
 
     if (!token || token === 'null' || token === 'undefined') {
