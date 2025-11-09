@@ -15,7 +15,6 @@ export const GetOrderListController = async (
     const skip = (page - 1) * limit;
 
     const {
-      user_id,
       order_id,
       date_from,
       date_to,
@@ -24,8 +23,24 @@ export const GetOrderListController = async (
       sort_dir = 'desc',
     } = req.query;
 
-    // Validate user_id
-    if (!user_id || typeof user_id !== 'string') {
+    // Get user from verifyToken middleware
+    const userUid = req.user?.uid;
+
+    if (!userUid) {
+      throw new CustomError(
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        'User not authenticated',
+      );
+    }
+
+    // Find user by uid to get id
+    const user = await database.user.findUnique({
+      where: { uid: userUid },
+      select: { id: true },
+    });
+
+    if (!user?.id) {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,
         HttpRes.message.UNAUTHORIZED,
@@ -33,17 +48,8 @@ export const GetOrderListController = async (
       );
     }
 
-    const userIdNum = parseInt(user_id, 10);
-    if (isNaN(userIdNum)) {
-      throw new CustomError(
-        HttpRes.status.BAD_REQUEST,
-        HttpRes.message.BAD_REQUEST,
-        'Invalid user ID',
-      );
-    }
-
     const where: any = {
-      user_id: userIdNum,
+      user_id: user.id,
     };
 
     // Order ID filtering (partial search)
@@ -55,7 +61,7 @@ export const GetOrderListController = async (
     }
 
     // Status filtering
-    if (status && typeof status === 'string') {
+    if (status) {
       const validStatuses = [
         'pending_payment',
         'processing',
@@ -63,14 +69,34 @@ export const GetOrderListController = async (
         'cancelled',
         'completed',
       ];
-      if (!validStatuses.includes(status.toLowerCase())) {
+      let statusArray: string[] = [];
+
+      if (typeof status === 'string') {
+        statusArray = [status.toLowerCase()];
+      } else if (Array.isArray(status)) {
+        statusArray = status.map((s) =>
+          typeof s === 'string' ? s.toLowerCase() : '',
+        );
+      }
+
+      // Validate all statuses
+      const invalidStatuses = statusArray.filter(
+        (s) => !validStatuses.includes(s),
+      );
+      if (invalidStatuses.length > 0) {
         throw new CustomError(
           HttpRes.status.BAD_REQUEST,
           HttpRes.message.BAD_REQUEST,
-          'Invalid status',
+          `Invalid status(es): ${invalidStatuses.join(', ')}`,
         );
       }
-      where.status = status.toLowerCase();
+
+      // Apply status filter
+      if (statusArray.length === 1) {
+        where.status = statusArray[0];
+      } else if (statusArray.length > 1) {
+        where.status = { in: statusArray };
+      }
     }
 
     // Date filtering (on created_at)

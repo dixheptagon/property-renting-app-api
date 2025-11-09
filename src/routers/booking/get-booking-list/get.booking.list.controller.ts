@@ -53,6 +53,9 @@ export const GetBookingListController = async (
 
     const where: any = {
       user_id: userId,
+      status: {
+        notIn: ['cancelled', 'completed'],
+      },
     };
 
     // Order ID filtering (partial search)
@@ -64,16 +67,36 @@ export const GetBookingListController = async (
     }
 
     // Status filtering
-    if (status && typeof status === 'string') {
+    if (status) {
       const validStatuses = ['pending_payment', 'processing', 'confirmed'];
-      if (!validStatuses.includes(status.toLowerCase())) {
+      let statusArray: string[] = [];
+
+      if (typeof status === 'string') {
+        statusArray = [status.toLowerCase()];
+      } else if (Array.isArray(status)) {
+        statusArray = status.map((s) =>
+          typeof s === 'string' ? s.toLowerCase() : '',
+        );
+      }
+
+      // Validate all statuses
+      const invalidStatuses = statusArray.filter(
+        (s) => !validStatuses.includes(s),
+      );
+      if (invalidStatuses.length > 0) {
         throw new CustomError(
           HttpRes.status.BAD_REQUEST,
           HttpRes.message.BAD_REQUEST,
-          'Invalid status',
+          `Invalid status(es): ${invalidStatuses.join(', ')}`,
         );
       }
-      where.status = status.toLowerCase();
+
+      // Apply status filter
+      if (statusArray.length === 1) {
+        where.status = statusArray[0];
+      } else if (statusArray.length > 1) {
+        where.status = { in: statusArray };
+      }
     }
 
     // Date filtering (on created_at)
@@ -132,7 +155,11 @@ export const GetBookingListController = async (
       include: {
         room: {
           include: {
-            property: true,
+            property: {
+              include: {
+                images: true,
+              },
+            },
           },
         },
       },
@@ -140,6 +167,8 @@ export const GetBookingListController = async (
       skip,
       take: limit,
     });
+
+    // Find Property Main Image
 
     // Format response
     const data = bookings.map((booking) => ({
@@ -151,6 +180,9 @@ export const GetBookingListController = async (
           name: booking.room.property.title,
           address: booking.room.property.address,
           city: booking.room.property.city,
+          main_image: booking.room.property.images.find(
+            (image) => image.is_main,
+          )?.url,
         },
       },
       status: booking.status,

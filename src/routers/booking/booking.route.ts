@@ -16,6 +16,7 @@ bookingRouter.post('/booking/create-order', verifyToken, CreateOrderController);
 
 // Webhook Callback from Midtrans to update booking status
 bookingRouter.post('/booking/order-notification', OrderNotificationController);
+
 // Upload Payment Proof
 bookingRouter.post(
   '/booking/:orderId/upload-payment-proof',
@@ -36,6 +37,10 @@ bookingRouter.get(
 bookingRouter.post('/booking/:orderId/cancel-order', CancelOrderController);
 
 // Get Order List
-bookingRouter.get('/booking/get-order-list', GetOrderListController);
+bookingRouter.get(
+  '/booking/get-order-list',
+  verifyToken,
+  GetOrderListController,
+);
 
 export default bookingRouter;
