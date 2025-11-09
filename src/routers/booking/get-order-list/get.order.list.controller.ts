@@ -48,7 +48,7 @@ export const GetOrderListController = async (
       );
     }
 
-    const where: any = {
+    const where: Record<string, any> = {
       user_id: user.id,
     };
 

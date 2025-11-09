@@ -24,7 +24,11 @@ bookingRouter.post(
   UploadPaymentProofController,
 );
 //Get Booking Details
-bookingRouter.get('/booking/get-booking/:orderId', GetBookingController);
+bookingRouter.get(
+  '/booking/get-booking/:orderId',
+  verifyToken,
+  GetBookingController,
+);
 
 // Get My Booking List
 bookingRouter.get(

@@ -11,9 +11,25 @@ export const GetBookingController = async (
 ) => {
   try {
     const { orderId } = req.params;
-    const { user_id } = req.query; // Assuming user_id passed as query param for auth
 
-    if (!user_id || typeof user_id !== 'string') {
+    // Get user from verifyToken middleware
+    const userUid = req.user?.uid;
+
+    if (!userUid) {
+      throw new CustomError(
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        'User not authenticated',
+      );
+    }
+
+    // Find user by uid to get id
+    const user = await database.user.findUnique({
+      where: { uid: userUid },
+      select: { id: true },
+    });
+
+    if (!user?.id) {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,
         HttpRes.message.UNAUTHORIZED,
@@ -21,22 +37,22 @@ export const GetBookingController = async (
       );
     }
 
-    const userIdNum = parseInt(user_id, 10);
-    if (isNaN(userIdNum)) {
-      throw new CustomError(
-        HttpRes.status.BAD_REQUEST,
-        HttpRes.message.BAD_REQUEST,
-        'Invalid user ID',
-      );
-    }
-
     // Find booking by uid
     const booking = await database.booking.findUnique({
-      where: { uid: orderId },
+      where: { uid: orderId, user_id: user.id },
       include: {
         room: {
           include: {
-            property: true,
+            property: {
+              include: {
+                images: true,
+                tenant: {
+                  select: {
+                    email: true,
+                  },
+                },
+              },
+            },
           },
         },
         user: true,
@@ -48,30 +64,6 @@ export const GetBookingController = async (
         HttpRes.status.NOT_FOUND,
         HttpRes.message.NOT_FOUND,
         'Booking not found',
-      );
-    }
-
-    // Check authorization: owner or admin (assuming tenant role is admin)
-    const user = await database.user.findUnique({
-      where: { id: userIdNum },
-    });
-
-    if (!user) {
-      throw new CustomError(
-        HttpRes.status.UNAUTHORIZED,
-        HttpRes.message.UNAUTHORIZED,
-        'User not found',
-      );
-    }
-
-    const isOwner = booking.user_id === userIdNum;
-    const isAdmin = user.role === 'tenant'; // Assuming tenant is admin
-
-    if (!isOwner && !isAdmin) {
-      throw new CustomError(
-        HttpRes.status.FORBIDDEN,
-        'Forbidden',
-        'Access denied',
       );
     }
 
@@ -94,9 +86,13 @@ export const GetBookingController = async (
         name: booking.room.name,
         property: {
           id: booking.room.property.id,
+          tenant_email: booking.room.property.tenant.email,
           title: booking.room.property.title,
           address: booking.room.property.address,
           city: booking.room.property.city,
+          main_image: booking.room.property.images.find(
+            (image) => image.is_main,
+          )?.url,
         },
       },
     };
