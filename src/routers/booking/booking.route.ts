@@ -4,26 +4,47 @@ import { OrderNotificationController } from './order-notification/order.notifica
 import { GetBookingController } from './get-booking/get.booking.controller';
 import { CancelOrderController } from './cancel-order/cancel.order.controller';
 import { GetOrderListController } from './get-order-list/get.order.list.controller';
+import { GetBookingListController } from './get-booking-list/get.booking.list.controller';
 import { UploadPaymentProofController } from './upload-payment-proof/upload.proof.controller';
 import { uploadPaymentProof } from '../../lib/middlewares/upload.multer';
+import { verifyToken } from '../../lib/middlewares/verify.token';
 
 const bookingRouter = Router();
 
-// 1. Create Booking Order
-bookingRouter.post('/booking/create-order', CreateOrderController);
-// 2.a Webhook Callback from Midtrans to update booking status
+// Create Booking Order
+bookingRouter.post('/booking/create-order', verifyToken, CreateOrderController);
+
+// Webhook Callback from Midtrans to update booking status
 bookingRouter.post('/booking/order-notification', OrderNotificationController);
-// 2.b Upload Payment Proof
+
+// Upload Payment Proof
 bookingRouter.post(
   '/booking/:orderId/upload-payment-proof',
   uploadPaymentProof().single('payment_proof'),
   UploadPaymentProofController,
 );
-// 3. Get Booking Details
-bookingRouter.get('/booking/get-booking/:orderId', GetBookingController);
-// 4. Cancel Booking Order
+//Get Booking Details
+bookingRouter.get(
+  '/booking/get-booking/:orderId',
+  verifyToken,
+  GetBookingController,
+);
+
+// Get My Booking List
+bookingRouter.get(
+  '/booking/my-bookings',
+  verifyToken,
+  GetBookingListController,
+);
+
+// Cancel Booking Order
 bookingRouter.post('/booking/:orderId/cancel-order', CancelOrderController);
-// 5. Get Order List
-bookingRouter.get('/booking/get-order-list', GetOrderListController);
+
+// Get Order List
+bookingRouter.get(
+  '/booking/get-order-list',
+  verifyToken,
+  GetOrderListController,
+);
 
 export default bookingRouter;

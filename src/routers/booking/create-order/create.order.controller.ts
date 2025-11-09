@@ -15,7 +15,6 @@ export const CreateOrderController = async (
   try {
     // Validate Request Body
     const {
-      user_id,
       room_id,
       property_id,
       check_in_date,
@@ -24,6 +23,20 @@ export const CreateOrderController = async (
       email,
       phone_number,
     } = await CreateOrderSchema.validate(req.body, { abortEarly: false });
+
+    // Get user id from auth middleware
+    const authUserId = req.user?.uid;
+
+    // Get property id from property UID
+    const property = await database.property.findUnique({
+      where: { uid: property_id },
+      select: { id: true },
+    });
+
+    const user = await database.user.findUnique({
+      where: { uid: authUserId },
+      select: { id: true },
+    });
 
     // Checking room availibility
     const room = await database.room.findUnique({
@@ -79,9 +92,9 @@ export const CreateOrderController = async (
     const order = await database.booking.create({
       data: {
         uid,
-        user_id,
+        user_id: user!.id,
         room_id,
-        property_id,
+        property_id: property!.id,
 
         check_in_date,
         check_out_date,

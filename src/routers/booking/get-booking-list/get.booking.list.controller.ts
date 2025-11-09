@@ -3,26 +3,14 @@ import database from '../../../lib/config/prisma.client';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
+import { normalizeTimezone } from '../utils/normalized.date';
 
-export const GetOrderListController = async (
+export const GetBookingListController = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const page = Math.max(1, Number(req.query.page) || 1);
-    const limit = Math.min(50, Number(req.query.limit) || 20);
-    const skip = (page - 1) * limit;
-
-    const {
-      order_id,
-      date_from,
-      date_to,
-      status,
-      sort_by = 'created_at',
-      sort_dir = 'desc',
-    } = req.query;
-
     // Get user from verifyToken middleware
     const userUid = req.user?.uid;
 
@@ -37,19 +25,37 @@ export const GetOrderListController = async (
     // Find user by uid to get id
     const user = await database.user.findUnique({
       where: { uid: userUid },
-      select: { id: true },
     });
 
-    if (!user?.id) {
+    if (!user) {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,
         HttpRes.message.UNAUTHORIZED,
-        'User ID required',
+        'User not found',
       );
     }
 
-    const where: Record<string, any> = {
-      user_id: user.id,
+    const userId = user.id;
+
+    // Parse query parameters
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const {
+      order_id,
+      date_from,
+      date_to,
+      status,
+      sort_by = 'created_at',
+      sort_dir = 'desc',
+    } = req.query;
+
+    const where: any = {
+      user_id: userId,
+      status: {
+        notIn: ['cancelled', 'completed'],
+      },
     };
 
     // Order ID filtering (partial search)
@@ -62,13 +68,7 @@ export const GetOrderListController = async (
 
     // Status filtering
     if (status) {
-      const validStatuses = [
-        'pending_payment',
-        'processing',
-        'confirmed',
-        'cancelled',
-        'completed',
-      ];
+      const validStatuses = ['pending_payment', 'processing', 'confirmed'];
       let statusArray: string[] = [];
 
       if (typeof status === 'string') {
@@ -111,7 +111,7 @@ export const GetOrderListController = async (
             'Invalid date_from format',
           );
         }
-        where.created_at.gte = fromDate;
+        where.created_at.gte = normalizeTimezone(fromDate);
       }
       if (date_to && typeof date_to === 'string') {
         const toDate = new Date(date_to);
@@ -122,13 +122,17 @@ export const GetOrderListController = async (
             'Invalid date_to format',
           );
         }
-        where.created_at.lte = toDate;
+        where.created_at.lte = normalizeTimezone(toDate);
       }
     }
 
     // Sorting
     const orderBy: any = {};
-    if (sort_by === 'created_at' || sort_by === 'check_in_date') {
+    if (
+      sort_by === 'created_at' ||
+      sort_by === 'check_in_date' ||
+      sort_by === 'total_price'
+    ) {
       orderBy[sort_by] = sort_dir === 'asc' ? 'asc' : 'desc';
     } else {
       orderBy.created_at = 'desc'; // default
@@ -137,13 +141,25 @@ export const GetOrderListController = async (
     // Get total count
     const total = await database.booking.count({ where });
 
+    // Get total completed count
+    const totalCompleted = await database.booking.count({
+      where: {
+        user_id: userId,
+        status: 'completed',
+      },
+    });
+
     // Get bookings
     const bookings = await database.booking.findMany({
       where,
       include: {
         room: {
           include: {
-            property: true,
+            property: {
+              include: {
+                images: true,
+              },
+            },
           },
         },
       },
@@ -152,13 +168,7 @@ export const GetOrderListController = async (
       take: limit,
     });
 
-    if (bookings.length === 0) {
-      throw new CustomError(
-        HttpRes.status.NOT_FOUND,
-        HttpRes.message.NOT_FOUND,
-        'No orders found matching the criteria',
-      );
-    }
+    // Find Property Main Image
 
     // Format response
     const data = bookings.map((booking) => ({
@@ -170,17 +180,21 @@ export const GetOrderListController = async (
           name: booking.room.property.title,
           address: booking.room.property.address,
           city: booking.room.property.city,
+          main_image: booking.room.property.images.find(
+            (image) => image.is_main,
+          )?.url,
         },
       },
       status: booking.status,
-      check_in_date: booking.check_in_date,
-      check_out_date: booking.check_out_date,
+      check_in_date: normalizeTimezone(booking.check_in_date),
+      check_out_date: normalizeTimezone(booking.check_out_date),
       total_price: booking.total_price,
-      created_at: booking.created_at,
+      created_at: normalizeTimezone(booking.created_at),
     }));
 
     const response = {
       data,
+      total_completed: totalCompleted,
       pagination: {
         page,
         limit,
@@ -191,7 +205,9 @@ export const GetOrderListController = async (
 
     res
       .status(HttpRes.status.OK)
-      .json(ResponseHandler.success('Orders retrieved successfully', response));
+      .json(
+        ResponseHandler.success('Bookings retrieved successfully', response),
+      );
   } catch (error) {
     next(error);
   }
