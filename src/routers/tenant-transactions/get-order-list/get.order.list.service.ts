@@ -1,46 +1,7 @@
 import database from '../../../lib/config/prisma.client';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
-
-interface GetOrderListParams {
-  tenantId: number;
-  status?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
-  page: number;
-  limit: number;
-  sortBy?: string;
-  sortDir?: string;
-}
-
-interface OrderListResponse {
-  data: {
-    orderId: string;
-    status: string;
-    check_in_date: Date;
-    check_out_date: Date;
-    total_price: number;
-    property: {
-      name: string;
-      address: string;
-      city: string;
-    };
-    room: {
-      name: string;
-      description: string;
-    };
-    user: {
-      name: string;
-      email: string;
-    };
-  }[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    total_pages: number;
-  };
-}
+import { GetOrderListParams, OrderListResponse } from './get.order.list.types';
 
 export class GetOrderListService {
   static async getOrderListByTenant(
@@ -49,10 +10,11 @@ export class GetOrderListService {
     const {
       tenantId,
       status,
+      category,
       dateFrom,
       dateTo,
       page,
-      limit,
+      limit = 10,
       sortBy = 'created_at',
       sortDir = 'desc',
     } = params;
@@ -65,23 +27,18 @@ export class GetOrderListService {
       },
     };
 
+    // Category filtering
+    if (category && category.length > 0) {
+      where.property.category = {
+        in: category,
+      };
+    }
+
     // Status filtering
-    if (status) {
-      const validStatuses = [
-        'pending_payment',
-        'processing',
-        'confirmed',
-        'cancelled',
-        'completed',
-      ];
-      if (!validStatuses.includes(status.toLowerCase())) {
-        throw new CustomError(
-          HttpRes.status.BAD_REQUEST,
-          HttpRes.message.BAD_REQUEST,
-          'Invalid status value',
-        );
-      }
-      where.status = status.toLowerCase();
+    if (status && status.length > 0) {
+      where.status = {
+        in: status,
+      };
     }
 
     // Date filtering on check_in_date
