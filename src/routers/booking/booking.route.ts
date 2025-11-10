@@ -20,9 +20,11 @@ bookingRouter.post('/booking/order-notification', OrderNotificationController);
 // Upload Payment Proof
 bookingRouter.post(
   '/booking/:orderId/upload-payment-proof',
+  verifyToken,
   uploadPaymentProof().single('payment_proof'),
   UploadPaymentProofController,
 );
+
 //Get Booking Details
 bookingRouter.get(
   '/booking/get-booking/:orderId',
@@ -38,7 +40,11 @@ bookingRouter.get(
 );
 
 // Cancel Booking Order
-bookingRouter.post('/booking/:orderId/cancel-order', CancelOrderController);
+bookingRouter.post(
+  '/booking/:orderId/cancel-order',
+  verifyToken,
+  CancelOrderController,
+);
 
 // Get Order List
 bookingRouter.get(

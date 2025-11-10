@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 
-export const CancelOrderByTenantSchema = Yup.object().shape({
-  cancellation_reason: Yup.string()
+export const RejectOrderSchema = Yup.object().shape({
+  rejection_reason: Yup.string()
     .required('Reason is required')
     .min(10, 'Reason must be at least 10 characters long')
     .max(500, 'Reason cannot exceed 500 characters')

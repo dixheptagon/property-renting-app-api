@@ -15,10 +15,7 @@ tenantRouter.use(verifyToken);
 tenantRouter.use(verifyTenant);
 
 // Get Order List by Tenant
-tenantRouter.get(
-  '/tenant/get-order-list',
-  GetOrderListByTenantController as any,
-);
+tenantRouter.get('/tenant/get-order-list', GetOrderListByTenantController);
 
 // Get Property List by Tenant
 tenantRouter.get(

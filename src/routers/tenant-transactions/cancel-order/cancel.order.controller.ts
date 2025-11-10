@@ -28,28 +28,35 @@ export const CancelOrderByTenantController = async (
     }
 
     // Validate request body
-    const { cancellationReason } = await CancelOrderByTenantSchema.validate(
+    const { cancellation_reason } = await CancelOrderByTenantSchema.validate(
       req.body,
       {
         abortEarly: false,
       },
     );
 
-    // Check authentication
-    const user = req.user;
-    if (!user || !user.id) {
+    // Get user from verifyToken middleware
+    const userUid = req.user?.uid;
+
+    if (!userUid) {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,
         HttpRes.message.UNAUTHORIZED,
-        'Authentication required',
+        'User not authenticated',
       );
     }
 
-    if (user.role !== 'tenant') {
+    // Find user by uid to get id
+    const user = await database.user.findUnique({
+      where: { uid: userUid },
+      select: { id: true },
+    });
+
+    if (!user?.id) {
       throw new CustomError(
-        HttpRes.status.FORBIDDEN,
-        HttpRes.message.FORBIDDEN,
-        'Access denied. Tenant role required.',
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        'User ID required',
       );
     }
 
@@ -92,7 +99,7 @@ export const CancelOrderByTenantController = async (
       where: { uid: orderId },
       data: {
         status: 'cancelled',
-        cancellation_reason: cancellationReason,
+        cancellation_reason: cancellation_reason,
       },
     });
 
