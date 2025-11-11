@@ -10,32 +10,52 @@ import { verifyTenant } from '../../lib/middlewares/verify.role';
 
 const tenantRouter = Router();
 
-// Apply authentication and role verification middleware to all tenant routes
-tenantRouter.use(verifyToken);
-tenantRouter.use(verifyTenant);
-
 // Get Order List by Tenant
-tenantRouter.get('/tenant/get-order-list', GetOrderListByTenantController);
+tenantRouter.get(
+  '/tenant/get-order-list',
+  verifyToken,
+  verifyTenant,
+  GetOrderListByTenantController,
+);
 
 // Get Property List by Tenant
 tenantRouter.get(
   '/tenant/get-property-list',
+  verifyToken,
+  verifyTenant,
   GetPropertyListByTenantController,
 );
 
 // Confirm Order by Tenant
-tenantRouter.post('/tenant/:orderId/confirm-order', ConfirmOrderController);
+tenantRouter.post(
+  '/tenant/:orderId/confirm-order',
+  verifyToken,
+  verifyTenant,
+  ConfirmOrderController,
+);
 
 // Reject Order by Tenant
-tenantRouter.post('/tenant/:orderId/reject-order', RejectOrderController);
+tenantRouter.post(
+  '/tenant/:orderId/reject-order',
+  verifyToken,
+  verifyTenant,
+  RejectOrderController,
+);
 
 // Cancel Order by Tenant
 tenantRouter.post(
   '/tenant/:orderId/cancel-order',
+  verifyToken,
+  verifyTenant,
   CancelOrderByTenantController,
 );
 
 // Complete Order by Tenant
-tenantRouter.post('/tenant/:orderId/complete-order', CompleteOrderController);
+tenantRouter.post(
+  '/tenant/:orderId/complete-order',
+  verifyToken,
+  verifyTenant,
+  CompleteOrderController,
+);
 
 export default tenantRouter;
