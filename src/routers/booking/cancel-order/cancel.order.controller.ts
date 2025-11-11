@@ -79,7 +79,7 @@ export const CancelOrderController = async (
     // Update booking status to cancelled
     const updatedBooking = await database.booking.update({
       where: { id: booking.id },
-      data: { status: 'cancelled' },
+      data: { status: 'cancelled', cancellation_reason },
     });
 
     // Return success response
