@@ -24,27 +24,18 @@ tenantRouter.get(
 );
 
 // Confirm Order by Tenant
-tenantRouter.post(
-  '/tenant/:orderId/confirm-order',
-  ConfirmOrderController as any,
-);
+tenantRouter.post('/tenant/:orderId/confirm-order', ConfirmOrderController);
 
 // Reject Order by Tenant
-tenantRouter.post(
-  '/tenant/:orderId/reject-order',
-  RejectOrderController as any,
-);
+tenantRouter.post('/tenant/:orderId/reject-order', RejectOrderController);
 
 // Cancel Order by Tenant
 tenantRouter.post(
   '/tenant/:orderId/cancel-order',
-  CancelOrderByTenantController as any,
+  CancelOrderByTenantController,
 );
 
 // Complete Order by Tenant
-tenantRouter.post(
-  '/tenant/:orderId/complete-order',
-  CompleteOrderController as any,
-);
+tenantRouter.post('/tenant/:orderId/complete-order', CompleteOrderController);
 
 export default tenantRouter;

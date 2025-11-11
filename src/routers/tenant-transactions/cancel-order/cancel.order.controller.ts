@@ -1,4 +1,4 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import database from '../../../lib/config/prisma.client';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
@@ -7,7 +7,7 @@ import { AuthRequest } from '../../../lib/middlewares/dummy.verify.role';
 import { CancelOrderByTenantSchema } from './cancel.order.validation';
 
 export const CancelOrderByTenantController = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
