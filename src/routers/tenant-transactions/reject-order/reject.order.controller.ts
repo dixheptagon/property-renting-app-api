@@ -1,17 +1,22 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import database from '../../../lib/config/prisma.client';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
-import { AuthRequest } from '../../../lib/middlewares/dummy.verify.role';
 import { SendRejectionService } from './send.rejection.service';
+import { RejectOrderSchema } from './reject.order.validation';
 
 export const RejectOrderController = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
+    // Validate request body
+    const { rejection_reason } = await RejectOrderSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
     // Get order ID from URL params
     const { orderId } = req.params;
 
@@ -27,21 +32,28 @@ export const RejectOrderController = async (
       );
     }
 
-    // Check authentication
-    const user = req.user;
-    if (!user || !user.id) {
+    // Get user from verifyToken middleware
+    const userUid = req.user?.uid;
+
+    if (!userUid) {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,
         HttpRes.message.UNAUTHORIZED,
-        'Authentication required',
+        'User not authenticated',
       );
     }
 
-    if (user.role !== 'tenant') {
+    // Find user by uid to get id
+    const user = await database.user.findUnique({
+      where: { uid: userUid },
+      select: { id: true },
+    });
+
+    if (!user?.id) {
       throw new CustomError(
-        HttpRes.status.FORBIDDEN,
-        HttpRes.message.FORBIDDEN,
-        'Access denied. Tenant role required.',
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        'User ID required',
       );
     }
 
@@ -90,6 +102,7 @@ export const RejectOrderController = async (
         status: 'pending_payment',
         payment_proof: null, // Clear the payment proof since it was rejected
         payment_deadline: payment_deadline,
+        cancellation_reason: rejection_reason,
       },
     });
 

@@ -13,13 +13,40 @@ export const CancelOrderController = async (
   try {
     const { orderId } = req.params;
 
-    const { user_id } = req.query; // Assuming user_id passed as query param for auth
+    if (
+      !orderId ||
+      typeof orderId !== 'string' ||
+      !orderId.startsWith('ORDER-')
+    ) {
+      throw new CustomError(
+        HttpRes.status.BAD_REQUEST,
+        HttpRes.message.BAD_REQUEST,
+        'Invalid order ID format. Expected format: ORDER-xxxxx',
+      );
+    }
 
     const { cancellation_reason } = await CancelOrderSchema.validate(req.body, {
       abortEarly: false,
     });
 
-    if (!user_id || typeof user_id !== 'string') {
+    // Get user from verifyToken middleware
+    const userUid = req.user?.uid;
+
+    if (!userUid) {
+      throw new CustomError(
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        'User not authenticated',
+      );
+    }
+
+    // Find user by uid to get id
+    const user = await database.user.findUnique({
+      where: { uid: userUid },
+      select: { id: true },
+    });
+
+    if (!user?.id) {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,
         HttpRes.message.UNAUTHORIZED,
@@ -27,18 +54,9 @@ export const CancelOrderController = async (
       );
     }
 
-    const userIdNum = parseInt(user_id, 10);
-    if (isNaN(userIdNum)) {
-      throw new CustomError(
-        HttpRes.status.BAD_REQUEST,
-        HttpRes.message.BAD_REQUEST,
-        'Invalid user ID',
-      );
-    }
-
     // Find booking by uid
     const booking = await database.booking.findUnique({
-      where: { uid: orderId },
+      where: { uid: orderId, user_id: user.id },
     });
 
     if (!booking) {
@@ -46,15 +64,6 @@ export const CancelOrderController = async (
         HttpRes.status.NOT_FOUND,
         HttpRes.message.NOT_FOUND,
         'Booking not found',
-      );
-    }
-
-    // Check authorization: owner only
-    if (booking.user_id !== Number(user_id)) {
-      throw new CustomError(
-        HttpRes.status.FORBIDDEN,
-        HttpRes.message.FORBIDDEN,
-        'Access denied',
       );
     }
 
@@ -70,7 +79,7 @@ export const CancelOrderController = async (
     // Update booking status to cancelled
     const updatedBooking = await database.booking.update({
       where: { id: booking.id },
-      data: { status: 'cancelled' },
+      data: { status: 'cancelled', cancellation_reason },
     });
 
     // Return success response

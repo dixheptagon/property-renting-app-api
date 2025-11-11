@@ -1,46 +1,7 @@
 import database from '../../../lib/config/prisma.client';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
-
-interface GetOrderListParams {
-  tenantId: number;
-  status?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
-  page: number;
-  limit: number;
-  sortBy?: string;
-  sortDir?: string;
-}
-
-interface OrderListResponse {
-  data: {
-    orderId: string;
-    status: string;
-    check_in_date: Date;
-    check_out_date: Date;
-    total_price: number;
-    property: {
-      name: string;
-      address: string;
-      city: string;
-    };
-    room: {
-      name: string;
-      description: string;
-    };
-    user: {
-      name: string;
-      email: string;
-    };
-  }[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    total_pages: number;
-  };
-}
+import { GetOrderListParams, OrderListResponse } from './get.order.list.types';
 
 export class GetOrderListService {
   static async getOrderListByTenant(
@@ -48,92 +9,64 @@ export class GetOrderListService {
   ): Promise<OrderListResponse> {
     const {
       tenantId,
-      status,
+      status: baseStatus = [], // default kosong
+      category,
       dateFrom,
       dateTo,
       page,
-      limit,
+      limit = 10,
       sortBy = 'created_at',
       sortDir = 'desc',
     } = params;
+
     const skip = (page - 1) * limit;
 
-    // Build where clause
-    const where: any = {
-      property: {
-        user_id: tenantId, // Only bookings for properties owned by this tenant
-      },
+    // === 1. FILTER UMUM (tenant, category, date) ===
+    const filterWhere: any = {
+      property: { user_id: tenantId },
     };
 
-    // Status filtering
-    if (status) {
-      const validStatuses = [
-        'pending_payment',
-        'processing',
-        'confirmed',
-        'cancelled',
-        'completed',
-      ];
-      if (!validStatuses.includes(status.toLowerCase())) {
-        throw new CustomError(
-          HttpRes.status.BAD_REQUEST,
-          HttpRes.message.BAD_REQUEST,
-          'Invalid status value',
-        );
-      }
-      where.status = status.toLowerCase();
+    if (category?.length) {
+      filterWhere.property.category = { in: category };
     }
 
-    // Date filtering on check_in_date
     if (dateFrom || dateTo) {
-      where.check_in_date = {};
-      if (dateFrom) {
-        where.check_in_date.gte = dateFrom;
-      }
-      if (dateTo) {
-        where.check_in_date.lte = dateTo;
-      }
+      filterWhere.check_in_date = {};
+      if (dateFrom) filterWhere.check_in_date.gte = dateFrom;
+      if (dateTo) filterWhere.check_in_date.lte = dateTo;
     }
 
-    // Sorting
+    // === 2. STATUS FILTER DARI USER ===
+    const hasStatusFilter = baseStatus.length > 0;
+    const statusFilter = hasStatusFilter ? { status: { in: baseStatus } } : {};
+
+    // === 3. WHERE UNTUK LIST & TOTAL (ikut status filter) ===
+    const listWhere = hasStatusFilter
+      ? { ...filterWhere, ...statusFilter }
+      : filterWhere;
+
+    // === 4. SORTING ===
     const orderBy: any = {};
-    if (
-      sortBy === 'created_at' ||
-      sortBy === 'check_in_date' ||
-      sortBy === 'total_price'
-    ) {
+    const validSortFields = [
+      'created_at',
+      'check_in_date',
+      'total_price',
+    ] as const;
+    if (validSortFields.includes(sortBy as any)) {
       orderBy[sortBy] = sortDir === 'asc' ? 'asc' : 'desc';
     } else {
-      orderBy.created_at = 'desc'; // default
+      orderBy.created_at = 'desc';
     }
 
-    // Get total count
-    const total = await database.booking.count({ where });
+    // === 5. GET TOTAL & LIST ===
+    const total = await database.booking.count({ where: listWhere });
 
-    // Get bookings with joins
     const bookings = await database.booking.findMany({
-      where,
+      where: listWhere,
       include: {
-        property: {
-          select: {
-            title: true,
-            address: true,
-            city: true,
-          },
-        },
-        room: {
-          select: {
-            name: true,
-            description: true,
-          },
-        },
-        user: {
-          select: {
-            first_name: true,
-            last_name: true,
-            email: true,
-          },
-        },
+        property: { select: { title: true, address: true, city: true } },
+        room: { select: { name: true, description: true } },
+        user: { select: { first_name: true, last_name: true, email: true } },
       },
       orderBy,
       skip,
@@ -148,7 +81,39 @@ export class GetOrderListService {
       );
     }
 
-    // Format response
+    // === 6. STATISTICS: IKUT STATUS FILTER ===
+    const countByStatus = async (targetStatus: string) => {
+      if (!hasStatusFilter) {
+        // Tidak ada filter → hitung semua yang status = target
+        return database.booking.count({
+          where: { ...filterWhere, status: targetStatus },
+        });
+      }
+
+      // Ada filter → hitung hanya yang (status IN baseStatus) AND status = target
+      return database.booking.count({
+        where: {
+          ...filterWhere,
+          AND: [statusFilter, { status: targetStatus }],
+        },
+      });
+    };
+
+    const [
+      totalCompleted,
+      totalCancelled,
+      totalPending,
+      totalProcessing,
+      totalConfirmed,
+    ] = await Promise.all([
+      countByStatus('completed'),
+      countByStatus('cancelled'),
+      countByStatus('pending_payment'),
+      countByStatus('processing'),
+      countByStatus('confirmed'),
+    ]);
+
+    // === 7. FORMAT RESPONSE ===
     const data = bookings.map((booking) => ({
       orderId: booking.uid || `ORDER-${booking.id}`,
       status: booking.status,
@@ -177,6 +142,14 @@ export class GetOrderListService {
         limit,
         total,
         total_pages: Math.ceil(total / limit),
+      },
+      statistics: {
+        total_order: total,
+        total_completed: totalCompleted,
+        total_cancelled: totalCancelled,
+        total_pending: totalPending,
+        total_processing: totalProcessing,
+        total_confirmed: totalConfirmed,
       },
     };
   }

@@ -22,9 +22,34 @@ export const UploadPaymentProofController = async (
       );
     }
 
+    // Get user from verifyToken middleware
+    const userUid = req.user?.uid;
+
+    if (!userUid) {
+      throw new CustomError(
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        'User not authenticated',
+      );
+    }
+
+    // Find user by uid to get id
+    const user = await database.user.findUnique({
+      where: { uid: userUid },
+      select: { id: true },
+    });
+
+    if (!user?.id) {
+      throw new CustomError(
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        'User ID required',
+      );
+    }
+
     // Find booking by uid (assuming orderId is uid)
     const booking = await database.booking.findUnique({
-      where: { uid: orderId },
+      where: { uid: orderId, user_id: user.id },
     });
 
     if (!booking) {
@@ -74,6 +99,7 @@ export const UploadPaymentProofController = async (
         status: 'processing',
         paid_at: new Date(),
         payment_method: 'bank_transfer',
+        cancellation_reason: null,
       },
     });
 

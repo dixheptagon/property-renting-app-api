@@ -79,6 +79,8 @@ export const GetBookingController = async (
       email: booking.email,
       phone_number: booking.phone_number,
       payment_method: booking.payment_method,
+      payment_proof: booking.payment_proof,
+      cancellation_reason: booking.cancellation_reason,
       transaction_id: booking.transaction_id,
       paid_at: booking.paid_at,
       room: {

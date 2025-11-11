@@ -1,4 +1,4 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import database from '../../../lib/config/prisma.client';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
@@ -7,7 +7,7 @@ import { AuthRequest } from '../../../lib/middlewares/dummy.verify.role';
 import { SendConfirmationService } from './send.confirmation.service';
 
 export const ConfirmOrderController = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
@@ -27,21 +27,28 @@ export const ConfirmOrderController = async (
       );
     }
 
-    // Check authentication
-    const user = req.user;
-    if (!user || !user.id) {
+    // Get user from verifyToken middleware
+    const userUid = req.user?.uid;
+
+    if (!userUid) {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,
         HttpRes.message.UNAUTHORIZED,
-        'Authentication required',
+        'User not authenticated',
       );
     }
 
-    if (user.role !== 'tenant') {
+    // Find user by uid to get id
+    const user = await database.user.findUnique({
+      where: { uid: userUid },
+      select: { id: true },
+    });
+
+    if (!user?.id) {
       throw new CustomError(
-        HttpRes.status.FORBIDDEN,
-        HttpRes.message.FORBIDDEN,
-        'Access denied. Tenant role required.',
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        'User ID required',
       );
     }
 
@@ -84,6 +91,7 @@ export const ConfirmOrderController = async (
       where: { uid: orderId },
       data: {
         status: 'confirmed',
+        cancellation_reason: null,
       },
     });
 
