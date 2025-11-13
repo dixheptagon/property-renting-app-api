@@ -1,13 +1,12 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { CreateReviewSchema } from './create.review.validation';
 import database from '../../../lib/config/prisma.client';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
-import { AuthRequest } from '../../../lib/middlewares/dummy.verify.role';
 
 export const CreateReviewController = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
@@ -17,22 +16,40 @@ export const CreateReviewController = async (
       abortEarly: false,
     });
 
-    // Validate user authentication
-    if (!req.user) {
+    // Get user from verifyToken middleware
+    const userUid = req.user?.uid;
+
+    if (!userUid) {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,
         HttpRes.message.UNAUTHORIZED,
-        'Authentication required',
+        'User not authenticated',
       );
     }
 
-    const userIdNum = req.user.id;
+    // Find user by uid to get id
+    const user = await database.user.findUnique({
+      where: { uid: userUid },
+      select: { id: true },
+    });
+
+    if (!user?.id) {
+      throw new CustomError(
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        'User ID required',
+      );
+    }
 
     // Find booking by uid
     const booking = await database.booking.findUnique({
       where: { uid: booking_uid },
       include: {
-        property: true,
+        property: {
+          select: {
+            id: true,
+          },
+        },
         review: true,
       },
     });
@@ -46,7 +63,7 @@ export const CreateReviewController = async (
     }
 
     // Check if booking belongs to authenticated user
-    if (booking.user_id !== userIdNum) {
+    if (booking.user_id !== user.id) {
       throw new CustomError(
         HttpRes.status.FORBIDDEN,
         HttpRes.message.FORBIDDEN,
@@ -87,7 +104,7 @@ export const CreateReviewController = async (
     const review = await database.review.create({
       data: {
         booking_id: booking.id,
-        user_id: userIdNum,
+        user_id: user.id,
         property_id: booking.property_id,
         rating: rating,
         comment: comment,
@@ -110,9 +127,25 @@ export const CreateReviewController = async (
       },
     });
 
+    // Prepare response data
+    const responseData = {
+      booking_uid: booking.uid,
+      status: booking.status,
+      review: {
+        id: review.id,
+        rating: review.rating,
+        comment: review.comment,
+        reply: null,
+        createdAt: review.created_at,
+        updatedAt: review.updated_at,
+      },
+    };
+
     res
       .status(HttpRes.status.CREATED)
-      .json(ResponseHandler.success('Review created successfully', review));
+      .json(
+        ResponseHandler.success('Review created successfully', responseData),
+      );
   } catch (error) {
     next(error);
   }
