@@ -52,8 +52,6 @@ export const verifyToken = (
       env.JWT_ACCESS_SECRET!,
     ) as JwtPayload;
 
-    console.log('decodedToken', decodedToken);
-
     req.user = decodedToken;
     next();
   } catch (error) {

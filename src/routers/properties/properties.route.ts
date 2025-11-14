@@ -9,6 +9,7 @@ import { verifyToken } from '../../lib/middlewares/verify.token';
 import { verifyTenant } from '../../lib/middlewares/verify.role';
 import { retrievePropertyListController } from './retrieve-property-list/retrieve.property.list.controller';
 import { getPropertyDetailsController } from './retrieve-property-detail/property.detail.controller';
+import { getOwnedPropertyIdController } from './get-owned-property-id/get.owned.propery.id.controller';
 
 const propertiesRouter = Router();
 
@@ -70,6 +71,14 @@ propertiesRouter.get(
 propertiesRouter.get(
   '/properties/:uid/property-details',
   getPropertyDetailsController,
+);
+
+// GET /api/properties/my-properties
+propertiesRouter.get(
+  '/properties/my-properties',
+  verifyToken,
+  verifyTenant,
+  getOwnedPropertyIdController,
 );
 
 export default propertiesRouter;
