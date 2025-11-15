@@ -22,6 +22,7 @@ export const GetTenantProfileController = async (
       where: { uid: userId },
       select: {
         id: true,
+        role: true,
       },
     });
 
@@ -43,12 +44,33 @@ export const GetTenantProfileController = async (
         .json(ResponseHandler.success('Tenant profile not found', null));
     }
 
+    // Response
+    const response = {
+      tenantProfile: {
+        id: tenantProfile.id,
+        user_id: tenantProfile.user_id,
+        contact: tenantProfile.contact,
+        address: tenantProfile.address,
+        city: tenantProfile.city,
+        country: tenantProfile.country,
+        government_id_type: tenantProfile.government_id_type,
+        government_id_path: tenantProfile.government_id_path,
+        verified: tenantProfile.verified,
+        created_at: tenantProfile.created_at,
+        updated_at: tenantProfile.updated_at,
+      },
+      user: {
+        id: user.id,
+        role: user.role,
+      },
+    };
+
     return res
       .status(HttpRes.status.OK)
       .json(
         ResponseHandler.success(
           'Tenant profile retrieved successfully',
-          tenantProfile,
+          response,
         ),
       );
   } catch (error) {

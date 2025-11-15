@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { CustomError } from '../utils/custom.error';
 import { HttpRes } from '../constant/http.response';
+import database from '../config/prisma.client';
 
 // Define the structure of the user from JWT payload
 interface User {
@@ -26,7 +27,7 @@ enum UserRole {
 
 // Middleware to verify user role
 export const verifyRole = (allowedRoles: UserRole[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Check if user is authenticated (req.user should be set by verifyToken middleware)
       if (!req.user) {
@@ -37,8 +38,22 @@ export const verifyRole = (allowedRoles: UserRole[]) => {
         );
       }
 
+      // get role from user
+      const user = await database.user.findUnique({
+        where: { uid: req.user.uid },
+        select: { role: true },
+      });
+
       // Check if user's role is in the allowed roles
-      if (!allowedRoles.includes(req.user.role as UserRole)) {
+      if (!user) {
+        throw new CustomError(
+          HttpRes.status.UNAUTHORIZED,
+          HttpRes.message.UNAUTHORIZED,
+          'User not found',
+        );
+      }
+
+      if (!allowedRoles.includes(user.role as UserRole)) {
         throw new CustomError(
           HttpRes.status.FORBIDDEN,
           HttpRes.message.FORBIDDEN,

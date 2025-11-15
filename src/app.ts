@@ -51,9 +51,9 @@ import propertiesRouter from './routers/properties/properties.route';
 const routers = [
   authRouter,
   bookingRouter,
-  tenantRouter,
-  reviewRoute,
   propertiesRouter,
+  reviewRoute,
+  tenantRouter,
 ];
 routers.forEach((router) => {
   app.use('/api', router);

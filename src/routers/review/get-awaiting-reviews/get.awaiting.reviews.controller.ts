@@ -4,7 +4,7 @@ import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
 
-export const GetMyReviewsController = async (
+export const GetAwaitingReviewsController = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -13,7 +13,7 @@ export const GetMyReviewsController = async (
     const {
       page = '1',
       limit = '10',
-      orderBy = 'reviewCreatedAt',
+      orderBy = 'createdAt',
       order = 'desc',
     } = req.query;
 
@@ -54,7 +54,7 @@ export const GetMyReviewsController = async (
     }
 
     // Validate orderBy and order parameters
-    const validOrderBy = ['reviewCreatedAt'];
+    const validOrderBy = ['createdAt', 'check_in_date'];
     const validOrder = ['asc', 'desc'];
 
     if (
@@ -68,42 +68,36 @@ export const GetMyReviewsController = async (
       );
     }
 
-    // Get completed bookings with reviews
-    const bookingsWithReviews = await database.booking.findMany({
+    // Get completed bookings without reviews
+    const bookingsWithoutReviews = await database.booking.findMany({
       where: {
         user_id: user.id,
         status: 'completed',
-        review: {
-          isNot: null,
-        },
+        review: null,
       },
       include: {
         property: {
           select: {
             id: true,
             title: true,
-            tenant: {
+            images: {
               select: {
                 id: true,
-                first_name: true,
-                last_name: true,
-                display_name: true,
+                url: true,
+                is_main: true,
+              },
+            },
+            rooms: {
+              select: {
+                id: true,
+                name: true,
               },
             },
           },
         },
-        room: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        review: true,
       },
       orderBy: {
-        review: {
-          created_at: order as 'asc' | 'desc',
-        },
+        [orderBy === 'createdAt' ? 'created_at' : 'check_in_date']: order,
       },
       skip: (pageNum - 1) * limitNum,
       take: limitNum,
@@ -114,43 +108,29 @@ export const GetMyReviewsController = async (
       where: {
         user_id: user.id,
         status: 'completed',
-        review: {
-          isNot: null,
-        },
+        review: null,
       },
     });
 
     const totalPages = Math.ceil(totalCount / limitNum);
 
     // Format response data
-    const reviewsData = bookingsWithReviews.map((booking: any) => ({
+    const awaitingReviewsData = bookingsWithoutReviews.map((booking) => ({
       booking_uid: booking.uid,
       status: booking.status,
+      check_in_date: booking.check_in_date,
+      check_out_date: booking.check_out_date,
+      total_price: booking.total_price,
       property: {
         id: booking.property.id,
         name: booking.property.title,
-        room_type: booking.room.name,
-        tenant: {
-          id: booking.property.tenant.id,
-          first_name: booking.property.tenant.first_name,
-          last_name: booking.property.tenant.last_name,
-          display_name: booking.property.tenant.display_name,
-        },
+        room_types: booking.property.rooms.map((room) => room.name),
+        main_image: booking.property.images.find((image) => image.is_main)?.url,
       },
-      review: booking.review
-        ? {
-            id: booking.review.id,
-            rating: booking.review.rating,
-            comment: booking.review.comment,
-            reply: booking.review.reply,
-            createdAt: booking.review.created_at,
-            updatedAt: booking.review.updated_at,
-          }
-        : null,
     }));
 
     const responseData = {
-      reviews: reviewsData,
+      awaiting_reviews: awaitingReviewsData,
       pagination: {
         currentPage: pageNum,
         totalPages,
@@ -163,7 +143,7 @@ export const GetMyReviewsController = async (
       .status(HttpRes.status.OK)
       .json(
         ResponseHandler.success(
-          'My reviews retrieved successfully',
+          'Awaiting reviews retrieved successfully',
           responseData,
         ),
       );

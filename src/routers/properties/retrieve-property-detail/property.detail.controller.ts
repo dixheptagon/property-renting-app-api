@@ -15,13 +15,8 @@ export const getPropertyDetailsController = async (
     // Extract and validate parameters
     const { uid } = req.params;
 
-    console.log('📋 Request parameters:', {
-      uid,
-    });
-
     // Validate uid
     if (!uid || typeof uid !== 'string') {
-      console.error('❌ Invalid property uid:', uid);
       throw new CustomError(
         HttpRes.status.BAD_REQUEST,
         HttpRes.message.BAD_REQUEST,
@@ -30,14 +25,7 @@ export const getPropertyDetailsController = async (
     }
 
     // Call service
-    console.log('🏠 Fetching property details from service...');
     const propertyDetails = await getPropertyDetails(uid);
-
-    console.log('✅ Property details retrieved successfully');
-    console.log('📊 Response summary:', {
-      propertyUid: propertyDetails.uid,
-      roomCount: propertyDetails.rooms.length,
-    });
 
     res
       .status(HttpRes.status.OK)
@@ -48,10 +36,7 @@ export const getPropertyDetailsController = async (
         ),
       );
   } catch (error) {
-    console.error('💥 Error in property details retrieval:', error);
-
     if (error instanceof Error && error.message === HttpRes.message.NOT_FOUND) {
-      console.log('⚠️ Property not found');
       return next(
         new CustomError(
           HttpRes.status.NOT_FOUND,

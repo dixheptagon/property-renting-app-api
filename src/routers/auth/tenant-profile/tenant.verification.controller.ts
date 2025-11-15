@@ -131,8 +131,9 @@ export const TenantVerificationController = async (
       // Don't throw error - email failure shouldn't break the verification process
     }
 
-    return res.status(HttpRes.status.OK).json(
-      ResponseHandler.success('Verification submitted successfully', {
+    // Response
+    const response = {
+      tenantProfile: {
         id: result.id,
         user_id: result.user_id,
         contact: result.contact,
@@ -144,8 +145,22 @@ export const TenantVerificationController = async (
         verified: result.verified,
         created_at: result.created_at,
         updated_at: result.updated_at,
-      }),
-    );
+      },
+      user: {
+        id: user.id,
+        role: user.role,
+        email: user.email,
+      },
+    };
+
+    return res
+      .status(HttpRes.status.OK)
+      .json(
+        ResponseHandler.success(
+          'Verification submitted successfully',
+          response,
+        ),
+      );
   } catch (error) {
     next(error);
   }
