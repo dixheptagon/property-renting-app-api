@@ -20,7 +20,7 @@ export const getReviewsByTenant = async (
   const {
     page,
     limit,
-    rating = 5,
+    rating,
     date_from,
     date_to,
     sort_by,
@@ -28,6 +28,19 @@ export const getReviewsByTenant = async (
     search,
     propertyId,
   } = params;
+
+  console.log('🔧 [Get Reviews by Tenant] Destructured parameters:');
+  console.log('   - page:', page, 'limit:', limit);
+  console.log(
+    '   - rating:',
+    rating,
+    'date_from:',
+    date_from,
+    'date_to:',
+    date_to,
+  );
+  console.log('   - sort_by:', sort_by, 'sort_dir:', sort_dir);
+  console.log('   - search:', search, 'propertyId:', propertyId);
 
   // Determine property ID for tenant
   console.log('🏠 [Get Reviews by Tenant] Determining property ID...');
@@ -243,6 +256,36 @@ export const getReviewsByTenant = async (
     reviews.length,
     'reviews',
   );
+
+  // Debug: Check if there are any reviews at all for this property
+  const allReviewsForProperty = await database.review.count({
+    where: { property_id: propertyIdNum },
+  });
+  console.log(
+    '🔍 [Get Reviews by Tenant] Total reviews in DB for property',
+    propertyIdNum,
+    ':',
+    allReviewsForProperty,
+  );
+
+  // Debug: Check raw reviews without filters
+  if (reviews.length === 0 && allReviewsForProperty > 0) {
+    console.log(
+      '⚠️ [Get Reviews by Tenant] Reviews exist but query returned none - checking filters',
+    );
+    const rawReviews = await database.review.findMany({
+      where: { property_id: propertyIdNum },
+      take: 3,
+      select: {
+        id: true,
+        rating: true,
+        created_at: true,
+        user_id: true,
+        booking_id: true,
+      },
+    });
+    console.log('🔍 [Get Reviews by Tenant] Raw reviews sample:', rawReviews);
+  }
 
   // Get total count
   console.log('🔢 [Get Reviews by Tenant] Getting total count...');
