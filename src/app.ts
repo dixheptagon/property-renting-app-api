@@ -45,6 +45,7 @@ import bookingRouter from './routers/booking/booking.route';
 import tenantRouter from './routers/tenant-transactions/tenant.route';
 import reviewRoute from './routers/review/review.route';
 import propertiesRouter from './routers/properties/properties.route';
+import reportRouter from './routers/report/report.route';
 
 // use user router
 
@@ -54,6 +55,7 @@ const routers = [
   propertiesRouter,
   reviewRoute,
   tenantRouter,
+  reportRouter,
 ];
 routers.forEach((router) => {
   app.use('/api', router);
