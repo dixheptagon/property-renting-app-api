@@ -37,8 +37,9 @@ reviewRoute.get(
 // POST /api/review/:booking_uid/reply - Tenant reply to a review
 reviewRoute.post(
   '/review/:booking_uid/reply',
+  verifyToken,
   verifyTenant,
-  ReplyReviewController as any,
+  ReplyReviewController,
 );
 
 export default reviewRoute;

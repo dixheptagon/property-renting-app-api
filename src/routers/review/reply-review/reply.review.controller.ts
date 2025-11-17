@@ -1,39 +1,45 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { ReplyReviewSchema } from './reply.review.validation';
 import database from '../../../lib/config/prisma.client';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
-import { AuthRequest } from '../../../lib/middlewares/dummy.verify.role';
 
 export const ReplyReviewController = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const { booking_uid } = req.params;
-    const { reply_comment } = await ReplyReviewSchema.validate(req.body, {
-      abortEarly: false,
-    });
+    const { booking_uid, reply_comment } = await ReplyReviewSchema.validate(
+      req.body,
+      {
+        abortEarly: false,
+      },
+    );
 
-    // Validate user authentication
-    if (!req.user) {
+    // Get user from verifyToken middleware
+    const userUid = req.user?.uid;
+
+    if (!userUid) {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,
         HttpRes.message.UNAUTHORIZED,
-        'Authentication required',
+        'User not authenticated',
       );
     }
 
-    const userIdNum = req.user.id;
+    // Get user by UID
+    const user = await database.user.findUnique({
+      where: { uid: userUid },
+      select: { id: true },
+    });
 
-    // Check if user is a tenant
-    if (req.user.role !== 'tenant') {
+    if (!user?.id) {
       throw new CustomError(
-        HttpRes.status.FORBIDDEN,
-        HttpRes.message.FORBIDDEN,
-        'Only tenants can reply to reviews',
+        HttpRes.status.UNAUTHORIZED,
+        HttpRes.message.UNAUTHORIZED,
+        'User ID required',
       );
     }
 
@@ -64,20 +70,11 @@ export const ReplyReviewController = async (
     }
 
     // Check if tenant owns the property
-    if (booking.property.user_id !== userIdNum) {
+    if (booking.property.user_id !== user.id) {
       throw new CustomError(
         HttpRes.status.FORBIDDEN,
         HttpRes.message.FORBIDDEN,
         'You can only reply to reviews for properties you own',
-      );
-    }
-
-    // Check if reply already exists
-    if (booking.review.reply) {
-      throw new CustomError(
-        HttpRes.status.CONFLICT,
-        HttpRes.message.CONFLICT,
-        'Reply already exists for this review',
       );
     }
 
@@ -86,6 +83,7 @@ export const ReplyReviewController = async (
       where: { id: booking.review.id },
       data: {
         reply: reply_comment,
+        updated_at: new Date(),
       },
       include: {
         user: {
@@ -110,17 +108,15 @@ export const ReplyReviewController = async (
 
     // Log reply creation
     console.log(
-      `Reply added to review ${booking.review.id} for booking ${booking_uid} by tenant ${userIdNum}`,
+      `Reply added to review ${booking.review.id} for booking ${booking_uid} by tenant ${user.id}`,
     );
 
-    res
-      .status(HttpRes.status.OK)
-      .json(
-        ResponseHandler.success(
-          'Reply added to review successfully',
-          updatedReview,
-        ),
-      );
+    res.status(HttpRes.status.OK).json(
+      ResponseHandler.success('Reply added to review successfully', {
+        id: updatedReview.id,
+        reply_comment: updatedReview.reply,
+      }),
+    );
   } catch (error) {
     next(error);
   }

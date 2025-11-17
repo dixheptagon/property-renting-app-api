@@ -72,6 +72,8 @@ export const RefreshTokenController = async (
       { expiresIn: '7d' },
     );
 
+    console.log('newAccessToken', newAccessToken);
+
     // Update refresh token in database
     await database.user.update({
       where: { id: user.id },
