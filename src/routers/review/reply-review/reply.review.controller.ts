@@ -106,11 +106,6 @@ export const ReplyReviewController = async (
       },
     });
 
-    // Log reply creation
-    console.log(
-      `Reply added to review ${booking.review.id} for booking ${booking_uid} by tenant ${user.id}`,
-    );
-
     res.status(HttpRes.status.OK).json(
       ResponseHandler.success('Reply added to review successfully', {
         id: updatedReview.id,

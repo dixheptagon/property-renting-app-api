@@ -10,13 +10,6 @@ export class GetSalesReportService {
   ): Promise<SalesReportResponse> {
     const { tenantId, propertyId, startDate, endDate } = params;
 
-    console.log('Service - Tenant ID:', tenantId);
-    console.log('Service - Property ID:', propertyId);
-    console.log('Service - Date range:', {
-      start: startDate.toISOString(),
-      end: endDate.toISOString(),
-    });
-
     // Fetch bookings
     const bookings = await database.booking.findMany({
       where: {
@@ -33,7 +26,6 @@ export class GetSalesReportService {
         created_at: true,
       },
     });
-    console.log('Service - Number of bookings fetched:', bookings.length);
 
     // Calculate totals
     const totalOrders = bookings.length;
@@ -47,18 +39,10 @@ export class GetSalesReportService {
       .filter((b) => b.status === 'completed')
       .reduce((sum, b) => sum + Number(b.total_price), 0);
 
-    console.log('Service - Totals:', {
-      totalOrders,
-      completedOrders,
-      cancelledOrders,
-      totalRevenue,
-    });
-
     // Determine grouping by weeks
     const diffTime = endDate.getTime() - startDate.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24));
     const totalWeeks = Math.ceil(diffDays / 7);
-    console.log('Service - Date calculations:', { diffDays, totalWeeks });
 
     let groupSize: number;
     if (totalWeeks <= 4) {
@@ -70,7 +54,6 @@ export class GetSalesReportService {
     } else {
       groupSize = 4; // 6 months: 4 weeks each
     }
-    console.log('Service - Group size:', groupSize);
 
     // Group by periods
     const periods: { period: string; completed: number; cancelled: number }[] =
@@ -106,10 +89,6 @@ export class GetSalesReportService {
         completed: periodCompleted,
         cancelled: periodCancelled,
       });
-      console.log(`Service - Period ${weekStart}-${weekEnd}:`, {
-        completed: periodCompleted,
-        cancelled: periodCancelled,
-      });
 
       weekStart += groupSize;
     }
@@ -124,7 +103,6 @@ export class GetSalesReportService {
       endDate: endDate.toISOString().split('T')[0],
     };
 
-    console.log('Service - Final result:', result);
     return result;
   }
 }

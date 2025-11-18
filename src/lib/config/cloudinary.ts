@@ -78,8 +78,6 @@ export const cloudinaryMoveImage = async (
     });
     return result;
   } catch (error) {
-    console.log(error);
-
     throw new CustomError(
       HttpRes.status.INTERNAL_SERVER_ERROR,
       HttpRes.message.INTERNAL_SERVER_ERROR,

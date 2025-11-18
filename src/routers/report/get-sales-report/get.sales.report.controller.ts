@@ -13,7 +13,6 @@ export const GetSalesReportController = async (
   try {
     // Get user from verifyToken middleware
     const userUid = req.user?.uid;
-    console.log('User UID:', userUid);
 
     if (!userUid) {
       throw new CustomError(
@@ -38,11 +37,9 @@ export const GetSalesReportController = async (
     }
 
     const tenantId = user.id;
-    console.log('Tenant ID:', tenantId);
 
     // Parse query parameters
     const { propertyUId, startDate, endDate } = req.query;
-    console.log('Query parameters:', { propertyUId, startDate, endDate });
 
     // Validate and set dateRange
     let start: Date;
@@ -85,10 +82,6 @@ export const GetSalesReportController = async (
       start = new Date();
       start.setMonth(start.getMonth() - 1);
     }
-    console.log('Date range:', {
-      start: start.toISOString(),
-      end: end.toISOString(),
-    });
 
     // Get propertyId
     let propertyId: number;
@@ -133,7 +126,6 @@ export const GetSalesReportController = async (
 
       propertyId = property.id;
     }
-    console.log('Property ID:', propertyId);
 
     // Call service to get sales report
     const result = await GetSalesReportService.getSalesReport({

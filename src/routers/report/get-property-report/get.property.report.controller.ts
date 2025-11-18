@@ -83,10 +83,6 @@ export const getPropertyReportController = async (
       );
     }
 
-    console.log('Property UID:', property_uid);
-    console.log('Room Type UID:', room_type_uid || 'Not specified');
-    console.log('Selected Date:', selectedDate.toISOString().split('T')[0]);
-
     // Find property by UID and verify ownership
     const property = await database.property.findUnique({
       where: { uid: property_uid },
@@ -159,8 +155,6 @@ export const getPropertyReportController = async (
       0,
     );
 
-    console.log('Total units:', totalUnits);
-
     if (totalUnits === 0) {
       // Return zero values if no units found
       const result = {
@@ -202,8 +196,6 @@ export const getPropertyReportController = async (
 
     const bookedUnitsCount = await database.booking.count(bookedRoomsQuery);
 
-    console.log('Booked units:', bookedUnitsCount);
-
     // Calculate metrics
     const availableUnits = totalUnits - bookedUnitsCount;
     const occupancyRate = Math.round((bookedUnitsCount / totalUnits) * 100);
@@ -215,8 +207,6 @@ export const getPropertyReportController = async (
       occupancy_rate: occupancyRate,
       selected_date: selectedDate.toISOString().split('T')[0],
     };
-
-    console.log('Final result:', result);
 
     res
       .status(HttpRes.status.OK)

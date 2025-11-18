@@ -4,8 +4,6 @@ import { CustomError } from '../../../../lib/utils/custom.error';
 import { HttpRes } from '../../../../lib/constant/http.response';
 
 export const movePropertyImagesService = async (propertyId: number) => {
-  console.log('Starting to move property images for property:', propertyId);
-
   return await database.$transaction(async (tx) => {
     try {
       // Get all property images that need to be moved (status = active, public_id starts with temp)
@@ -19,8 +17,6 @@ export const movePropertyImagesService = async (propertyId: number) => {
         },
       });
 
-      console.log(`Found ${propertyImages.length} property images to move`);
-
       // Move property images
       const propertyImagePromises = propertyImages.map(async (img) => {
         if (!img.public_id) {
@@ -32,12 +28,8 @@ export const movePropertyImagesService = async (propertyId: number) => {
         }
 
         const newPublicId = `staysia_property_renting_app/properties/${propertyId}/${img.public_id.split('/').pop()}`;
-        console.log(
-          `Moving property image from ${img.public_id} to ${newPublicId}`,
-        );
 
         const result = await cloudinaryMoveImage(img.public_id, newPublicId);
-        console.log(result);
 
         // Update database with new public_id and URL
         return tx.propertyImage.update({
@@ -50,7 +42,6 @@ export const movePropertyImagesService = async (propertyId: number) => {
       });
 
       await Promise.all(propertyImagePromises);
-      console.log('Property images moved successfully');
 
       // Get all rooms for this property
       const rooms = await tx.room.findMany({
@@ -60,8 +51,6 @@ export const movePropertyImagesService = async (propertyId: number) => {
 
       // Move room images for each room
       for (const room of rooms) {
-        console.log('Processing room images for room:', room.id);
-
         const roomImages = await tx.roomImage.findMany({
           where: {
             room_id: room.id,
@@ -72,10 +61,6 @@ export const movePropertyImagesService = async (propertyId: number) => {
           },
         });
 
-        console.log(
-          `Found ${roomImages.length} room images to move for room ${room.id}`,
-        );
-
         const roomImagePromises = roomImages.map(async (img) => {
           if (!img.public_id) {
             throw new CustomError(
@@ -85,9 +70,6 @@ export const movePropertyImagesService = async (propertyId: number) => {
             );
           }
           const newPublicId = `staysia_property_renting_app/properties/${propertyId}/rooms/${room.id}/${img.public_id.split('/').pop()}`;
-          console.log(
-            `Moving room image from ${img.public_id} to ${newPublicId}`,
-          );
 
           await cloudinaryMoveImage(img.public_id, newPublicId);
 
@@ -102,10 +84,8 @@ export const movePropertyImagesService = async (propertyId: number) => {
         });
 
         await Promise.all(roomImagePromises);
-        console.log(`Room images moved successfully for room ${room.id}`);
       }
 
-      console.log('All images moved successfully');
       return {
         message: 'Property images moved successfully',
         propertyId,

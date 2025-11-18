@@ -27,9 +27,6 @@ export const AutoCompleteOrderController = () => {
               status: 'completed',
             },
           });
-          console.log(
-            `Auto-completed order ${booking.uid} (ID: ${booking.id})`,
-          );
         } catch (error) {
           console.error(
             `Failed to auto-complete booking ID: ${booking.id}, UID: ${booking.uid}`,

@@ -82,8 +82,6 @@ export const sendTenantVerifiedEmail = async ({
       subject: 'Tenant Verification Successful - staysia.id',
       html: htmlToSend,
     });
-
-    console.log(`Tenant verification success email sent to ${email}`);
   } catch (error) {
     console.error('Failed to send tenant verification success email:', error);
     // Don't throw error to avoid breaking the main flow

@@ -13,11 +13,6 @@ export const OrderNotificationController = async (
   try {
     const notificationJson = req.body;
 
-    console.log(
-      'Received Midtrans notification:',
-      JSON.stringify(notificationJson, null, 2),
-    );
-
     // Parse required fields
     const {
       order_id,
@@ -29,17 +24,6 @@ export const OrderNotificationController = async (
       payment_type,
     } = notificationJson;
 
-    console.log(
-      'Parsed fields - order_id:',
-      order_id,
-      'transaction_status:',
-      transaction_status,
-      'status_code:',
-      status_code,
-      'gross_amount:',
-      gross_amount,
-    );
-
     // Verify signature
     const isSignatureValid = verifyMidtransSignature(
       order_id,
@@ -47,8 +31,6 @@ export const OrderNotificationController = async (
       gross_amount.toString(),
       signature_key,
     );
-
-    console.log('Signature verification result:', isSignatureValid);
 
     if (!isSignatureValid) {
       throw new CustomError(
@@ -64,12 +46,6 @@ export const OrderNotificationController = async (
       include: { room: true, property: true },
     });
 
-    console.log(
-      'Booking found:',
-      !!booking,
-      booking ? `status: ${booking.status}` : 'N/A',
-    );
-
     if (!booking) {
       // still respond 200 to acknowledge receipt
       throw new CustomError(
@@ -80,23 +56,14 @@ export const OrderNotificationController = async (
     }
 
     // Use transaction for atomicity
-    console.log('Starting transaction for order_id:', order_id);
+
     await database.$transaction(async (tx) => {
-      console.log(
-        'Inside transaction, transaction_status:',
-        transaction_status,
-      );
       if (
         transaction_status === 'settlement' ||
         transaction_status === 'capture'
       ) {
-        console.log(
-          'Transaction status is settlement/capture, booking status:',
-          booking.status,
-        );
         // Only update if still pending_payment
         if (booking.status === 'pending_payment') {
-          console.log('Updating booking to processing');
           // Update booking status to processing
           await tx.booking.update({
             where: { id: booking.id },

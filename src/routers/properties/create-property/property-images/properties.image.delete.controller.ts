@@ -9,7 +9,6 @@ import { cloudinaryDeleteTempPropertyImage } from '../../../../lib/config/cloudi
 const extractPublicIdFromUrl = (url: string): string => {
   const parsed = new URL(url);
 
-  // Cloudinary URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{folder}/{public_id}.{ext}
   const pathParts = parsed.pathname.split('/');
   const uploadIndex = pathParts.findIndex((p) => p === 'upload');
   if (uploadIndex === -1) throw new Error('Invalid Cloudinary URL');
@@ -19,7 +18,6 @@ const extractPublicIdFromUrl = (url: string): string => {
 
   const publicIdWithExt = pathAfterUpload.split('.')[0]; // Remove extension
 
-  console.log(publicIdWithExt);
   return publicIdWithExt;
 };
 
@@ -103,8 +101,6 @@ export const propertyImageDeleteController = async (
         let publicId: string;
         try {
           publicId = extractPublicIdFromUrl(image.url);
-
-          console.log('Public ID:', publicId);
         } catch (error) {
           throw new CustomError(
             HttpRes.status.INTERNAL_SERVER_ERROR,

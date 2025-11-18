@@ -10,8 +10,6 @@ export const getPropertyDetailsController = async (
   next: NextFunction,
 ) => {
   try {
-    console.log('🔍 Starting property details retrieval process...');
-
     // Extract and validate parameters
     const { uid } = req.params;
 

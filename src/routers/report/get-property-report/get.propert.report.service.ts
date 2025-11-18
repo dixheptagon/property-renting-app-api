@@ -10,14 +10,6 @@ export class GetPropertyReportService {
   ): Promise<PropertyReportResponse> {
     const { tenantId, propertyId, roomId, selectedDate } = params;
 
-    console.log('Service - Tenant ID:', tenantId);
-    console.log('Service - Property ID:', propertyId);
-    console.log('Service - Room ID:', roomId || 'Not specified');
-    console.log(
-      'Service - Selected Date:',
-      selectedDate.toISOString().split('T')[0],
-    );
-
     // Build room filter
     let roomFilter: any = { property_id: propertyId };
 
@@ -35,8 +27,6 @@ export class GetPropertyReportService {
       (sum, room) => sum + room.total_units,
       0,
     );
-
-    console.log('Service - Total units:', totalUnits);
 
     if (totalUnits === 0) {
       // Return zero values if no units found
@@ -70,8 +60,6 @@ export class GetPropertyReportService {
 
     const bookedUnitsCount = await database.booking.count(bookedUnitsQuery);
 
-    console.log('Service - Booked units:', bookedUnitsCount);
-
     // Calculate metrics
     const availableUnits = totalUnits - bookedUnitsCount;
     const occupancyRate = Math.round((bookedUnitsCount / totalUnits) * 100);
@@ -84,7 +72,6 @@ export class GetPropertyReportService {
       selected_date: selectedDate.toISOString().split('T')[0],
     };
 
-    console.log('Service - Final result:', result);
     return result;
   }
 }

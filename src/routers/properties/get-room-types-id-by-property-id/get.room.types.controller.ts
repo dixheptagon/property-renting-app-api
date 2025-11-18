@@ -10,8 +10,6 @@ export const getRoomTypesByPropertyIdController = async (
   next: NextFunction,
 ) => {
   try {
-    console.log('🔍 Starting room types retrieval process...');
-
     // Extract and validate propertyUid from query parameters
     const { propertyUid } = req.query;
 
@@ -23,8 +21,6 @@ export const getRoomTypesByPropertyIdController = async (
         'Property UID is required and must be a string',
       );
     }
-
-    console.log('Property UID:', propertyUid);
 
     // Find property by UID to get the ID
     const property = await database.property.findUnique({
@@ -49,7 +45,6 @@ export const getRoomTypesByPropertyIdController = async (
     }
 
     const propertyId = property.id;
-    console.log('Resolved Property ID:', propertyId);
 
     // Fetch room types for the property
     const rooms = await database.room.findMany({
@@ -65,8 +60,6 @@ export const getRoomTypesByPropertyIdController = async (
         created_at: 'asc',
       },
     });
-
-    console.log('Number of room types found:', rooms.length);
 
     res
       .status(HttpRes.status.OK)
