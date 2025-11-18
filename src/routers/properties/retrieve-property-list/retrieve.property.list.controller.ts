@@ -3,6 +3,7 @@ import database from '../../../lib/config/prisma.client';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
+import { formatNumberShort } from './format.number.to.short';
 
 export const retrievePropertyListController = async (
   req: Request,
@@ -79,20 +80,12 @@ export const retrievePropertyListController = async (
     // Amenities filtering (JSON array contains)
     if (amenities && typeof amenities === 'string') {
       const amenityList = amenities.split(',').map((a) => a.trim());
-
-      // Note: This is a simplified approach. In production, you might need more complex JSON querying
-      // For now, we'll assume amenities is stored as JSON array
     }
 
     // Rules filtering (similar to amenities)
     if (rules && typeof rules === 'string') {
       const ruleList = rules.split(',').map((r) => r.trim());
     }
-
-    // Date availability filtering (checkin/checkout)
-    // This is complex as it requires checking room unavailabilities
-    // For now, we'll skip this and implement basic filtering
-    // In a full implementation, you'd need to join with room_unavailabilities
 
     // Sorting
     const validSortOptions = [
@@ -158,6 +151,12 @@ export const retrievePropertyListController = async (
             last_name: true,
           },
         },
+        reviews: {
+          where: { is_public: true },
+          select: {
+            rating: true,
+          },
+        },
         _count: {
           select: {
             reviews: true,
@@ -168,6 +167,8 @@ export const retrievePropertyListController = async (
       skip,
       take: limit,
     });
+
+    // get revies count
 
     // Calculate pagination info
     const totalPages = Math.ceil(total / limit);
@@ -188,8 +189,7 @@ export const retrievePropertyListController = async (
       map_url: property.map_url,
       amenities: property.amenities,
       rules: property.rules,
-      rating_avg: property.rating_avg,
-      rating_count: property.rating_count,
+
       base_price: property.base_price,
       images: property.images.map((img) => ({
         url: img.url,
@@ -200,7 +200,14 @@ export const retrievePropertyListController = async (
         first_name: property.tenant.first_name,
         last_name: property.tenant.last_name,
       },
-      review_count: property._count.reviews,
+      review_count: formatNumberShort(property._count.reviews),
+      rating_avg:
+        property._count.reviews > 0
+          ? property.reviews.reduce(
+              (sum, review) => sum + Number(review.rating),
+              0,
+            ) / property._count.reviews
+          : null,
       updated_at: property.updated_at,
     }));
 
