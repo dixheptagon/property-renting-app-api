@@ -20,12 +20,12 @@ export interface Config {
   CLOUD_NAME: string;
   CLOUD_API_KEY: string;
   CLOUD_API_SECRET: string;
-  // CLOUD_EVENT_IMAGE_FOLDER_PATH: string;
   CLOUD_PAYMENT_PROOF_FOLDER_PATH: string;
   CLOUD_TEMP_PROPERTIES_IMAGE_FOLDER_PATH: string;
   CLOUD_TENANT_PROFILE_FOLDER_PATH: string;
   MIDTRANS_SERVER_KEY: string;
   MIDTRANS_CLIENT_KEY: string;
+  // FIREBASE_SERVICE_ACCOUNT: Firebaseop;
 }
 
 // create schema for validation
