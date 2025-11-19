@@ -1,0 +1,9 @@
+[
+  {
+    "property_uid": "property-1-1",
+    "start_date": "2024-12-20",
+    "end_date": "2025-01-05",
+    "adjustment_type": "percentage",
+    "adjustment_value": 20.0
+  }
+]
