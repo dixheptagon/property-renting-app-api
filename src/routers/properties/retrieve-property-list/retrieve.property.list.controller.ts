@@ -23,8 +23,6 @@ export const retrievePropertyListController = async (
       checkin,
       checkout,
       category,
-      amenities,
-      rules,
       sortBy = 'updated_at',
     } = req.query;
 
@@ -124,16 +122,6 @@ export const retrievePropertyListController = async (
       }
 
       where.category = category.toLowerCase();
-    }
-
-    // Amenities filtering (JSON array contains)
-    if (amenities && typeof amenities === 'string') {
-      const amenityList = amenities.split(',').map((a) => a.trim());
-    }
-
-    // Rules filtering (similar to amenities)
-    if (rules && typeof rules === 'string') {
-      const ruleList = rules.split(',').map((r) => r.trim());
     }
 
     // Sorting
@@ -263,18 +251,12 @@ export const retrievePropertyListController = async (
     // Build filters available (this would be dynamic in a full implementation)
     const availableFilters = {
       categories: ['house', 'apartment', 'hotel', 'villa', 'room'],
-      amenities: [], // Would be populated from database
-      rules: [], // Would be populated from database
     };
 
     // Build applied filters
     const appliedFilters: any = {};
     if (category && typeof category === 'string')
       appliedFilters.category = category;
-    if (amenities && typeof amenities === 'string')
-      appliedFilters.amenities = amenities.split(',');
-    if (rules && typeof rules === 'string')
-      appliedFilters.rules = rules.split(',');
     if (location && typeof location === 'string')
       appliedFilters.location = location;
     if (checkin && typeof checkin === 'string')
