@@ -13,9 +13,7 @@ export const uploadPropertyService = async (
   return await database.$transaction(
     async (tx) => {
       try {
-        console.log('Starting property upload transaction');
         // 1. Create Property
-        console.log('Creating property');
 
         // Get the minimum base price from the property base price
         let propertyRegularPrice = 0;
@@ -50,10 +48,9 @@ export const uploadPropertyService = async (
             status: PropertyStatus.active,
           },
         });
-        console.log('Property created with id:', property.id);
 
         // 2. Move Property Images
-        console.log('Starting to move property images');
+
         const propertyImagePromises = payload.propertyImages.map(
           async (img) => {
             const newPublicId = `staysia_property_renting_app/properties/${property.id}/${img.publicId.split('/').pop()}`;
@@ -74,14 +71,12 @@ export const uploadPropertyService = async (
         );
 
         await Promise.all(propertyImagePromises);
-        console.log('Property images moved successfully');
 
         // 3. Process Rooms
-        console.log('Starting to process rooms');
+
         const roomMap = new Map<string, number>();
 
         for (const roomData of payload.rooms) {
-          console.log('Creating room:', roomData.name);
           const room = await tx.room.create({
             data: {
               uid: uuidv4(),
@@ -98,12 +93,11 @@ export const uploadPropertyService = async (
               total_units: roomData.total_units,
             },
           });
-          console.log('Room created with id:', room.id);
 
           roomMap.set(roomData.tempId, room.id);
 
           // Move Room Images
-          console.log('Moving images for room:', room.id);
+
           const roomImagePromises = roomData.images.map(async (img) => {
             const newPublicId = `staysia_property_renting_app/properties/${property.id}/rooms/${room.id}/${img.publicId.split('/').pop()}`;
             await cloudinaryMoveImage(img.publicId, newPublicId);
@@ -122,10 +116,9 @@ export const uploadPropertyService = async (
           });
 
           await Promise.all(roomImagePromises);
-          console.log('Room images moved for room:', room.id);
 
           // Create Peak Season Rates for this room
-          console.log('Creating peak season rates for room:', room.id);
+
           const peakRates = payload.peakSeasonRates.filter(
             (rate) => rate.targetTempRoomId === roomData.tempId,
           );
@@ -142,10 +135,9 @@ export const uploadPropertyService = async (
               })),
             });
           }
-          console.log('Peak season rates created for room:', room.id);
 
           // Create Room Unavailabilities
-          console.log('Creating unavailabilities for room:', room.id);
+
           const unavailabilities = payload.unavailabilities.filter(
             (unav) => unav.targetTempRoomId === roomData.tempId,
           );
@@ -161,18 +153,15 @@ export const uploadPropertyService = async (
               })),
             });
           }
-          console.log('Unavailabilities created for room:', room.id);
         }
-        console.log('All rooms processed successfully');
 
-        console.log('Transaction completed successfully');
         return {
           propertyId: property.id,
           message: 'Property uploaded successfully',
         };
       } catch (error) {
         console.error('Transaction failed:', error);
-        console.log('Transaction rollback initiated');
+
         throw new CustomError(
           HttpRes.status.INTERNAL_SERVER_ERROR,
           HttpRes.message.INTERNAL_SERVER_ERROR,

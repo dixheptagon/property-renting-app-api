@@ -3,6 +3,7 @@ import database from '../../../lib/config/prisma.client';
 import { CustomError } from '../../../lib/utils/custom.error';
 import { HttpRes } from '../../../lib/constant/http.response';
 import { ResponseHandler } from '../../../lib/utils/response.handler';
+import { formatNumberShort } from './format.number.to.short';
 
 export const retrievePropertyListController = async (
   req: Request,
@@ -22,10 +23,45 @@ export const retrievePropertyListController = async (
       checkin,
       checkout,
       category,
-      amenities,
-      rules,
       sortBy = 'updated_at',
     } = req.query;
+
+    // Parse and validate checkin and checkout dates
+    let checkinDate: Date | null = null;
+    let checkoutDate: Date | null = null;
+
+    if (checkin && typeof checkin === 'string') {
+      checkinDate = new Date(checkin);
+      if (isNaN(checkinDate.getTime())) {
+        console.error('❌ Invalid checkin date:', checkin);
+        throw new CustomError(
+          HttpRes.status.BAD_REQUEST,
+          HttpRes.message.BAD_REQUEST,
+          'Invalid checkin date format. Use YYYY-MM-DD',
+        );
+      }
+    }
+
+    if (checkout && typeof checkout === 'string') {
+      checkoutDate = new Date(checkout);
+      if (isNaN(checkoutDate.getTime())) {
+        console.error('❌ Invalid checkout date:', checkout);
+        throw new CustomError(
+          HttpRes.status.BAD_REQUEST,
+          HttpRes.message.BAD_REQUEST,
+          'Invalid checkout date format. Use YYYY-MM-DD',
+        );
+      }
+    }
+
+    if (checkinDate && checkoutDate && checkinDate >= checkoutDate) {
+      console.error('❌ Checkin date is not before checkout date');
+      throw new CustomError(
+        HttpRes.status.BAD_REQUEST,
+        HttpRes.message.BAD_REQUEST,
+        'Checkin date must be before checkout date',
+      );
+    }
 
     // Validate page and limit
     if (page < 1) {
@@ -51,6 +87,18 @@ export const retrievePropertyListController = async (
       status: 'active', // Only show active properties
     };
 
+    // Filter by room unavailability if checkin and checkout are provided
+    if (checkinDate && checkoutDate) {
+      where.NOT = {
+        room_unavailabilities: {
+          some: {
+            start_date: { lte: checkoutDate },
+            end_date: { gte: checkinDate },
+          },
+        },
+      };
+    }
+
     // Location filtering (search in title, description, address, city, country)
     if (location && typeof location === 'string') {
       where.OR = [
@@ -75,24 +123,6 @@ export const retrievePropertyListController = async (
 
       where.category = category.toLowerCase();
     }
-
-    // Amenities filtering (JSON array contains)
-    if (amenities && typeof amenities === 'string') {
-      const amenityList = amenities.split(',').map((a) => a.trim());
-
-      // Note: This is a simplified approach. In production, you might need more complex JSON querying
-      // For now, we'll assume amenities is stored as JSON array
-    }
-
-    // Rules filtering (similar to amenities)
-    if (rules && typeof rules === 'string') {
-      const ruleList = rules.split(',').map((r) => r.trim());
-    }
-
-    // Date availability filtering (checkin/checkout)
-    // This is complex as it requires checking room unavailabilities
-    // For now, we'll skip this and implement basic filtering
-    // In a full implementation, you'd need to join with room_unavailabilities
 
     // Sorting
     const validSortOptions = [
@@ -158,6 +188,12 @@ export const retrievePropertyListController = async (
             last_name: true,
           },
         },
+        reviews: {
+          where: { is_public: true },
+          select: {
+            rating: true,
+          },
+        },
         _count: {
           select: {
             reviews: true,
@@ -168,6 +204,8 @@ export const retrievePropertyListController = async (
       skip,
       take: limit,
     });
+
+    // get revies count
 
     // Calculate pagination info
     const totalPages = Math.ceil(total / limit);
@@ -188,8 +226,7 @@ export const retrievePropertyListController = async (
       map_url: property.map_url,
       amenities: property.amenities,
       rules: property.rules,
-      rating_avg: property.rating_avg,
-      rating_count: property.rating_count,
+
       base_price: property.base_price,
       images: property.images.map((img) => ({
         url: img.url,
@@ -200,25 +237,26 @@ export const retrievePropertyListController = async (
         first_name: property.tenant.first_name,
         last_name: property.tenant.last_name,
       },
-      review_count: property._count.reviews,
+      review_count: formatNumberShort(property._count.reviews),
+      rating_avg:
+        property._count.reviews > 0
+          ? property.reviews.reduce(
+              (sum, review) => sum + Number(review.rating),
+              0,
+            ) / property._count.reviews
+          : null,
       updated_at: property.updated_at,
     }));
 
     // Build filters available (this would be dynamic in a full implementation)
     const availableFilters = {
       categories: ['house', 'apartment', 'hotel', 'villa', 'room'],
-      amenities: [], // Would be populated from database
-      rules: [], // Would be populated from database
     };
 
     // Build applied filters
     const appliedFilters: any = {};
     if (category && typeof category === 'string')
       appliedFilters.category = category;
-    if (amenities && typeof amenities === 'string')
-      appliedFilters.amenities = amenities.split(',');
-    if (rules && typeof rules === 'string')
-      appliedFilters.rules = rules.split(',');
     if (location && typeof location === 'string')
       appliedFilters.location = location;
     if (checkin && typeof checkin === 'string')

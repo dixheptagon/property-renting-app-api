@@ -6,6 +6,7 @@ import { ReplyReviewController } from './reply-review/reply.review.controller';
 import { verifyToken } from '../../lib/middlewares/verify.token';
 import { verifyTenant, verifyGuest } from '../../lib/middlewares/verify.role';
 import { GetReviewsByTenantController } from './get-reviews-by-tenant/get.reviews.by.tenant.controller';
+import { GetReviewsByPropertyIdController } from './get-reviews-by-property-id/get.reviews.by.property.id.controller';
 
 const reviewRoute = Router();
 
@@ -26,7 +27,7 @@ reviewRoute.get(
   GetAwaitingReviewsController,
 );
 
-// GET /api/review/:propertyId - Get reviews by property
+// GET /api/review/tenant - Get reviews by tenant (authenticated)
 reviewRoute.get(
   '/review/tenant',
   verifyToken,
@@ -34,11 +35,18 @@ reviewRoute.get(
   GetReviewsByTenantController,
 );
 
+// GET /api/review/property/:property_uid - Get reviews by property ID (public)
+reviewRoute.get(
+  '/review/property/:property_uid',
+  GetReviewsByPropertyIdController,
+);
+
 // POST /api/review/:booking_uid/reply - Tenant reply to a review
 reviewRoute.post(
   '/review/:booking_uid/reply',
+  verifyToken,
   verifyTenant,
-  ReplyReviewController as any,
+  ReplyReviewController,
 );
 
 export default reviewRoute;

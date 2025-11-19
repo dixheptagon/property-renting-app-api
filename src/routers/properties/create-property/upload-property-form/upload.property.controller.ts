@@ -26,7 +26,6 @@ export const uploadPropertyController = async (
     // Get tenant ID from middleware
     const tenantId = (req as any).user?.uid;
 
-    console.log(req.user);
     if (!tenantId) {
       throw new CustomError(
         HttpRes.status.UNAUTHORIZED,

@@ -51,8 +51,6 @@ export const GetOrderListByTenantController = async (
       sort_dir = 'desc',
     } = req.query;
 
-    console.log(req.query);
-
     // Validate status
     let statusFilter: string[] | undefined;
     if (status) {

@@ -51,7 +51,7 @@ generator client {
 
 datasource db {
   provider = "postgresql" // Asumsi database menggunakan PostgreSQL. Ganti jika menggunakan MySQL/SQLite.
-  url      = env("DIRECT_URL")
+  url      = env("DATABASE_URL")
 }
 
 model User {

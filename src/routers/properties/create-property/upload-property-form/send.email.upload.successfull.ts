@@ -85,8 +85,6 @@ export const sendPropertyUploadSuccessEmail = async ({
       subject: 'Property Created Successfully - staysia.id',
       html: htmlToSend,
     });
-
-    console.log(`Property upload success email sent to ${email}`);
   } catch (error) {
     console.error('Failed to send property upload success email:', error);
     // Don't throw error to avoid breaking the main flow

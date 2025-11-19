@@ -45,6 +45,7 @@ import bookingRouter from './routers/booking/booking.route';
 import tenantRouter from './routers/tenant-transactions/tenant.route';
 import reviewRoute from './routers/review/review.route';
 import propertiesRouter from './routers/properties/properties.route';
+import reportRouter from './routers/report/report.route';
 
 // use user router
 
@@ -54,6 +55,7 @@ const routers = [
   propertiesRouter,
   reviewRoute,
   tenantRouter,
+  reportRouter,
 ];
 routers.forEach((router) => {
   app.use('/api', router);
@@ -71,6 +73,16 @@ AutoOrderReminderController();
 import { AutoCompleteOrderController } from './routers/tenant-transactions/auto-complete-order/auto.complete.order.controller';
 
 AutoCompleteOrderController();
+
+// Initialize auto delete temp property image cron job
+import { AutoDeleteTempPropertyImage } from './routers/properties/auto-delete-temp-image/auto.delete.temp.property.image.controller';
+
+AutoDeleteTempPropertyImage();
+
+// Initialize auto delete temp room image cron job
+import { AutoDeleteTempRoomImage } from './routers/properties/auto-delete-temp-image/auto.delete.temp.room.image.controller';
+
+AutoDeleteTempRoomImage();
 
 // setup error handler middleware
 app.use(errorMiddleware);

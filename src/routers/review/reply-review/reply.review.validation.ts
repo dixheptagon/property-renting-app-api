@@ -1,6 +1,7 @@
 import * as Yup from 'yup';
 
 export const ReplyReviewSchema = Yup.object().shape({
+  booking_uid: Yup.string().required('Booking ID is required'),
   reply_comment: Yup.string()
     .required('Reply comment is required')
     .min(10, 'Reply comment must be at least 10 characters')

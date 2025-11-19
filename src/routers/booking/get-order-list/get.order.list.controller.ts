@@ -143,7 +143,11 @@ export const GetOrderListController = async (
       include: {
         room: {
           include: {
-            property: true,
+            property: {
+              include: {
+                images: true,
+              },
+            },
           },
         },
       },
@@ -170,6 +174,9 @@ export const GetOrderListController = async (
           name: booking.room.property.title,
           address: booking.room.property.address,
           city: booking.room.property.city,
+          main_image: booking.room.property.images.find(
+            (image) => image.is_main,
+          )?.url,
         },
       },
       status: booking.status,

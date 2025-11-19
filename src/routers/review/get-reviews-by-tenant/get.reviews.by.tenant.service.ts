@@ -11,12 +11,6 @@ export const getReviewsByTenant = async (
   userId: number,
   params: GetReviewsByTenantParams,
 ): Promise<ReviewsWithStats> => {
-  console.log(
-    '🔍 [Get Reviews by Tenant] Starting process for userId:',
-    userId,
-  );
-  console.log('📋 [Get Reviews by Tenant] Parameters:', params);
-
   const {
     page,
     limit,
@@ -29,33 +23,15 @@ export const getReviewsByTenant = async (
     propertyId,
   } = params;
 
-  console.log('🔧 [Get Reviews by Tenant] Destructured parameters:');
-  console.log('   - page:', page, 'limit:', limit);
-  console.log(
-    '   - rating:',
-    rating,
-    'date_from:',
-    date_from,
-    'date_to:',
-    date_to,
-  );
-  console.log('   - sort_by:', sort_by, 'sort_dir:', sort_dir);
-  console.log('   - search:', search, 'propertyId:', propertyId);
-
   // Determine property ID for tenant
-  console.log('🏠 [Get Reviews by Tenant] Determining property ID...');
+
   let propertyIdNum: number;
   if (!propertyId) {
-    console.log(
-      '📋 [Get Reviews by Tenant] No propertyId specified, getting first property for user',
-    );
     // Get first property of user
     const property = await database.property.findFirst({
       where: { user_id: userId },
       select: { id: true, uid: true, rooms: { select: { name: true } } },
     });
-
-    console.log('🏠 [Get Reviews by Tenant] First property result:', property);
 
     if (!property) {
       console.error('❌ [Get Reviews by Tenant] No properties found for user');
@@ -67,19 +43,12 @@ export const getReviewsByTenant = async (
     }
 
     propertyIdNum = property.id;
-    console.log(
-      '✅ [Get Reviews by Tenant] Using first property with ID:',
-      propertyIdNum,
-    );
   } else {
-    console.log('📋 [Get Reviews by Tenant] PropertyId specified:', propertyId);
     // Find property by uid and verify ownership
     const property = await database.property.findUnique({
       where: { uid: propertyId },
       select: { id: true, user_id: true },
     });
-
-    console.log('🏠 [Get Reviews by Tenant] Property lookup result:', property);
 
     if (!property) {
       console.error(
@@ -112,22 +81,16 @@ export const getReviewsByTenant = async (
     }
 
     propertyIdNum = property.id;
-    console.log(
-      '✅ [Get Reviews by Tenant] Property ownership verified, using property ID:',
-      propertyIdNum,
-    );
   }
 
   // Build where clause
-  console.log('🔧 [Get Reviews by Tenant] Building query filters...');
+
   const where: any = {
     property_id: propertyIdNum,
   };
-  console.log('📊 [Get Reviews by Tenant] Base where clause:', where);
 
   // Rating filter
   if (rating) {
-    console.log('⭐ [Get Reviews by Tenant] Applying rating filter:', rating);
     const ratingArray = Array.isArray(rating)
       ? rating.map((r) => parseInt(r as string, 10)).filter((r) => !isNaN(r))
       : typeof rating === 'string'
@@ -137,45 +100,26 @@ export const getReviewsByTenant = async (
             .filter((r) => !isNaN(r))
         : [];
 
-    console.log('⭐ [Get Reviews by Tenant] Parsed rating array:', ratingArray);
-
     if (ratingArray.length > 0) {
       where.rating = {
         in: ratingArray,
       };
-      console.log(
-        '✅ [Get Reviews by Tenant] Rating filter applied:',
-        where.rating,
-      );
     }
   }
 
   // Date range filter
   if (date_from || date_to) {
-    console.log('📅 [Get Reviews by Tenant] Applying date range filter:', {
-      date_from,
-      date_to,
-    });
     where.created_at = {};
     if (date_from) {
       where.created_at.gte = new Date(date_from);
-      console.log(
-        '📅 [Get Reviews by Tenant] Date from applied:',
-        where.created_at.gte,
-      );
     }
     if (date_to) {
       where.created_at.lte = new Date(date_to);
-      console.log(
-        '📅 [Get Reviews by Tenant] Date to applied:',
-        where.created_at.lte,
-      );
     }
   }
 
   // Search filter (in user names or room type names)
   if (search && typeof search === 'string') {
-    console.log('🔍 [Get Reviews by Tenant] Applying search filter:', search);
     where.OR = [
       {
         user: {
@@ -194,34 +138,18 @@ export const getReviewsByTenant = async (
         },
       },
     ];
-    console.log('✅ [Get Reviews by Tenant] Search filter applied');
   }
 
-  console.log(
-    '🎯 [Get Reviews by Tenant] Final where clause:',
-    JSON.stringify(where, null, 2),
-  );
-
   // Build order clause
-  console.log('🔀 [Get Reviews by Tenant] Building sort order...');
+
   const orderBy: any = {};
   if (sort_by) {
     orderBy[sort_by] = sort_dir || 'desc';
   } else {
     orderBy.created_at = 'desc';
   }
-  console.log('🔀 [Get Reviews by Tenant] Order clause:', orderBy);
 
   // Get reviews with pagination
-  console.log('🗄️ [Get Reviews by Tenant] Executing database query...');
-  console.log(
-    '📄 [Get Reviews by Tenant] Pagination - Page:',
-    page,
-    'Limit:',
-    limit,
-    'Skip:',
-    (page - 1) * limit,
-  );
 
   const reviews = await database.review.findMany({
     where,
@@ -251,28 +179,13 @@ export const getReviewsByTenant = async (
     take: limit,
   });
 
-  console.log(
-    '📊 [Get Reviews by Tenant] Reviews query completed. Found',
-    reviews.length,
-    'reviews',
-  );
-
   // Debug: Check if there are any reviews at all for this property
   const allReviewsForProperty = await database.review.count({
     where: { property_id: propertyIdNum },
   });
-  console.log(
-    '🔍 [Get Reviews by Tenant] Total reviews in DB for property',
-    propertyIdNum,
-    ':',
-    allReviewsForProperty,
-  );
 
   // Debug: Check raw reviews without filters
   if (reviews.length === 0 && allReviewsForProperty > 0) {
-    console.log(
-      '⚠️ [Get Reviews by Tenant] Reviews exist but query returned none - checking filters',
-    );
     const rawReviews = await database.review.findMany({
       where: { property_id: propertyIdNum },
       take: 3,
@@ -284,23 +197,14 @@ export const getReviewsByTenant = async (
         booking_id: true,
       },
     });
-    console.log('🔍 [Get Reviews by Tenant] Raw reviews sample:', rawReviews);
   }
 
   // Get total count
-  console.log('🔢 [Get Reviews by Tenant] Getting total count...');
+
   const totalCount = await database.review.count({ where });
   const totalPages = Math.ceil(totalCount / limit);
 
-  console.log(
-    '📈 [Get Reviews by Tenant] Total count:',
-    totalCount,
-    'Total pages:',
-    totalPages,
-  );
-
   // Calculate rating statistics
-  console.log('📊 [Get Reviews by Tenant] Calculating rating statistics...');
 
   const allFilteredReviews = await database.review.findMany({
     where,
@@ -308,12 +212,6 @@ export const getReviewsByTenant = async (
       rating: true,
     },
   });
-
-  console.log(
-    '📊 [Get Reviews by Tenant] Found',
-    allFilteredReviews.length,
-    'reviews for statistics',
-  );
 
   // Calculate average rating
   const averageRating =
@@ -323,11 +221,6 @@ export const getReviewsByTenant = async (
           0,
         ) / allFilteredReviews.length
       : 0;
-
-  console.log(
-    '📊 [Get Reviews by Tenant] Average rating calculated:',
-    averageRating,
-  );
 
   // Calculate rating distribution (1-5 stars)
   const ratingStats = {
@@ -347,15 +240,11 @@ export const getReviewsByTenant = async (
     }
   });
 
-  console.log('📊 [Get Reviews by Tenant] Rating distribution:', ratingStats);
-
   const statistics: ReviewStatistics = {
     average_rating: Number(averageRating.toFixed(1)),
     total_reviews: allFilteredReviews.length,
     rating_distribution: ratingStats,
   };
-
-  console.log('📊 [Get Reviews by Tenant] Statistics completed:', statistics);
 
   const result = {
     reviews,
@@ -367,13 +256,6 @@ export const getReviewsByTenant = async (
       limit,
     },
   };
-
-  console.log('✅ [Get Reviews by Tenant] Process completed successfully');
-  console.log('📋 [Get Reviews by Tenant] Final result summary:');
-  console.log('   - Reviews returned:', reviews.length);
-  console.log('   - Total reviews in DB:', totalCount);
-  console.log('   - Current page:', page, 'of', totalPages);
-  console.log('   - Average rating:', statistics.average_rating);
 
   return result;
 };
