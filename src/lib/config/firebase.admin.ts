@@ -1,6 +1,5 @@
 import admin from 'firebase-admin';
-
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!);
+import serviceAccount from './serviceAccountKey.json'; // download dari Firebase console
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
