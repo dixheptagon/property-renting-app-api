@@ -50,8 +50,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // Asumsi database menggunakan PostgreSQL. Ganti jika menggunakan MySQL/SQLite.
+  provider = "postgresql" 
   url      = env("DATABASE_URL")
+  directUrl = env("SUPABASE_DIRECT_URL") 
 }
 
 model User {
