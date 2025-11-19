@@ -77,12 +77,12 @@ AutoCompleteOrderController();
 // Initialize auto delete temp property image cron job
 import { AutoDeleteTempPropertyImage } from './routers/properties/auto-delete-temp-image/auto.delete.temp.property.image.controller';
 
-AutoDeleteTempRoomImage();
+AutoDeleteTempPropertyImage();
 
 // Initialize auto delete temp room image cron job
 import { AutoDeleteTempRoomImage } from './routers/properties/auto-delete-temp-image/auto.delete.temp.room.image.controller';
 
-AutoDeleteTempPropertyImage();
+AutoDeleteTempRoomImage();
 
 // setup error handler middleware
 app.use(errorMiddleware);

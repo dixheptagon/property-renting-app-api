@@ -28,6 +28,43 @@ export const retrievePropertyListController = async (
       sortBy = 'updated_at',
     } = req.query;
 
+    // Parse and validate checkin and checkout dates
+    let checkinDate: Date | null = null;
+    let checkoutDate: Date | null = null;
+
+    if (checkin && typeof checkin === 'string') {
+      checkinDate = new Date(checkin);
+      if (isNaN(checkinDate.getTime())) {
+        console.error('❌ Invalid checkin date:', checkin);
+        throw new CustomError(
+          HttpRes.status.BAD_REQUEST,
+          HttpRes.message.BAD_REQUEST,
+          'Invalid checkin date format. Use YYYY-MM-DD',
+        );
+      }
+    }
+
+    if (checkout && typeof checkout === 'string') {
+      checkoutDate = new Date(checkout);
+      if (isNaN(checkoutDate.getTime())) {
+        console.error('❌ Invalid checkout date:', checkout);
+        throw new CustomError(
+          HttpRes.status.BAD_REQUEST,
+          HttpRes.message.BAD_REQUEST,
+          'Invalid checkout date format. Use YYYY-MM-DD',
+        );
+      }
+    }
+
+    if (checkinDate && checkoutDate && checkinDate >= checkoutDate) {
+      console.error('❌ Checkin date is not before checkout date');
+      throw new CustomError(
+        HttpRes.status.BAD_REQUEST,
+        HttpRes.message.BAD_REQUEST,
+        'Checkin date must be before checkout date',
+      );
+    }
+
     // Validate page and limit
     if (page < 1) {
       console.error('❌ Invalid page number:', page);
@@ -51,6 +88,18 @@ export const retrievePropertyListController = async (
     const where: any = {
       status: 'active', // Only show active properties
     };
+
+    // Filter by room unavailability if checkin and checkout are provided
+    if (checkinDate && checkoutDate) {
+      where.NOT = {
+        room_unavailabilities: {
+          some: {
+            start_date: { lte: checkoutDate },
+            end_date: { gte: checkinDate },
+          },
+        },
+      };
+    }
 
     // Location filtering (search in title, description, address, city, country)
     if (location && typeof location === 'string') {
