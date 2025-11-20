@@ -1,7 +1,0 @@
-{
-  "build": {
-    "command": "npm run build",
-    "path": "dist"
-  },
-  "start": "node dist/server.js"
-}
