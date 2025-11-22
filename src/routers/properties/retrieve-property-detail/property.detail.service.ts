@@ -39,6 +39,7 @@ export const getPropertyDetails = async (
       },
       room_unavailabilities: true,
       peak_season_rates: true,
+      reviews: true,
     },
   });
 
@@ -48,6 +49,22 @@ export const getPropertyDetails = async (
       HttpRes.message.NOT_FOUND,
       'Property not found',
     );
+  }
+
+  // Calculate rating average and count from reviews
+  const validReviews = property.reviews.filter(
+    (review) => review.is_public === true && review.deleted_at === null,
+  );
+  const rating_count = validReviews.length;
+  let rating_avg: Decimal | null = null;
+  if (rating_count > 0) {
+    const total = validReviews.reduce(
+      (sum, review) => sum.add(review.rating),
+      new Decimal(0),
+    );
+    rating_avg = total
+      .div(rating_count)
+      .toDecimalPlaces(1, Decimal.ROUND_HALF_UP);
   }
 
   // Format tenant data
@@ -110,6 +127,9 @@ export const getPropertyDetails = async (
     adjustment_value: rate.adjustment_value,
   }));
 
+  console.log(rating_avg);
+  console.log(rating_count);
+
   return {
     uid: property.uid,
     category: property.category,
@@ -127,8 +147,8 @@ export const getPropertyDetails = async (
     custom_amenities: property.custom_amenities,
     rules: property.rules,
     custom_rules: property.custom_rules,
-    rating_avg: property.rating_avg,
-    rating_count: property.rating_count,
+    rating_avg,
+    rating_count,
     base_price: property.base_price,
     status: property.status,
     tenant,
