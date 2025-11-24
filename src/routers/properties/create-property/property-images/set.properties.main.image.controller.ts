@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { ResponseHandler } from '../../../../lib/utils/response.handler';
-import { HttpRes } from '../../../../lib/constant/http.response';
-import { CustomError } from '../../../../lib/utils/custom.error';
-import database from '../../../../lib/config/prisma.client';
+import { ResponseHandler } from '../../../../lib/utils/response.handler.js';
+import { HttpRes } from '../../../../lib/constant/http.response.js';
+import { CustomError } from '../../../../lib/utils/custom.error.js';
+import database from '../../../../lib/config/prisma.client.js';
 
 export const setPropertiesMainImageController = async (
   req: Request,

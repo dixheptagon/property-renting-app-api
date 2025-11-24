@@ -1,5 +1,5 @@
 import midtransClient from 'midtrans-client';
-import env from '../../env';
+import env from '../../env.js';
 
 const snap = new midtransClient.Snap({
   isProduction: false,

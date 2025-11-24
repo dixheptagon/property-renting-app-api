@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import * as Yup from 'yup';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { CustomError } from '../utils/custom.error';
-import { ResponseHandler } from '../utils/response.handler';
-import { HttpRes } from '../constant/http.response';
+import { CustomError } from '../utils/custom.error.js';
+import { ResponseHandler } from '../utils/response.handler.js';
+import { HttpRes } from '../constant/http.response.js';
 
 // Error handler middleware
 export const errorMiddleware = (

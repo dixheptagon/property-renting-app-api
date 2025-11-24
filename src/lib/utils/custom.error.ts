@@ -1,5 +1,3 @@
-import { HttpRes } from '../constant/http.response';
-
 export class CustomError extends Error {
   status: number;
   details: string;

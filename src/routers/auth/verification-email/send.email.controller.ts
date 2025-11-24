@@ -2,15 +2,13 @@ import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
 import Handlebars from 'handlebars';
-import transporter from '../../../lib/config/nodemailer.transporter';
-
+import transporter from '../../../lib/config/nodemailer.transporter.js';
 import { NextFunction, Request, Response } from 'express';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
-import database from '../../../lib/config/prisma.client';
-
-import { SendEmailVerificationSchema } from './send.email.validation';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import database from '../../../lib/config/prisma.client.js';
+import { SendEmailVerificationSchema } from './send.email.validation.js';
 
 export const SendEmailVerificationController = async (
   req: Request,

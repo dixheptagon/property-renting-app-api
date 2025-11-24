@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { ResendVerificationSchema } from './resend.verification.validation';
-import database from '../../../lib/config/prisma.client';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { SendEmailVerificationController } from '../verification-email/send.email.controller';
+import { ResendVerificationSchema } from './resend.verification.validation.js';
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { SendEmailVerificationController } from '../verification-email/send.email.controller.js';
 
 export const ResendVerificationController = async (
   req: Request,

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import env from '../../env';
+import env from '../../env.js';
 
 /**
  * Verifies the signature key from Midtrans notification.
@@ -24,11 +24,5 @@ export const verifyMidtransSignature = (
     .digest('hex');
   const isValid = expectedSignature === signature_key;
 
-  if (!isValid) {
-    console.log('Signature verification failed');
-    console.log('Hash string:', hashString);
-    console.log('Expected signature:', expectedSignature);
-    console.log('Received signature_key:', signature_key);
-  }
   return isValid;
 };

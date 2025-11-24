@@ -1,12 +1,12 @@
 import jwt from 'jsonwebtoken';
-import env from '../../../env';
+import env from '../../../env.js';
 import { NextFunction, Request, Response } from 'express';
-import database from '../../../lib/config/prisma.client';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
-import admin from '../../../lib/config/firebase.admin';
-import { SocialLoginSchema } from './social.login.validation';
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import admin from '../../../lib/config/firebase.admin.js';
+import { SocialLoginSchema } from './social.login.validation.js';
 
 export const SocialLoginController = async (
   req: Request,

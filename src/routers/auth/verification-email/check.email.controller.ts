@@ -1,9 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import database from '../../../lib/config/prisma.client';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
-import { CheckEmailSchema } from './check.email.validation';
+import database from '../../../lib/config/prisma.client.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import { CheckEmailSchema } from './check.email.validation.js';
 
 export const CheckEmailController = async (
   req: Request,

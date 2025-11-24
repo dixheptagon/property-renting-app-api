@@ -1,9 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { VerifyOtpSchema, VerifyTokenSchema } from './verify.email.validation';
-import database from '../../../lib/config/prisma.client';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import {
+  VerifyOtpSchema,
+  VerifyTokenSchema,
+} from './verify.email.validation.js';
+import database from '../../../lib/config/prisma.client.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
 
 export const VerifyEmailController = async (
   req: Request,

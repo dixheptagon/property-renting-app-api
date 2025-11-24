@@ -1,11 +1,11 @@
-import database from '../../../lib/config/prisma.client';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
 import {
   GetReviewsByTenantParams,
   ReviewStatistics,
   ReviewsWithStats,
-} from './get.reviews.by.tenant.types';
+} from './get.reviews.by.tenant.types.js';
 
 export const getReviewsByTenant = async (
   userId: number,

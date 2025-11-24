@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { GetOrderListByTenantController } from './get-order-list/get.order.list.controller';
-import { GetPropertyListByTenantController } from './get-property-list/get.property.list.controller';
-import { ConfirmOrderController } from './confirm-order/confirm.order.controller';
-import { RejectOrderController } from './reject-order/reject.order.controller';
-import { CancelOrderByTenantController } from './cancel-order/cancel.order.controller';
-import { CompleteOrderController } from './complete-order/complete.order.controller';
-import { verifyToken } from '../../lib/middlewares/verify.token';
-import { verifyTenant } from '../../lib/middlewares/verify.role';
+import { GetOrderListByTenantController } from './get-order-list/get.order.list.controller.js';
+import { GetPropertyListByTenantController } from './get-property-list/get.property.list.controller.js';
+import { ConfirmOrderController } from './confirm-order/confirm.order.controller.js';
+import { RejectOrderController } from './reject-order/reject.order.controller.js';
+import { CancelOrderByTenantController } from './cancel-order/cancel.order.controller.js';
+import { CompleteOrderController } from './complete-order/complete.order.controller.js';
+import { verifyToken } from '../../lib/middlewares/verify.token.js';
+import { verifyTenant } from '../../lib/middlewares/verify.role.js';
 
 const tenantRouter = Router();
 

@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { GetPropertyListService } from './get.property.list.service';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
-import database from '../../../lib/config/prisma.client';
+import { GetPropertyListService } from './get.property.list.service.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import database from '../../../lib/config/prisma.client.js';
 
 export const GetPropertyListByTenantController = async (
   req: Request,

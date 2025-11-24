@@ -1,9 +1,9 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
-import transporter from '../../../../lib/config/nodemailer.transporter';
-import database from '../../../../lib/config/prisma.client';
-import { UploadPropertyPayload } from './upload.property.types';
+import transporter from '../../../../lib/config/nodemailer.transporter.js';
+import database from '../../../../lib/config/prisma.client.js';
+import { UploadPropertyPayload } from './upload.property.types.js';
 
 interface SendPropertyUploadSuccessEmailParams {
   email: string;

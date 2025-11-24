@@ -1,6 +1,7 @@
 import admin from 'firebase-admin';
+import env from '../../env.js';
 
-const base64 = process.env.FIREBASE_SERVICE_ACCOUNT;
+const base64 = env.FIREBASE_SERVICE_ACCOUNT;
 
 if (!base64) {
   throw new Error(

@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
-import { getPropertyDetails } from './property.detail.service';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
+import { getPropertyDetails } from './property.detail.service.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
 
 export const getPropertyDetailsController = async (
   req: Request,

@@ -1,8 +1,8 @@
 import path from 'path';
 import fs from 'fs';
 import Handlebars from 'handlebars';
-import transporter from '../../../lib/config/nodemailer.transporter';
-import database from '../../../lib/config/prisma.client';
+import transporter from '../../../lib/config/nodemailer.transporter.js';
+import database from '../../../lib/config/prisma.client.js';
 
 export class SendRejectionService {
   private static async sendEmail(

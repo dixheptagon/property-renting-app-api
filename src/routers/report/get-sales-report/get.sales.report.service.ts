@@ -1,8 +1,8 @@
-import database from '../../../lib/config/prisma.client';
+import database from '../../../lib/config/prisma.client.js';
 import {
   GetSalesReportParams,
   SalesReportResponse,
-} from './get.sales.report.types';
+} from './get.sales.report.types.js';
 
 export class GetSalesReportService {
   static async getSalesReport(

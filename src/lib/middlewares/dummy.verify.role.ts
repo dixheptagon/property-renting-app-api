@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { CustomError } from '../utils/custom.error';
-import { HttpRes } from '../constant/http.response';
+import { CustomError } from '../utils/custom.error.js';
+import { HttpRes } from '../constant/http.response.js';
 
 export interface AuthRequest extends Request {
   user?: { id: number; email: string; role: string; uid: string };

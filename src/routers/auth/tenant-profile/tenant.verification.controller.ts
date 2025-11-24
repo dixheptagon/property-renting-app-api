@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import database from '../../../lib/config/prisma.client';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { cloudinaryUploadTenantProfileDocument } from '../../../lib/config/cloudinary';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { TenantVerificationSchema } from './tenant.verification.validation';
-import { sendTenantVerifiedEmail } from './send.email.tenant.verified';
+import database from '../../../lib/config/prisma.client.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { cloudinaryUploadTenantProfileDocument } from '../../../lib/config/cloudinary.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { TenantVerificationSchema } from './tenant.verification.validation.js';
+import { sendTenantVerifiedEmail } from './send.email.tenant.verified.js';
 
 export const TenantVerificationController = async (
   req: Request,

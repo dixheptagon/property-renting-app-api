@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
-import env from '../../env';
+import env from '../../env.js';
 import { NextFunction, Request, Response } from 'express';
-import { CustomError } from '../utils/custom.error';
-import { HttpRes } from '../constant/http.response';
+import { CustomError } from '../utils/custom.error.js';
+import { HttpRes } from '../constant/http.response.js';
 
 // Define the structure of the JWT payload
 interface JwtPayload {

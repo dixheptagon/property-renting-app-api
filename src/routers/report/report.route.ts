@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { GetSalesReportController } from './get-sales-report/get.sales.report.controller';
-import { getPropertyReportController } from './get-property-report/get.property.report.controller';
-import { verifyToken } from '../../lib/middlewares/verify.token';
-import { verifyTenant } from '../../lib/middlewares/verify.role';
+import { GetSalesReportController } from './get-sales-report/get.sales.report.controller.js';
+import { getPropertyReportController } from './get-property-report/get.property.report.controller.js';
+import { verifyToken } from '../../lib/middlewares/verify.token.js';
+import { verifyTenant } from '../../lib/middlewares/verify.role.js';
 
 const reportRouter = Router();
 

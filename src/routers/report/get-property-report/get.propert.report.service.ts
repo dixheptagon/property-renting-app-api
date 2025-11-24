@@ -1,8 +1,8 @@
-import database from '../../../lib/config/prisma.client';
+import database from '../../../lib/config/prisma.client.js';
 import {
   GetPropertyReportParams,
   PropertyReportResponse,
-} from './get.property.report.types';
+} from './get.property.report.types.js';
 
 export class GetPropertyReportService {
   static async getPropertyReport(

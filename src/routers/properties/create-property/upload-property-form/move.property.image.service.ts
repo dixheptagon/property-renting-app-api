@@ -1,7 +1,7 @@
-import database from '../../../../lib/config/prisma.client';
-import { cloudinaryMoveImage } from '../../../../lib/config/cloudinary';
-import { CustomError } from '../../../../lib/utils/custom.error';
-import { HttpRes } from '../../../../lib/constant/http.response';
+import database from '../../../../lib/config/prisma.client.js';
+import { cloudinaryMoveImage } from '../../../../lib/config/cloudinary.js';
+import { CustomError } from '../../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../../lib/constant/http.response.js';
 
 export const movePropertyImagesService = async (propertyId: number) => {
   return await database.$transaction(async (tx) => {

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import database from '../../../lib/config/prisma.client';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
-import { HttpRes } from '../../../lib/constant/http.response';
+import database from '../../../lib/config/prisma.client.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
 
 export const GetTenantProfileController = async (
   req: Request,

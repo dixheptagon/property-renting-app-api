@@ -1,8 +1,8 @@
-import database from '../../../lib/config/prisma.client';
+import database from '../../../lib/config/prisma.client.js';
 import { Decimal } from '@prisma/client/runtime/library';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { PropertyDetailResponse } from './propert.detail.response';
-import { CustomError } from '../../../lib/utils/custom.error';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { PropertyDetailResponse } from './propert.detail.response.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
 
 export const getPropertyDetails = async (
   uid: string,
@@ -39,6 +39,7 @@ export const getPropertyDetails = async (
       },
       room_unavailabilities: true,
       peak_season_rates: true,
+      reviews: true,
     },
   });
 
@@ -48,6 +49,22 @@ export const getPropertyDetails = async (
       HttpRes.message.NOT_FOUND,
       'Property not found',
     );
+  }
+
+  // Calculate rating average and count from reviews
+  const validReviews = property.reviews.filter(
+    (review) => review.is_public === true && review.deleted_at === null,
+  );
+  const rating_count = validReviews.length;
+  let rating_avg: Decimal | null = null;
+  if (rating_count > 0) {
+    const total = validReviews.reduce(
+      (sum, review) => sum.add(review.rating),
+      new Decimal(0),
+    );
+    rating_avg = total
+      .div(rating_count)
+      .toDecimalPlaces(1, Decimal.ROUND_HALF_UP);
   }
 
   // Format tenant data
@@ -127,8 +144,8 @@ export const getPropertyDetails = async (
     custom_amenities: property.custom_amenities,
     rules: property.rules,
     custom_rules: property.custom_rules,
-    rating_avg: property.rating_avg,
-    rating_count: property.rating_count,
+    rating_avg,
+    rating_count,
     base_price: property.base_price,
     status: property.status,
     tenant,

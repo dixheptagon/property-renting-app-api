@@ -1,6 +1,6 @@
 import cron from 'node-cron';
-import database from '../../../lib/config/prisma.client';
-import { SendReminderService } from './send.reminder.service';
+import database from '../../../lib/config/prisma.client.js';
+import { SendReminderService } from './send.reminder.service.js';
 
 export const AutoOrderReminderController = () => {
   // Run daily at 00:00 server time to send reminder emails for tomorrow's check-ins

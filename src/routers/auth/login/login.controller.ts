@@ -1,12 +1,12 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import env from '../../../env';
-import { LoginSchema } from './login.validation';
+import env from '../../../env.js';
+import { LoginSchema } from './login.validation.js';
 import { NextFunction, Request, Response } from 'express';
-import database from '../../../lib/config/prisma.client';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
 
 export const LoginController = async (
   req: Request,
