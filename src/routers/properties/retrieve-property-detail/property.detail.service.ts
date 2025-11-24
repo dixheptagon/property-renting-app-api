@@ -1,8 +1,8 @@
-import database from '../../../lib/config/prisma.client';
+import database from '../../../lib/config/prisma.client.js';
 import { Decimal } from '@prisma/client/runtime/library';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { PropertyDetailResponse } from './propert.detail.response';
-import { CustomError } from '../../../lib/utils/custom.error';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { PropertyDetailResponse } from './propert.detail.response.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
 
 export const getPropertyDetails = async (
   uid: string,
@@ -126,9 +126,6 @@ export const getPropertyDetails = async (
     adjustment_type: rate.adjustment_type,
     adjustment_value: rate.adjustment_value,
   }));
-
-  console.log(rating_avg);
-  console.log(rating_count);
 
   return {
     uid: property.uid,

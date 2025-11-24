@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import database from '../../../lib/config/prisma.client';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { cloudinaryUploadPaymentProof } from '../../../lib/config/cloudinary';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { cloudinaryUploadPaymentProof } from '../../../lib/config/cloudinary.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
 
 export const UploadPaymentProofController = async (
   req: Request,

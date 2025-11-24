@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import multer from 'multer';
-import { CustomError } from '../utils/custom.error';
-import { HttpRes } from '../constant/http.response';
+import { CustomError } from '../utils/custom.error.js';
+import { HttpRes } from '../constant/http.response.js';
 
 export const uploadPaymentProof = () => {
   const storage = multer.memoryStorage();

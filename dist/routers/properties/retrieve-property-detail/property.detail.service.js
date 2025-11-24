@@ -1,24 +1,10 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPropertyDetails = void 0;
-const prisma_client_1 = __importDefault(require("../../../lib/config/prisma.client"));
-const http_response_1 = require("../../../lib/constant/http.response");
-const custom_error_1 = require("../../../lib/utils/custom.error");
-const getPropertyDetails = (uid) => __awaiter(void 0, void 0, void 0, function* () {
+import database from '../../../lib/config/prisma.client.js';
+import { Decimal } from '@prisma/client/runtime/library';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+export const getPropertyDetails = async (uid) => {
     // Find property with all required relations
-    const property = yield prisma_client_1.default.property.findFirst({
+    const property = await database.property.findFirst({
         where: {
             uid,
             status: 'active',
@@ -49,10 +35,21 @@ const getPropertyDetails = (uid) => __awaiter(void 0, void 0, void 0, function* 
             },
             room_unavailabilities: true,
             peak_season_rates: true,
+            reviews: true,
         },
     });
     if (!property) {
-        throw new custom_error_1.CustomError(http_response_1.HttpRes.status.NOT_FOUND, http_response_1.HttpRes.message.NOT_FOUND, 'Property not found');
+        throw new CustomError(HttpRes.status.NOT_FOUND, HttpRes.message.NOT_FOUND, 'Property not found');
+    }
+    // Calculate rating average and count from reviews
+    const validReviews = property.reviews.filter((review) => review.is_public === true && review.deleted_at === null);
+    const rating_count = validReviews.length;
+    let rating_avg = null;
+    if (rating_count > 0) {
+        const total = validReviews.reduce((sum, review) => sum.add(review.rating), new Decimal(0));
+        rating_avg = total
+            .div(rating_count)
+            .toDecimalPlaces(1, Decimal.ROUND_HALF_UP);
     }
     // Format tenant data
     const tenant = {
@@ -123,8 +120,8 @@ const getPropertyDetails = (uid) => __awaiter(void 0, void 0, void 0, function* 
         custom_amenities: property.custom_amenities,
         rules: property.rules,
         custom_rules: property.custom_rules,
-        rating_avg: property.rating_avg,
-        rating_count: property.rating_count,
+        rating_avg,
+        rating_count,
         base_price: property.base_price,
         status: property.status,
         tenant,
@@ -133,5 +130,4 @@ const getPropertyDetails = (uid) => __awaiter(void 0, void 0, void 0, function* 
         room_unavailabilities,
         peak_season_rates,
     };
-});
-exports.getPropertyDetails = getPropertyDetails;
+};

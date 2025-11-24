@@ -201,17 +201,6 @@ const { data, success, message } = await fetchMyBookings();
 
 if (success) {
   const { data: bookings, total_completed, pagination } = data;
-
-  console.log(`Total completed bookings: ${total_completed}`);
-  console.log(`Current page: ${pagination.page}/${pagination.total_pages}`);
-  console.log(`Total bookings: ${pagination.total}`);
-
-  // Process bookings array
-  bookings.forEach((booking) => {
-    console.log(`Order ${booking.order_id}: ${booking.status}`);
-    console.log(`Room: ${booking.room.name} at ${booking.room.property.name}`);
-    console.log(`Dates: ${booking.check_in_date} to ${booking.check_out_date}`);
-  });
 } else {
   console.error('Error:', message);
 }

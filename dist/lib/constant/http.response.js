@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.HttpRes = void 0;
-exports.HttpRes = Object.freeze({
+export const HttpRes = Object.freeze({
     status: {
         // Success
         OK: 200,

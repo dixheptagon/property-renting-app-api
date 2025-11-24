@@ -1,41 +1,26 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.RegisterController = void 0;
-const bcrypt_1 = __importDefault(require("bcrypt"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const env_1 = __importDefault(require("../../../env"));
-const register_validation_1 = require("./register.validation");
-const prisma_client_1 = __importDefault(require("../../../lib/config/prisma.client"));
-const custom_error_1 = require("../../../lib/utils/custom.error");
-const http_response_1 = require("../../../lib/constant/http.response");
-const response_handler_1 = require("../../../lib/utils/response.handler");
-const RegisterController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import env from '../../../env.js';
+import { RegisterSchema } from './register.validation.js';
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+export const RegisterController = async (req, res, next) => {
     try {
         // Validate request body
-        const { first_name, last_name, email, password, role = 'guest', } = yield register_validation_1.RegisterSchema.validate(req.body, {
+        const { first_name, last_name, email, password, role = 'guest', } = await RegisterSchema.validate(req.body, {
             abortEarly: false,
         });
         // Check if user already exists
-        const existingUser = yield prisma_client_1.default.user.findUnique({
+        const existingUser = await database.user.findUnique({
             where: { email },
         });
         if (existingUser) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.CONFLICT, http_response_1.HttpRes.message.CONFLICT, 'User already registered. Please login.');
+            throw new CustomError(HttpRes.status.CONFLICT, HttpRes.message.CONFLICT, 'User already registered. Please login.');
         }
         // Check if email was verified
-        const emailVerification = yield prisma_client_1.default.emailVerification.findFirst({
+        const emailVerification = await database.emailVerification.findFirst({
             where: {
                 email,
                 is_used: true,
@@ -43,16 +28,16 @@ const RegisterController = (req, res, next) => __awaiter(void 0, void 0, void 0,
             orderBy: { created_at: 'desc' },
         });
         if (!emailVerification) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, 'Email not verified. Please verify your email first.');
+            throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, 'Email not verified. Please verify your email first.');
         }
         // Hash password
-        const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
         // Create user
-        const transaction = yield prisma_client_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        const transaction = await database.$transaction(async (tx) => {
             // Generate UID
             const uid = crypto.randomUUID();
             // Create new user
-            const user = yield tx.user.create({
+            const user = await tx.user.create({
                 data: {
                     uid,
                     first_name,
@@ -73,19 +58,19 @@ const RegisterController = (req, res, next) => __awaiter(void 0, void 0, void 0,
                 },
             });
             // Clean up used verification records
-            yield tx.emailVerification.deleteMany({
+            await tx.emailVerification.deleteMany({
                 where: { email },
             });
             // Create JWT token
-            const accessToken = jsonwebtoken_1.default.sign({ uid: user.uid, email: user.email, role: user.role }, env_1.default.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+            const accessToken = jwt.sign({ uid: user.uid, email: user.email, role: user.role }, env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
             // Create refresh token
-            const refreshToken = jsonwebtoken_1.default.sign({ uid: user.uid, email: user.email, role: user.role }, env_1.default.JWT_REFRESH_SECRET, { expiresIn: '7d' });
-            yield tx.user.update({
+            const refreshToken = jwt.sign({ uid: user.uid, email: user.email, role: user.role }, env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+            await tx.user.update({
                 where: { id: user.id },
                 data: { refresh_token: refreshToken },
             });
             return { user, accessToken, refreshToken };
-        }));
+        });
         // Send refresh token via HTTP-Only cookie
         res.cookie('refresh_token', transaction.refreshToken, {
             httpOnly: true,
@@ -96,11 +81,10 @@ const RegisterController = (req, res, next) => __awaiter(void 0, void 0, void 0,
         });
         const fullname = `${transaction.user.first_name} ${transaction.user.last_name}`;
         return res
-            .status(http_response_1.HttpRes.status.CREATED)
-            .json(response_handler_1.ResponseHandler.success(`${http_response_1.HttpRes.message.CREATED} : Registration completed successfully! Welcome ${fullname}`, { user: transaction.user, access_token: transaction.accessToken }));
+            .status(HttpRes.status.CREATED)
+            .json(ResponseHandler.success(`${HttpRes.message.CREATED} : Registration completed successfully! Welcome ${fullname}`, { user: transaction.user, access_token: transaction.accessToken }));
     }
     catch (error) {
         next(error);
     }
-});
-exports.RegisterController = RegisterController;
+};

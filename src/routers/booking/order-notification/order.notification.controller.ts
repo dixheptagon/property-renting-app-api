@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import database from '../../../lib/config/prisma.client';
-import { verifyMidtransSignature } from '../../../lib/utils/verify.midtrans.signature';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
+import database from '../../../lib/config/prisma.client.js';
+import { verifyMidtransSignature } from '../../../lib/utils/verify.midtrans.signature.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
 
 export const OrderNotificationController = async (
   req: Request,

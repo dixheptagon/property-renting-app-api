@@ -1,24 +1,9 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.retrievePropertyListController = void 0;
-const prisma_client_1 = __importDefault(require("../../../lib/config/prisma.client"));
-const custom_error_1 = require("../../../lib/utils/custom.error");
-const http_response_1 = require("../../../lib/constant/http.response");
-const response_handler_1 = require("../../../lib/utils/response.handler");
-const format_number_to_short_1 = require("./format.number.to.short");
-const retrievePropertyListController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import { formatNumberShort } from './format.number.to.short.js';
+export const retrievePropertyListController = async (req, res, next) => {
     try {
         // Parse and validate query parameters
         const page = Math.max(1, Number(req.query.page) || 1);
@@ -34,28 +19,28 @@ const retrievePropertyListController = (req, res, next) => __awaiter(void 0, voi
             checkinDate = new Date(checkin);
             if (isNaN(checkinDate.getTime())) {
                 console.error('❌ Invalid checkin date:', checkin);
-                throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, 'Invalid checkin date format. Use YYYY-MM-DD');
+                throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, 'Invalid checkin date format. Use YYYY-MM-DD');
             }
         }
         if (checkout && typeof checkout === 'string') {
             checkoutDate = new Date(checkout);
             if (isNaN(checkoutDate.getTime())) {
                 console.error('❌ Invalid checkout date:', checkout);
-                throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, 'Invalid checkout date format. Use YYYY-MM-DD');
+                throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, 'Invalid checkout date format. Use YYYY-MM-DD');
             }
         }
         if (checkinDate && checkoutDate && checkinDate >= checkoutDate) {
             console.error('❌ Checkin date is not before checkout date');
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, 'Checkin date must be before checkout date');
+            throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, 'Checkin date must be before checkout date');
         }
         // Validate page and limit
         if (page < 1) {
             console.error('❌ Invalid page number:', page);
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, 'Page number must be greater than 0');
+            throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, 'Page number must be greater than 0');
         }
         if (![12, 24, 48].includes(limit)) {
             console.error('❌ Invalid limit value:', limit);
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, 'Limit must be one of: 12, 24, 48');
+            throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, 'Limit must be one of: 12, 24, 48');
         }
         // Build where clause
         const where = {
@@ -86,7 +71,7 @@ const retrievePropertyListController = (req, res, next) => __awaiter(void 0, voi
             const validCategories = ['house', 'apartment', 'hotel', 'villa', 'room'];
             if (!validCategories.includes(category.toLowerCase())) {
                 console.error('❌ Invalid category:', category);
-                throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, `Invalid category. Must be one of: ${validCategories.join(', ')}`);
+                throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, `Invalid category. Must be one of: ${validCategories.join(', ')}`);
             }
             where.category = category.toLowerCase();
         }
@@ -120,16 +105,16 @@ const retrievePropertyListController = (req, res, next) => __awaiter(void 0, voi
             typeof sortBy === 'string' &&
             !validSortOptions.includes(sortBy)) {
             console.error('❌ Invalid sort option:', sortBy);
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, `Invalid sort option. Must be one of: ${validSortOptions.join(', ')}`);
+            throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, `Invalid sort option. Must be one of: ${validSortOptions.join(', ')}`);
         }
         // Get total count
-        const total = yield prisma_client_1.default.property.count({ where });
+        const total = await database.property.count({ where });
         if (total === 0) {
             console.error('⚠️ No properties found matching criteria');
             // Don't throw error for empty results, just return empty array
         }
         // Get properties with related data
-        const properties = yield prisma_client_1.default.property.findMany({
+        const properties = await database.property.findMany({
             where,
             include: {
                 images: {
@@ -188,7 +173,7 @@ const retrievePropertyListController = (req, res, next) => __awaiter(void 0, voi
                 first_name: property.tenant.first_name,
                 last_name: property.tenant.last_name,
             },
-            review_count: (0, format_number_to_short_1.formatNumberShort)(property._count.reviews),
+            review_count: formatNumberShort(property._count.reviews),
             rating_avg: property._count.reviews > 0
                 ? property.reviews.reduce((sum, review) => sum + Number(review.rating), 0) / property._count.reviews
                 : null,
@@ -224,12 +209,11 @@ const retrievePropertyListController = (req, res, next) => __awaiter(void 0, voi
             },
         };
         res
-            .status(http_response_1.HttpRes.status.OK)
-            .json(response_handler_1.ResponseHandler.success('Properties retrieved successfully', response));
+            .status(HttpRes.status.OK)
+            .json(ResponseHandler.success('Properties retrieved successfully', response));
     }
     catch (error) {
         console.error('💥 Error in property list retrieval:', error);
         next(error);
     }
-});
-exports.retrievePropertyListController = retrievePropertyListController;
+};

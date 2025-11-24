@@ -1,31 +1,17 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const prisma_client_1 = __importDefault(require("../../../lib/config/prisma.client"));
-const http_response_1 = require("../../../lib/constant/http.response");
-const custom_error_1 = require("../../../lib/utils/custom.error");
-const GetTotalPriceOrder = (room_id, check_in_date, check_out_date) => __awaiter(void 0, void 0, void 0, function* () {
+import database from '../../../lib/config/prisma.client.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+const GetTotalPriceOrder = async (room_id, check_in_date, check_out_date) => {
     // Parse dates to local timezone (Asia/Jakarta UTC+7)
     const localCheckIn = new Date(check_in_date.getTime() + 7 * 60 * 60 * 1000);
     const localCheckOut = new Date(check_out_date.getTime() + 7 * 60 * 60 * 1000);
-    const room = yield prisma_client_1.default.room.findUnique({
+    const room = await database.room.findUnique({
         where: { id: room_id },
     });
     if (!room) {
-        throw new custom_error_1.CustomError(http_response_1.HttpRes.status.NOT_FOUND, http_response_1.HttpRes.message.NOT_FOUND, 'Room not found');
+        throw new CustomError(HttpRes.status.NOT_FOUND, HttpRes.message.NOT_FOUND, 'Room not found');
     }
-    const peakSeasons = yield prisma_client_1.default.peakSeasonRate.findMany({
+    const peakSeasons = await database.peakSeasonRate.findMany({
         where: {
             OR: [{ room_id }, { property_id: room.property_id }],
             start_date: { lte: check_out_date },
@@ -57,5 +43,5 @@ const GetTotalPriceOrder = (room_id, check_in_date, check_out_date) => __awaiter
         currentDate.setDate(currentDate.getDate() + 1);
     }
     return totalPrice;
-});
-exports.default = GetTotalPriceOrder;
+};
+export default GetTotalPriceOrder;

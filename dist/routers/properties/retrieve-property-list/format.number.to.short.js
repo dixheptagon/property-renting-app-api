@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatNumberShort = formatNumberShort;
-function formatNumberShort(value, decimals = 2, locale = 'id-ID') {
+export function formatNumberShort(value, decimals = 2, locale = 'id-ID') {
     const num = Number(value);
     if (isNaN(num))
         return '0';

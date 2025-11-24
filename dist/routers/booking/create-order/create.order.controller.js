@@ -1,56 +1,43 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateOrderController = void 0;
-const create_order_validation_1 = require("./create.order.validation");
-const prisma_client_1 = __importDefault(require("../../../lib/config/prisma.client"));
-const custom_error_1 = require("../../../lib/utils/custom.error");
-const http_response_1 = require("../../../lib/constant/http.response");
-const get_total_price_order_1 = __importDefault(require("../utils/get.total.price.order"));
-const midtrans_client_1 = __importDefault(require("../../../lib/config/midtrans.client"));
-const response_handler_1 = require("../../../lib/utils/response.handler");
-const CreateOrderController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+import { CreateOrderSchema } from './create.order.validation.js';
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import GetTotalPriceOrder from '../utils/get.total.price.order.js';
+import snap from '../../../lib/config/midtrans.client.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import { normalizeDateRange } from '../utils/normalized.date.js';
+export const CreateOrderController = async (req, res, next) => {
     try {
         // Validate Request Body
-        const { room_id, property_id, check_in_date, check_out_date, fullname, email, phone_number, } = yield create_order_validation_1.CreateOrderSchema.validate(req.body, { abortEarly: false });
+        const { room_id, property_id, check_in_date, check_out_date, fullname, email, phone_number, } = await CreateOrderSchema.validate(req.body, { abortEarly: false });
+        // Normalize check-in and check-out dates to Asia/Jakarta timezone
+        const { start: normalizedCheckIn, end: normalizedCheckOut } = normalizeDateRange(check_in_date, check_out_date);
         // Get user id from auth middleware
-        const authUserId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.uid;
+        const authUserId = req.user?.uid;
         // Get property id from property UID
-        const property = yield prisma_client_1.default.property.findUnique({
+        const property = await database.property.findUnique({
             where: { uid: property_id },
             select: { id: true },
         });
-        const user = yield prisma_client_1.default.user.findUnique({
+        const user = await database.user.findUnique({
             where: { uid: authUserId },
             select: { id: true },
         });
         // Checking room availibility
-        const room = yield prisma_client_1.default.room.findUnique({
+        const room = await database.room.findUnique({
             where: { id: room_id },
         });
         if (!room) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.NOT_FOUND, http_response_1.HttpRes.message.NOT_FOUND, 'Room not found');
+            throw new CustomError(HttpRes.status.NOT_FOUND, HttpRes.message.NOT_FOUND, 'Room not found');
         }
-        const overlappingBookings = yield prisma_client_1.default.booking.count({
+        const overlappingBookings = await database.booking.count({
             where: {
                 room_id,
                 check_in_date: {
-                    lte: check_out_date,
+                    lte: normalizedCheckOut,
                 },
                 check_out_date: {
-                    gte: check_in_date,
+                    gte: normalizedCheckIn,
                 },
                 status: {
                     notIn: ['cancelled', 'completed'],
@@ -58,24 +45,24 @@ const CreateOrderController = (req, res, next) => __awaiter(void 0, void 0, void
             },
         });
         if (overlappingBookings >= room.total_units) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, 'Room is fully booked on the selected dates');
+            throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, 'Room is fully booked on the selected dates');
         }
         //1. Calculate total price based on room price and peak season rate
-        const total_price = yield (0, get_total_price_order_1.default)(room_id, check_in_date, check_out_date);
+        const total_price = await GetTotalPriceOrder(room_id, normalizedCheckIn, normalizedCheckOut);
         // START TRANSACTIONS
         const uid = 'ORDER-' + crypto.randomUUID();
         // payment deadline 2 Hours after booking
         const payment_deadline = new Date();
         payment_deadline.setHours(payment_deadline.getHours() + 2);
         //2. Create Booking Order in database
-        const order = yield prisma_client_1.default.booking.create({
+        const order = await database.booking.create({
             data: {
                 uid,
                 user_id: user.id,
                 room_id,
                 property_id: property.id,
-                check_in_date,
-                check_out_date,
+                check_in_date: normalizedCheckIn,
+                check_out_date: normalizedCheckOut,
                 fullname,
                 email,
                 phone_number,
@@ -118,19 +105,18 @@ const CreateOrderController = (req, res, next) => __awaiter(void 0, void 0, void
             },
         };
         // 4. Create and Get Token from Midtrans
-        const transactionToken = yield midtrans_client_1.default.createTransaction(transactionDetails);
+        const transactionToken = await snap.createTransaction(transactionDetails);
         // 5. update booking with midtrans token
-        yield prisma_client_1.default.booking.update({
+        await database.booking.update({
             where: { id: order.id },
             data: { transaction_id: transactionToken.token },
         });
         // 6. Send Response
         res
-            .status(http_response_1.HttpRes.status.CREATED)
-            .json(response_handler_1.ResponseHandler.success(`${http_response_1.HttpRes.message.CREATED} : Order created successfully`, { order, transaction_token: transactionToken }));
+            .status(HttpRes.status.CREATED)
+            .json(ResponseHandler.success(`${HttpRes.message.CREATED} : Order created successfully`, { order, transaction_token: transactionToken }));
     }
     catch (error) {
         next(error);
     }
-});
-exports.CreateOrderController = CreateOrderController;
+};

@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { movePropertyImagesService } from './move.property.image.service';
-import { ResponseHandler } from '../../../../lib/utils/response.handler';
-import { CustomError } from '../../../../lib/utils/custom.error';
-import { HttpRes } from '../../../../lib/constant/http.response';
-import database from '../../../../lib/config/prisma.client';
+import { movePropertyImagesService } from './move.property.image.service.js';
+import { ResponseHandler } from '../../../../lib/utils/response.handler.js';
+import { CustomError } from '../../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../../lib/constant/http.response.js';
+import database from '../../../../lib/config/prisma.client.js';
 
 export const movePropertyImagesController = async (
   req: Request,

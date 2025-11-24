@@ -1,10 +1,11 @@
 import { PropertyStatus, ImageStatus } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
-import database from '../../../../lib/config/prisma.client';
-import { cloudinaryMoveImage } from '../../../../lib/config/cloudinary';
-import { CustomError } from '../../../../lib/utils/custom.error';
-import { HttpRes } from '../../../../lib/constant/http.response';
-import { UploadPropertyPayload } from './upload.property.types';
+import database from '../../../../lib/config/prisma.client.js';
+import { cloudinaryMoveImage } from '../../../../lib/config/cloudinary.js';
+import { CustomError } from '../../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../../lib/constant/http.response.js';
+import { UploadPropertyPayload } from './upload.property.types.js';
+import { normalizeDateRange } from '../../../../lib/utils/normalized.date.js';
 
 export const uploadPropertyService = async (
   payload: UploadPropertyPayload,
@@ -125,14 +126,20 @@ export const uploadPropertyService = async (
 
           if (peakRates.length > 0) {
             await tx.peakSeasonRate.createMany({
-              data: peakRates.map((rate) => ({
-                property_id: property.id,
-                room_id: room.id,
-                start_date: new Date(rate.start_date),
-                end_date: new Date(rate.end_date),
-                adjustment_type: rate.adjustment_type as any,
-                adjustment_value: rate.adjustment_value,
-              })),
+              data: peakRates.map((rate) => {
+                const { start, end } = normalizeDateRange(
+                  new Date(rate.start_date),
+                  new Date(rate.end_date),
+                );
+                return {
+                  property_id: property.id,
+                  room_id: room.id,
+                  start_date: start,
+                  end_date: end,
+                  adjustment_type: rate.adjustment_type as any,
+                  adjustment_value: rate.adjustment_value,
+                };
+              }),
             });
           }
 
@@ -144,13 +151,19 @@ export const uploadPropertyService = async (
 
           if (unavailabilities.length > 0) {
             await tx.roomUnavailability.createMany({
-              data: unavailabilities.map((unav) => ({
-                property_id: property.id,
-                room_id: room.id,
-                start_date: new Date(unav.start_date),
-                end_date: new Date(unav.end_date),
-                reason: unav.reason,
-              })),
+              data: unavailabilities.map((unav) => {
+                const { start, end } = normalizeDateRange(
+                  new Date(unav.start_date),
+                  new Date(unav.end_date),
+                );
+                return {
+                  property_id: property.id,
+                  room_id: room.id,
+                  start_date: start,
+                  end_date: end,
+                  reason: unav.reason,
+                };
+              }),
             });
           }
         }

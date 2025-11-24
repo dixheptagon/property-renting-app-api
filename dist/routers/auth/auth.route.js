@@ -1,38 +1,36 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const register_controller_1 = require("./register/register.controller");
-const check_email_controller_1 = require("./verification-email/check.email.controller");
-const send_email_controller_1 = require("./verification-email/send.email.controller");
-const resend_verification_controller_1 = require("./resend-verification/resend.verification.controller");
-const verify_email_controller_1 = require("./verification-email/verify.email.controller");
-const login_controller_1 = require("./login/login.controller");
-const social_login_controller_1 = require("./login/social.login.controller");
-const refresh_token_controller_1 = require("./refresh-token/refresh.token.controller");
-const get_tenant_profile_controller_1 = require("./tenant-profile/get.tenant.profile.controller");
-const tenant_verification_controller_1 = require("./tenant-profile/tenant.verification.controller");
-const upload_multer_1 = require("../../lib/middlewares/upload.multer");
-const verify_token_1 = require("../../lib/middlewares/verify.token");
-const authRouter = (0, express_1.Router)();
+import { Router } from 'express';
+import { RegisterController } from './register/register.controller.js';
+import { CheckEmailController } from './verification-email/check.email.controller.js';
+import { SendEmailVerificationController } from './verification-email/send.email.controller.js';
+import { ResendVerificationController } from './resend-verification/resend.verification.controller.js';
+import { VerifyEmailController } from './verification-email/verify.email.controller.js';
+import { LoginController } from './login/login.controller.js';
+import { SocialLoginController } from './login/social.login.controller.js';
+import { RefreshTokenController } from './refresh-token/refresh.token.controller.js';
+import { GetTenantProfileController } from './tenant-profile/get.tenant.profile.controller.js';
+import { TenantVerificationController } from './tenant-profile/tenant.verification.controller.js';
+import { uploadTenantProfileDocument } from '../../lib/middlewares/upload.multer.js';
+import { verifyToken } from '../../lib/middlewares/verify.token.js';
+const authRouter = Router();
 // Step 1: Check if email exists
-authRouter.post('/auth/check-email', check_email_controller_1.CheckEmailController);
+authRouter.post('/auth/check-email', CheckEmailController);
 // Step 2: Send email verification code
-authRouter.post('/auth/send-verification', send_email_controller_1.SendEmailVerificationController);
+authRouter.post('/auth/send-verification', SendEmailVerificationController);
 // Step 2b: Resend verification code (with rate limiting)
-authRouter.post('/auth/resend-verification', resend_verification_controller_1.ResendVerificationController);
+authRouter.post('/auth/resend-verification', ResendVerificationController);
 // Step 3: Verify email with code or token
-authRouter.post('/auth/verify-email', verify_email_controller_1.VerifyEmailController);
+authRouter.post('/auth/verify-email', VerifyEmailController);
 // Step 4: Complete registration after email verification
-authRouter.post('/auth/register', register_controller_1.RegisterController);
+authRouter.post('/auth/register', RegisterController);
 // Step 5a: Login
-authRouter.post('/auth/login', login_controller_1.LoginController);
+authRouter.post('/auth/login', LoginController);
 // Step 5b: Social Login
-authRouter.post('/auth/social-login', social_login_controller_1.SocialLoginController);
+authRouter.post('/auth/social-login', SocialLoginController);
 // step 6: Refresh token
-authRouter.post('/auth/refresh-token', refresh_token_controller_1.RefreshTokenController);
+authRouter.post('/auth/refresh-token', RefreshTokenController);
 // Tenant Profile routes
 // Get Tenant Profile
-authRouter.get('/auth/tenant-profile', verify_token_1.verifyToken, get_tenant_profile_controller_1.GetTenantProfileController);
+authRouter.get('/auth/tenant-profile', verifyToken, GetTenantProfileController);
 // Tenant Verification
-authRouter.post('/auth/tenant-profile/verification', verify_token_1.verifyToken, (0, upload_multer_1.uploadTenantProfileDocument)().single('government_id_file'), tenant_verification_controller_1.TenantVerificationController);
-exports.default = authRouter;
+authRouter.post('/auth/tenant-profile/verification', verifyToken, uploadTenantProfileDocument().single('government_id_file'), TenantVerificationController);
+export default authRouter;

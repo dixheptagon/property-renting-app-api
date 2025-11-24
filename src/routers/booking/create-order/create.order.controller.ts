@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { CreateOrderSchema } from './create.order.validation';
-import database from '../../../lib/config/prisma.client';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import GetTotalPriceOrder from '../utils/get.total.price.order';
-import snap from '../../../lib/config/midtrans.client';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
+import { CreateOrderSchema } from './create.order.validation.js';
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import GetTotalPriceOrder from '../utils/get.total.price.order.js';
+import snap from '../../../lib/config/midtrans.client.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import { normalizeDateRange } from '../utils/normalized.date.js';
 
 export const CreateOrderController = async (
   req: Request,
@@ -23,6 +24,10 @@ export const CreateOrderController = async (
       email,
       phone_number,
     } = await CreateOrderSchema.validate(req.body, { abortEarly: false });
+
+    // Normalize check-in and check-out dates to Asia/Jakarta timezone
+    const { start: normalizedCheckIn, end: normalizedCheckOut } =
+      normalizeDateRange(check_in_date, check_out_date);
 
     // Get user id from auth middleware
     const authUserId = req.user?.uid;
@@ -55,10 +60,10 @@ export const CreateOrderController = async (
       where: {
         room_id,
         check_in_date: {
-          lte: check_out_date,
+          lte: normalizedCheckOut,
         },
         check_out_date: {
-          gte: check_in_date,
+          gte: normalizedCheckIn,
         },
         status: {
           notIn: ['cancelled', 'completed'],
@@ -77,8 +82,8 @@ export const CreateOrderController = async (
     //1. Calculate total price based on room price and peak season rate
     const total_price = await GetTotalPriceOrder(
       room_id,
-      check_in_date,
-      check_out_date,
+      normalizedCheckIn,
+      normalizedCheckOut,
     );
 
     // START TRANSACTIONS
@@ -96,8 +101,8 @@ export const CreateOrderController = async (
         room_id,
         property_id: property!.id,
 
-        check_in_date,
-        check_out_date,
+        check_in_date: normalizedCheckIn,
+        check_out_date: normalizedCheckOut,
 
         fullname,
         email,

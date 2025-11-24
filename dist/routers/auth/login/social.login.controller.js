@@ -1,60 +1,34 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SocialLoginController = void 0;
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const env_1 = __importDefault(require("../../../env"));
-const prisma_client_1 = __importDefault(require("../../../lib/config/prisma.client"));
-const custom_error_1 = require("../../../lib/utils/custom.error");
-const http_response_1 = require("../../../lib/constant/http.response");
-const response_handler_1 = require("../../../lib/utils/response.handler");
-const firebase_admin_1 = __importDefault(require("../../../lib/config/firebase.admin"));
-const social_login_validation_1 = require("./social.login.validation");
-const SocialLoginController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+import jwt from 'jsonwebtoken';
+import env from '../../../env.js';
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import admin from '../../../lib/config/firebase.admin.js';
+import { SocialLoginSchema } from './social.login.validation.js';
+export const SocialLoginController = async (req, res, next) => {
     try {
-        const { idToken } = yield social_login_validation_1.SocialLoginSchema.validate(req.body, {
+        const { idToken } = await SocialLoginSchema.validate(req.body, {
             abortEarly: false,
         });
         // Verify the idToken with Firebase Admin SDK
-        const decodedToken = yield firebase_admin_1.default.auth().verifyIdToken(idToken);
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
         // Extract required fields
         const { uid, email, name, picture } = decodedToken;
         if (!uid || !email) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, 'Invalid token: missing uid or email');
+            throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, 'Invalid token: missing uid or email');
         }
         // Split name into first name and last name
         const names = name.split(' ');
         const firstName = names[0];
         const lastName = names.slice(1).join(' ');
         // Check if user exists by uid
-        let user = yield prisma_client_1.default.user.findUnique({
+        let user = await database.user.findUnique({
             where: { uid },
         });
         if (!user) {
             // Create new user
-            user = yield prisma_client_1.default.user.create({
+            user = await database.user.create({
                 data: {
                     uid,
                     email,
@@ -66,7 +40,7 @@ const SocialLoginController = (req, res, next) => __awaiter(void 0, void 0, void
                 },
             });
             // Create UserProvider entry
-            yield prisma_client_1.default.userProvider.create({
+            await database.userProvider.create({
                 data: {
                     user_id: user.id,
                     provider: 'google',
@@ -75,11 +49,11 @@ const SocialLoginController = (req, res, next) => __awaiter(void 0, void 0, void
             });
         }
         // Generate access token
-        const accessToken = jsonwebtoken_1.default.sign({ uid: user.uid, email: user.email, role: user.role }, env_1.default.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+        const accessToken = jwt.sign({ uid: user.uid, email: user.email, role: user.role }, env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
         // Generate refresh token
-        const refreshToken = jsonwebtoken_1.default.sign({ uid: user.uid, email: user.email, role: user.role }, env_1.default.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+        const refreshToken = jwt.sign({ uid: user.uid, email: user.email, role: user.role }, env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
         // Store refresh token in database
-        yield prisma_client_1.default.user.update({
+        await database.user.update({
             where: { id: user.id },
             data: { refresh_token: refreshToken },
         });
@@ -92,19 +66,18 @@ const SocialLoginController = (req, res, next) => __awaiter(void 0, void 0, void
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
         // Prepare user response data
-        const { password: _, refresh_token } = user, userData = __rest(user, ["password", "refresh_token"]);
-        return res.status(http_response_1.HttpRes.status.OK).json(response_handler_1.ResponseHandler.success('Social login successful', {
+        const { password: _, refresh_token, ...userData } = user;
+        return res.status(HttpRes.status.OK).json(ResponseHandler.success('Social login successful', {
             access_token: accessToken,
             user: userData,
         }));
     }
     catch (error) {
-        if (error instanceof custom_error_1.CustomError) {
+        if (error instanceof CustomError) {
             next(error);
         }
         else {
-            next(new custom_error_1.CustomError(http_response_1.HttpRes.status.INTERNAL_SERVER_ERROR, http_response_1.HttpRes.message.INTERNAL_SERVER_ERROR, 'An error occurred during social login'));
+            next(new CustomError(HttpRes.status.INTERNAL_SERVER_ERROR, HttpRes.message.INTERNAL_SERVER_ERROR, 'An error occurred during social login'));
         }
     }
-});
-exports.SocialLoginController = SocialLoginController;
+};

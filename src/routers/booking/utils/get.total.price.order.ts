@@ -1,6 +1,6 @@
-import database from '../../../lib/config/prisma.client';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { CustomError } from '../../../lib/utils/custom.error';
+import database from '../../../lib/config/prisma.client.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
 
 const GetTotalPriceOrder = async (
   room_id: number,

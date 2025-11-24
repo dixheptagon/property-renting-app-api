@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import database from '../../../lib/config/prisma.client';
+import database from '../../../lib/config/prisma.client.js';
 
 export const AutoCancelOrder = () => {
   // Run every hour to auto-cancel pending payments after 2 hours

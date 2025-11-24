@@ -1,35 +1,20 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SendEmailVerificationController = void 0;
-const crypto_1 = __importDefault(require("crypto"));
-const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
-const handlebars_1 = __importDefault(require("handlebars"));
-const nodemailer_transporter_1 = __importDefault(require("../../../lib/config/nodemailer.transporter"));
-const custom_error_1 = require("../../../lib/utils/custom.error");
-const http_response_1 = require("../../../lib/constant/http.response");
-const response_handler_1 = require("../../../lib/utils/response.handler");
-const prisma_client_1 = __importDefault(require("../../../lib/config/prisma.client"));
-const send_email_validation_1 = require("./send.email.validation");
-const SendEmailVerificationController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+import crypto from 'crypto';
+import path from 'path';
+import fs from 'fs';
+import Handlebars from 'handlebars';
+import transporter from '../../../lib/config/nodemailer.transporter.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import database from '../../../lib/config/prisma.client.js';
+import { SendEmailVerificationSchema } from './send.email.validation.js';
+export const SendEmailVerificationController = async (req, res, next) => {
     try {
-        const { email } = yield send_email_validation_1.SendEmailVerificationSchema.validate(req.body, {
+        const { email } = await SendEmailVerificationSchema.validate(req.body, {
             abortEarly: false,
         });
         // Check if email already exists and verified
-        const existingUser = yield prisma_client_1.default.user.findUnique({
+        const existingUser = await database.user.findUnique({
             where: { email },
             select: {
                 id: true,
@@ -40,12 +25,12 @@ const SendEmailVerificationController = (req, res, next) => __awaiter(void 0, vo
             },
         });
         if (existingUser && existingUser.is_verified) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.CONFLICT, http_response_1.HttpRes.message.CONFLICT, 'Email already registered and verified. Please login.');
+            throw new CustomError(HttpRes.status.CONFLICT, HttpRes.message.CONFLICT, 'Email already registered and verified. Please login.');
         }
         // Generate verification code (6 digits)
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
         // Generate verification token
-        const verificationToken = crypto_1.default.randomBytes(32).toString('hex');
+        const verificationToken = crypto.randomBytes(32).toString('hex');
         // Expiry in 15 minutes for email verification
         const verificationExpiry = new Date(Date.now() + 15 * 60 * 1000);
         // convert to Locale for casting
@@ -57,7 +42,7 @@ const SendEmailVerificationController = (req, res, next) => __awaiter(void 0, vo
             minute: '2-digit',
         });
         // Store or update email verification data
-        yield prisma_client_1.default.emailVerification.upsert({
+        await database.emailVerification.upsert({
             where: { email },
             update: {
                 verification_code: verificationCode,
@@ -87,11 +72,11 @@ const SendEmailVerificationController = (req, res, next) => __awaiter(void 0, vo
             minute: '2-digit',
         });
         // Send email verification
-        const templateHtmlDir = path_1.default.resolve(__dirname, '../../../lib/template');
+        const templateHtmlDir = path.resolve(__dirname, '../../../lib/template');
         const templateHtmlFile = 'account.activation.html';
-        const templateHtmlPath = path_1.default.join(templateHtmlDir, templateHtmlFile);
-        const templateHtml = fs_1.default.readFileSync(templateHtmlPath, 'utf-8');
-        const compiledTemplate = handlebars_1.default.compile(templateHtml);
+        const templateHtmlPath = path.join(templateHtmlDir, templateHtmlFile);
+        const templateHtml = fs.readFileSync(templateHtmlPath, 'utf-8');
+        const compiledTemplate = Handlebars.compile(templateHtml);
         const htmlToSend = compiledTemplate({
             email: email,
             verification_code: verificationCode,
@@ -101,13 +86,13 @@ const SendEmailVerificationController = (req, res, next) => __awaiter(void 0, vo
             email_timestamp: currentTimestamp,
             current_year: new Date().getFullYear(),
         });
-        yield nodemailer_transporter_1.default.sendMail({
+        await transporter.sendMail({
             from: 'Staysia <admin@gmail.com>',
             to: email,
             subject: 'Email Verification - staysia.id',
             html: htmlToSend,
         });
-        res.status(http_response_1.HttpRes.status.OK).json(response_handler_1.ResponseHandler.success('Verification code sent to your email. Please check your inbox.', {
+        res.status(HttpRes.status.OK).json(ResponseHandler.success('Verification code sent to your email. Please check your inbox.', {
             email: email,
             expiresIn: '15 minutes',
         }));
@@ -115,5 +100,4 @@ const SendEmailVerificationController = (req, res, next) => __awaiter(void 0, vo
     catch (error) {
         next(error);
     }
-});
-exports.SendEmailVerificationController = SendEmailVerificationController;
+};

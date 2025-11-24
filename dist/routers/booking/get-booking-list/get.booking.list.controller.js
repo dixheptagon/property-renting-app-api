@@ -1,37 +1,21 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetBookingListController = void 0;
-const prisma_client_1 = __importDefault(require("../../../lib/config/prisma.client"));
-const custom_error_1 = require("../../../lib/utils/custom.error");
-const http_response_1 = require("../../../lib/constant/http.response");
-const response_handler_1 = require("../../../lib/utils/response.handler");
-const normalized_date_1 = require("../utils/normalized.date");
-const GetBookingListController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import { normalizeTimezone } from '../utils/normalized.date.js';
+export const GetBookingListController = async (req, res, next) => {
     try {
         // Get user from verifyToken middleware
-        const userUid = (_a = req.user) === null || _a === void 0 ? void 0 : _a.uid;
+        const userUid = req.user?.uid;
         if (!userUid) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.UNAUTHORIZED, http_response_1.HttpRes.message.UNAUTHORIZED, 'User not authenticated');
+            throw new CustomError(HttpRes.status.UNAUTHORIZED, HttpRes.message.UNAUTHORIZED, 'User not authenticated');
         }
         // Find user by uid to get id
-        const user = yield prisma_client_1.default.user.findUnique({
+        const user = await database.user.findUnique({
             where: { uid: userUid },
         });
         if (!user) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.UNAUTHORIZED, http_response_1.HttpRes.message.UNAUTHORIZED, 'User not found');
+            throw new CustomError(HttpRes.status.UNAUTHORIZED, HttpRes.message.UNAUTHORIZED, 'User not found');
         }
         const userId = user.id;
         // Parse query parameters
@@ -65,7 +49,7 @@ const GetBookingListController = (req, res, next) => __awaiter(void 0, void 0, v
             // Validate all statuses
             const invalidStatuses = statusArray.filter((s) => !validStatuses.includes(s));
             if (invalidStatuses.length > 0) {
-                throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, `Invalid status(es): ${invalidStatuses.join(', ')}`);
+                throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, `Invalid status(es): ${invalidStatuses.join(', ')}`);
             }
             // Apply status filter
             if (statusArray.length === 1) {
@@ -81,16 +65,16 @@ const GetBookingListController = (req, res, next) => __awaiter(void 0, void 0, v
             if (date_from && typeof date_from === 'string') {
                 const fromDate = new Date(date_from);
                 if (isNaN(fromDate.getTime())) {
-                    throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, 'Invalid date_from format');
+                    throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, 'Invalid date_from format');
                 }
-                where.created_at.gte = (0, normalized_date_1.normalizeTimezone)(fromDate);
+                where.created_at.gte = normalizeTimezone(fromDate);
             }
             if (date_to && typeof date_to === 'string') {
                 const toDate = new Date(date_to);
                 if (isNaN(toDate.getTime())) {
-                    throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, 'Invalid date_to format');
+                    throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, 'Invalid date_to format');
                 }
-                where.created_at.lte = (0, normalized_date_1.normalizeTimezone)(toDate);
+                where.created_at.lte = normalizeTimezone(toDate);
             }
         }
         // Sorting
@@ -104,16 +88,16 @@ const GetBookingListController = (req, res, next) => __awaiter(void 0, void 0, v
             orderBy.created_at = 'desc'; // default
         }
         // Get total count
-        const total = yield prisma_client_1.default.booking.count({ where });
+        const total = await database.booking.count({ where });
         // Get total completed count
-        const totalCompleted = yield prisma_client_1.default.booking.count({
+        const totalCompleted = await database.booking.count({
             where: {
                 user_id: userId,
                 status: 'completed',
             },
         });
         // Get bookings
-        const bookings = yield prisma_client_1.default.booking.findMany({
+        const bookings = await database.booking.findMany({
             where,
             include: {
                 room: {
@@ -132,27 +116,24 @@ const GetBookingListController = (req, res, next) => __awaiter(void 0, void 0, v
         });
         // Find Property Main Image
         // Format response
-        const data = bookings.map((booking) => {
-            var _a;
-            return ({
-                order_id: booking.uid,
-                room: {
-                    name: booking.room.name,
-                    description: booking.room.description,
-                    property: {
-                        name: booking.room.property.title,
-                        address: booking.room.property.address,
-                        city: booking.room.property.city,
-                        main_image: (_a = booking.room.property.images.find((image) => image.is_main)) === null || _a === void 0 ? void 0 : _a.url,
-                    },
+        const data = bookings.map((booking) => ({
+            order_id: booking.uid,
+            room: {
+                name: booking.room.name,
+                description: booking.room.description,
+                property: {
+                    name: booking.room.property.title,
+                    address: booking.room.property.address,
+                    city: booking.room.property.city,
+                    main_image: booking.room.property.images.find((image) => image.is_main)?.url,
                 },
-                status: booking.status,
-                check_in_date: (0, normalized_date_1.normalizeTimezone)(booking.check_in_date),
-                check_out_date: (0, normalized_date_1.normalizeTimezone)(booking.check_out_date),
-                total_price: booking.total_price,
-                created_at: (0, normalized_date_1.normalizeTimezone)(booking.created_at),
-            });
-        });
+            },
+            status: booking.status,
+            check_in_date: normalizeTimezone(booking.check_in_date),
+            check_out_date: normalizeTimezone(booking.check_out_date),
+            total_price: booking.total_price,
+            created_at: normalizeTimezone(booking.created_at),
+        }));
         const response = {
             data,
             total_completed: totalCompleted,
@@ -164,11 +145,10 @@ const GetBookingListController = (req, res, next) => __awaiter(void 0, void 0, v
             },
         };
         res
-            .status(http_response_1.HttpRes.status.OK)
-            .json(response_handler_1.ResponseHandler.success('Bookings retrieved successfully', response));
+            .status(HttpRes.status.OK)
+            .json(ResponseHandler.success('Bookings retrieved successfully', response));
     }
     catch (error) {
         next(error);
     }
-});
-exports.GetBookingListController = GetBookingListController;
+};

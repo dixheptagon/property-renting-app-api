@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { CreateReviewController } from './create-review/create.review.controller';
-import { GetMyReviewsController } from './get-my-reviews/get.my.reviews.controller';
-import { GetAwaitingReviewsController } from './get-awaiting-reviews/get.awaiting.reviews.controller';
-import { ReplyReviewController } from './reply-review/reply.review.controller';
-import { verifyToken } from '../../lib/middlewares/verify.token';
-import { verifyTenant, verifyGuest } from '../../lib/middlewares/verify.role';
-import { GetReviewsByTenantController } from './get-reviews-by-tenant/get.reviews.by.tenant.controller';
-import { GetReviewsByPropertyIdController } from './get-reviews-by-property-id/get.reviews.by.property.id.controller';
+import { CreateReviewController } from './create-review/create.review.controller.js';
+import { GetMyReviewsController } from './get-my-reviews/get.my.reviews.controller.js';
+import { GetAwaitingReviewsController } from './get-awaiting-reviews/get.awaiting.reviews.controller.js';
+import { ReplyReviewController } from './reply-review/reply.review.controller.js';
+import { verifyToken } from '../../lib/middlewares/verify.token.js';
+import { verifyTenant } from '../../lib/middlewares/verify.role.js';
+import { GetReviewsByTenantController } from './get-reviews-by-tenant/get.reviews.by.tenant.controller.js';
+import { GetReviewsByPropertyIdController } from './get-reviews-by-property-id/get.reviews.by.property.id.controller.js';
 
 const reviewRoute = Router();
 

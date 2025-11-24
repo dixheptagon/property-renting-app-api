@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import database from '../../../lib/config/prisma.client';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
-import { getReviewsByTenant } from './get.reviews.by.tenant.service';
-import { GetReviewsByTenantParams } from './get.reviews.by.tenant.types';
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import { getReviewsByTenant } from './get.reviews.by.tenant.service.js';
+import { GetReviewsByTenantParams } from './get.reviews.by.tenant.types.js';
 
 export const GetReviewsByTenantController = async (
   req: Request,

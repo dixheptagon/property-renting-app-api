@@ -1,6 +1,6 @@
 import cron from 'node-cron';
-import database from '../../../lib/config/prisma.client';
-import { cloudinaryDeleteTempPropertyImage } from '../../../lib/config/cloudinary';
+import database from '../../../lib/config/prisma.client.js';
+import { cloudinaryDeleteTempPropertyImage } from '../../../lib/config/cloudinary.js';
 
 const extractPublicIdFromUrl = (url: string): string | null => {
   try {

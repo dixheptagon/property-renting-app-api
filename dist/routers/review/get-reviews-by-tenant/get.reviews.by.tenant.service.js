@@ -1,52 +1,37 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getReviewsByTenant = void 0;
-const prisma_client_1 = __importDefault(require("../../../lib/config/prisma.client"));
-const custom_error_1 = require("../../../lib/utils/custom.error");
-const http_response_1 = require("../../../lib/constant/http.response");
-const getReviewsByTenant = (userId, params) => __awaiter(void 0, void 0, void 0, function* () {
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+export const getReviewsByTenant = async (userId, params) => {
     const { page, limit, rating, date_from, date_to, sort_by, sort_dir, search, propertyId, } = params;
     // Determine property ID for tenant
     let propertyIdNum;
     if (!propertyId) {
         // Get first property of user
-        const property = yield prisma_client_1.default.property.findFirst({
+        const property = await database.property.findFirst({
             where: { user_id: userId },
             select: { id: true, uid: true, rooms: { select: { name: true } } },
         });
         if (!property) {
             console.error('❌ [Get Reviews by Tenant] No properties found for user');
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.NOT_FOUND, http_response_1.HttpRes.message.NOT_FOUND, 'Tenant does not have any property');
+            throw new CustomError(HttpRes.status.NOT_FOUND, HttpRes.message.NOT_FOUND, 'Tenant does not have any property');
         }
         propertyIdNum = property.id;
     }
     else {
         // Find property by uid and verify ownership
-        const property = yield prisma_client_1.default.property.findUnique({
+        const property = await database.property.findUnique({
             where: { uid: propertyId },
             select: { id: true, user_id: true },
         });
         if (!property) {
             console.error('❌ [Get Reviews by Tenant] Property not found:', propertyId);
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.NOT_FOUND, http_response_1.HttpRes.message.NOT_FOUND, 'Property not found');
+            throw new CustomError(HttpRes.status.NOT_FOUND, HttpRes.message.NOT_FOUND, 'Property not found');
         }
         // Verify the property belongs to the authenticated tenant
         if (property.user_id !== userId) {
             console.error('🚫 [Get Reviews by Tenant] Property ownership verification failed');
             console.error('   Property user_id:', property.user_id, 'Request user_id:', userId);
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.FORBIDDEN, http_response_1.HttpRes.message.FORBIDDEN, 'You can only view reviews for your own properties');
+            throw new CustomError(HttpRes.status.FORBIDDEN, HttpRes.message.FORBIDDEN, 'You can only view reviews for your own properties');
         }
         propertyIdNum = property.id;
     }
@@ -110,7 +95,7 @@ const getReviewsByTenant = (userId, params) => __awaiter(void 0, void 0, void 0,
         orderBy.created_at = 'desc';
     }
     // Get reviews with pagination
-    const reviews = yield prisma_client_1.default.review.findMany({
+    const reviews = await database.review.findMany({
         where,
         include: {
             user: {
@@ -138,12 +123,12 @@ const getReviewsByTenant = (userId, params) => __awaiter(void 0, void 0, void 0,
         take: limit,
     });
     // Debug: Check if there are any reviews at all for this property
-    const allReviewsForProperty = yield prisma_client_1.default.review.count({
+    const allReviewsForProperty = await database.review.count({
         where: { property_id: propertyIdNum },
     });
     // Debug: Check raw reviews without filters
     if (reviews.length === 0 && allReviewsForProperty > 0) {
-        const rawReviews = yield prisma_client_1.default.review.findMany({
+        const rawReviews = await database.review.findMany({
             where: { property_id: propertyIdNum },
             take: 3,
             select: {
@@ -156,10 +141,10 @@ const getReviewsByTenant = (userId, params) => __awaiter(void 0, void 0, void 0,
         });
     }
     // Get total count
-    const totalCount = yield prisma_client_1.default.review.count({ where });
+    const totalCount = await database.review.count({ where });
     const totalPages = Math.ceil(totalCount / limit);
     // Calculate rating statistics
-    const allFilteredReviews = yield prisma_client_1.default.review.findMany({
+    const allFilteredReviews = await database.review.findMany({
         where,
         select: {
             rating: true,
@@ -199,5 +184,4 @@ const getReviewsByTenant = (userId, params) => __awaiter(void 0, void 0, void 0,
         },
     };
     return result;
-});
-exports.getReviewsByTenant = getReviewsByTenant;
+};

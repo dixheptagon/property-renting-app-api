@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResponseHandler = void 0;
-class ResponseHandler {
+export class ResponseHandler {
     constructor(success, message, data, error) {
         this.success = success;
         this.message = message;
@@ -23,4 +20,3 @@ class ResponseHandler {
         return new ResponseHandler(false, message, undefined, error);
     }
 }
-exports.ResponseHandler = ResponseHandler;

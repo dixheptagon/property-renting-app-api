@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import database from '../../../lib/config/prisma.client';
-import { CustomError } from '../../../lib/utils/custom.error';
-import { HttpRes } from '../../../lib/constant/http.response';
-import { ResponseHandler } from '../../../lib/utils/response.handler';
-import { SendRejectionService } from './send.rejection.service';
-import { RejectOrderSchema } from './reject.order.validation';
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import { SendRejectionService } from './send.rejection.service.js';
+import { RejectOrderSchema } from './reject.order.validation.js';
 
 export const RejectOrderController = async (
   req: Request,

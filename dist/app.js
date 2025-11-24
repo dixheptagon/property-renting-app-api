@@ -1,30 +1,26 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const body_parser_1 = __importDefault(require("body-parser"));
-const cors_1 = __importDefault(require("cors"));
-const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const request_logger_1 = require("./lib/middlewares/request.logger");
-const error_handler_1 = require("./lib/middlewares/error.handler");
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import { requestLogger } from './lib/middlewares/request.logger.js';
+import { errorMiddleware } from './lib/middlewares/error.handler.js';
+import env from './env.js';
 // setup express
-const app = (0, express_1.default)();
+const app = express();
 // setup middleware : CORS
-app.use((0, cors_1.default)({
-    origin: 'http://localhost:3000', // FE lo
+app.use(cors({
+    origin: env.CLIENT_URL,
     credentials: true, // kalau pake cookies
 })); // Semua client dapat mengakses API kita
 // setup middleware: body parser
-app.use(body_parser_1.default.json());
-app.use(body_parser_1.default.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 // setup middleware: cookie parser
-app.use((0, cookie_parser_1.default)());
+app.use(cookieParser());
 // setup middleware: LOGGING
-app.use(request_logger_1.requestLogger);
+app.use(requestLogger);
 // expose public folder
-app.use('/public', express_1.default.static('public'));
+app.use('/public', express.static('public'));
 // setup middleware: CORS (Cross-Origin Resource Sharing)
 // define root routes
 app.get('/', (req, res) => {
@@ -33,40 +29,40 @@ app.get('/', (req, res) => {
     });
 });
 // import routers
-const auth_route_1 = __importDefault(require("./routers/auth/auth.route"));
-const booking_route_1 = __importDefault(require("./routers/booking/booking.route"));
-const tenant_route_1 = __importDefault(require("./routers/tenant-transactions/tenant.route"));
-const review_route_1 = __importDefault(require("./routers/review/review.route"));
-const properties_route_1 = __importDefault(require("./routers/properties/properties.route"));
-const report_route_1 = __importDefault(require("./routers/report/report.route"));
+import authRouter from './routers/auth/auth.route.js';
+import bookingRouter from './routers/booking/booking.route.js';
+import tenantRouter from './routers/tenant-transactions/tenant.route.js';
+import reviewRoute from './routers/review/review.route.js';
+import propertiesRouter from './routers/properties/properties.route.js';
+import reportRouter from './routers/report/report.route.js';
 // use user router
 const routers = [
-    auth_route_1.default,
-    booking_route_1.default,
-    properties_route_1.default,
-    review_route_1.default,
-    tenant_route_1.default,
-    report_route_1.default,
+    authRouter,
+    bookingRouter,
+    propertiesRouter,
+    reviewRoute,
+    tenantRouter,
+    reportRouter,
 ];
 routers.forEach((router) => {
     app.use('/api', router);
 });
 // Initialize auto-cancel cron job
-const auto_cancel_order_controller_1 = require("./routers/booking/auto-cancel-order/auto.cancel.order.controller");
-(0, auto_cancel_order_controller_1.AutoCancelOrder)();
+import { AutoCancelOrder } from './routers/booking/auto-cancel-order/auto.cancel.order.controller.js';
+AutoCancelOrder();
 // Initialize auto order reminder cron job
-const auto_order_reminder_controller_1 = require("./routers/tenant-transactions/auto-order-reminder/auto.order.reminder.controller");
-(0, auto_order_reminder_controller_1.AutoOrderReminderController)();
+import { AutoOrderReminderController } from './routers/tenant-transactions/auto-order-reminder/auto.order.reminder.controller.js';
+AutoOrderReminderController();
 // Initialize auto complete order cron job
-const auto_complete_order_controller_1 = require("./routers/tenant-transactions/auto-complete-order/auto.complete.order.controller");
-(0, auto_complete_order_controller_1.AutoCompleteOrderController)();
+import { AutoCompleteOrderController } from './routers/tenant-transactions/auto-complete-order/auto.complete.order.controller.js';
+AutoCompleteOrderController();
 // Initialize auto delete temp property image cron job
-const auto_delete_temp_property_image_controller_1 = require("./routers/properties/auto-delete-temp-image/auto.delete.temp.property.image.controller");
-(0, auto_delete_temp_property_image_controller_1.AutoDeleteTempPropertyImage)();
+import { AutoDeleteTempPropertyImage } from './routers/properties/auto-delete-temp-image/auto.delete.temp.property.image.controller.js';
+AutoDeleteTempPropertyImage();
 // Initialize auto delete temp room image cron job
-const auto_delete_temp_room_image_controller_1 = require("./routers/properties/auto-delete-temp-image/auto.delete.temp.room.image.controller");
-(0, auto_delete_temp_room_image_controller_1.AutoDeleteTempRoomImage)();
+import { AutoDeleteTempRoomImage } from './routers/properties/auto-delete-temp-image/auto.delete.temp.room.image.controller.js';
+AutoDeleteTempRoomImage();
 // setup error handler middleware
-app.use(error_handler_1.errorMiddleware);
+app.use(errorMiddleware);
 // export app for server
-exports.default = app;
+export default app;

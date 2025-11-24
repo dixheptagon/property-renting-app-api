@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import database from '../../../lib/config/prisma.client';
+import database from '../../../lib/config/prisma.client.js';
 
 export const AutoCompleteOrderController = () => {
   // Run daily at 00:00 server time to auto-complete orders where check-out date has passed 6 hours ago

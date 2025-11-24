@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import { CreateOrderController } from './create-order/create.order.controller';
-import { OrderNotificationController } from './order-notification/order.notification.controller';
-import { GetBookingController } from './get-booking/get.booking.controller';
-import { CancelOrderController } from './cancel-order/cancel.order.controller';
-import { GetOrderListController } from './get-order-list/get.order.list.controller';
-import { GetBookingListController } from './get-booking-list/get.booking.list.controller';
-import { UploadPaymentProofController } from './upload-payment-proof/upload.proof.controller';
-import { uploadPaymentProof } from '../../lib/middlewares/upload.multer';
-import { verifyToken } from '../../lib/middlewares/verify.token';
+import { CreateOrderController } from './create-order/create.order.controller.js';
+import { OrderNotificationController } from './order-notification/order.notification.controller.js';
+import { GetBookingController } from './get-booking/get.booking.controller.js';
+import { CancelOrderController } from './cancel-order/cancel.order.controller.js';
+import { GetOrderListController } from './get-order-list/get.order.list.controller.js';
+import { GetBookingListController } from './get-booking-list/get.booking.list.controller.js';
+import { UploadPaymentProofController } from './upload-payment-proof/upload.proof.controller.js';
+import { uploadPaymentProof } from '../../lib/middlewares/upload.multer.js';
+import { verifyToken } from '../../lib/middlewares/verify.token.js';
 
 const bookingRouter = Router();
 

@@ -1,32 +1,16 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.GetTenantProfileController = void 0;
-const prisma_client_1 = __importDefault(require("../../../lib/config/prisma.client"));
-const response_handler_1 = require("../../../lib/utils/response.handler");
-const http_response_1 = require("../../../lib/constant/http.response");
-const GetTenantProfileController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+import database from '../../../lib/config/prisma.client.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+export const GetTenantProfileController = async (req, res, next) => {
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.uid;
+        const userId = req.user?.uid;
         if (!userId) {
             return res
-                .status(http_response_1.HttpRes.status.UNAUTHORIZED)
-                .json(response_handler_1.ResponseHandler.error('Unauthorized', 'User not authenticated'));
+                .status(HttpRes.status.UNAUTHORIZED)
+                .json(ResponseHandler.error('Unauthorized', 'User not authenticated'));
         }
         // Find User by UId
-        const user = yield prisma_client_1.default.user.findUnique({
+        const user = await database.user.findUnique({
             where: { uid: userId },
             select: {
                 id: true,
@@ -35,18 +19,18 @@ const GetTenantProfileController = (req, res, next) => __awaiter(void 0, void 0,
         });
         if (!user) {
             return res
-                .status(http_response_1.HttpRes.status.OK)
-                .json(response_handler_1.ResponseHandler.success('User not found', null));
+                .status(HttpRes.status.OK)
+                .json(ResponseHandler.success('User not found', null));
         }
-        const tenantProfile = yield prisma_client_1.default.tenantProfile.findUnique({
+        const tenantProfile = await database.tenantProfile.findUnique({
             where: {
                 user_id: user.id,
             },
         });
         if (!tenantProfile) {
             return res
-                .status(http_response_1.HttpRes.status.OK)
-                .json(response_handler_1.ResponseHandler.success('Tenant profile not found', null));
+                .status(HttpRes.status.OK)
+                .json(ResponseHandler.success('Tenant profile not found', null));
         }
         // Response
         const response = {
@@ -69,11 +53,10 @@ const GetTenantProfileController = (req, res, next) => __awaiter(void 0, void 0,
             },
         };
         return res
-            .status(http_response_1.HttpRes.status.OK)
-            .json(response_handler_1.ResponseHandler.success('Tenant profile retrieved successfully', response));
+            .status(HttpRes.status.OK)
+            .json(ResponseHandler.success('Tenant profile retrieved successfully', response));
     }
     catch (error) {
         next(error);
     }
-});
-exports.GetTenantProfileController = GetTenantProfileController;
+};

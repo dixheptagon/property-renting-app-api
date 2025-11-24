@@ -1,8 +1,8 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
-import transporter from '../../../lib/config/nodemailer.transporter';
-import database from '../../../lib/config/prisma.client';
+import transporter from '../../../lib/config/nodemailer.transporter.js';
+import database from '../../../lib/config/prisma.client.js';
 
 interface SendTenantVerifiedEmailParams {
   email: string;

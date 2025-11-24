@@ -8,6 +8,7 @@ dotenv.config();
 export interface Config {
   PORT: number;
   NODE_ENV: string;
+  CLIENT_URL: string;
   LOCAL_DIRECT_URL: string;
   JWT_ACCESS_SECRET: string;
   JWT_REFRESH_SECRET: string;
@@ -20,18 +21,19 @@ export interface Config {
   CLOUD_NAME: string;
   CLOUD_API_KEY: string;
   CLOUD_API_SECRET: string;
-  // CLOUD_EVENT_IMAGE_FOLDER_PATH: string;
   CLOUD_PAYMENT_PROOF_FOLDER_PATH: string;
   CLOUD_TEMP_PROPERTIES_IMAGE_FOLDER_PATH: string;
   CLOUD_TENANT_PROFILE_FOLDER_PATH: string;
   MIDTRANS_SERVER_KEY: string;
   MIDTRANS_CLIENT_KEY: string;
+  FIREBASE_SERVICE_ACCOUNT: string;
 }
 
 // create schema for validation
 const schema = Yup.object().shape({
   PORT: Yup.number().default(2000).required(),
   NODE_ENV: Yup.string().default('development').required(),
+  CLIENT_URL: Yup.string().required('CLIENT_URL is required'),
   LOCAL_DIRECT_URL: Yup.string().required('DIRECT_URL is required'),
   JWT_ACCESS_SECRET: Yup.string().required('ACCESS_SECRET is required'),
   JWT_REFRESH_SECRET: Yup.string().required('REFRESH_SECRET is required'),
@@ -50,9 +52,6 @@ const schema = Yup.object().shape({
   CLOUD_NAME: Yup.string().required('CLOUD_NAME is required'),
   CLOUD_API_KEY: Yup.string().required('CLOUD_API_KEY is required'),
   CLOUD_API_SECRET: Yup.string().required('CLOUD_API_SECRET is required'),
-  // CLOUD_EVENT_IMAGE_FOLDER_PATH: Yup.string().required(
-  //   'CLOUD_EVENT_IMAGE_FOLDER_PATH is required',
-  // ),
   CLOUD_PAYMENT_PROOF_FOLDER_PATH: Yup.string().required(
     'CLOUD_PAYMENT_PROOF_FOLDER_PATH is required',
   ),
@@ -64,6 +63,9 @@ const schema = Yup.object().shape({
   ),
   MIDTRANS_SERVER_KEY: Yup.string().required('MIDTRANS_SERVER_KEY is required'),
   MIDTRANS_CLIENT_KEY: Yup.string().required('MIDTRANS_CLIENT_KEY is required'),
+  FIREBASE_SERVICE_ACCOUNT: Yup.string().required(
+    'FIREBASE_SERVICE_ACCOUNT is required',
+  ),
 });
 
 // validate config

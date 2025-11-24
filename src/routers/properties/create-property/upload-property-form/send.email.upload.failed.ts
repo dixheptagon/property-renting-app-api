@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
-import transporter from '../../../../lib/config/nodemailer.transporter';
+import transporter from '../../../../lib/config/nodemailer.transporter.js';
 
 interface SendPropertyUploadFailedEmailParams {
   email: string;

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { CustomError } from '../utils/custom.error';
-import { HttpRes } from '../constant/http.response';
-import database from '../config/prisma.client';
+import { CustomError } from '../utils/custom.error.js';
+import { HttpRes } from '../constant/http.response.js';
+import database from '../config/prisma.client.js';
 
 // Define the structure of the user from JWT payload
 interface User {

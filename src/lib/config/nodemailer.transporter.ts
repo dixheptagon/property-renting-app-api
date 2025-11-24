@@ -1,11 +1,12 @@
 import nodemailer from 'nodemailer';
+import env from '../../env.js';
 
 // Create a test account or replace with real credentials.
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.NODEMAILER_APP_EMAIL,
-    pass: process.env.NODEMAILER_APP_PASSWORD,
+    user: env.NODEMAILER_APP_EMAIL,
+    pass: env.NODEMAILER_APP_PASSWORD,
   },
 });
 

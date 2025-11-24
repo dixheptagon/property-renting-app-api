@@ -1,77 +1,61 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CompleteOrderController = void 0;
-const prisma_client_1 = __importDefault(require("../../../lib/config/prisma.client"));
-const custom_error_1 = require("../../../lib/utils/custom.error");
-const http_response_1 = require("../../../lib/constant/http.response");
-const response_handler_1 = require("../../../lib/utils/response.handler");
-const CompleteOrderController = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+import database from '../../../lib/config/prisma.client.js';
+import { CustomError } from '../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../lib/constant/http.response.js';
+import { ResponseHandler } from '../../../lib/utils/response.handler.js';
+export const CompleteOrderController = async (req, res, next) => {
     try {
         // Get order ID from URL params
         const { orderId } = req.params;
         if (!orderId ||
             typeof orderId !== 'string' ||
             !orderId.startsWith('ORDER-')) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, 'Invalid order ID format. Expected format: ORDER-xxxxx');
+            throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, 'Invalid order ID format. Expected format: ORDER-xxxxx');
         }
         // Get user from verifyToken middleware
-        const userUid = (_a = req.user) === null || _a === void 0 ? void 0 : _a.uid;
+        const userUid = req.user?.uid;
         if (!userUid) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.UNAUTHORIZED, http_response_1.HttpRes.message.UNAUTHORIZED, 'User not authenticated');
+            throw new CustomError(HttpRes.status.UNAUTHORIZED, HttpRes.message.UNAUTHORIZED, 'User not authenticated');
         }
         // Find user by uid to get id
-        const user = yield prisma_client_1.default.user.findUnique({
+        const user = await database.user.findUnique({
             where: { uid: userUid },
             select: { id: true },
         });
-        if (!(user === null || user === void 0 ? void 0 : user.id)) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.UNAUTHORIZED, http_response_1.HttpRes.message.UNAUTHORIZED, 'User ID required');
+        if (!user?.id) {
+            throw new CustomError(HttpRes.status.UNAUTHORIZED, HttpRes.message.UNAUTHORIZED, 'User ID required');
         }
         // Find booking with property details
-        const booking = yield prisma_client_1.default.booking.findUnique({
+        const booking = await database.booking.findUnique({
             where: { uid: orderId },
             include: {
                 property: true,
             },
         });
         if (!booking) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.NOT_FOUND, http_response_1.HttpRes.message.NOT_FOUND, 'Booking not found');
+            throw new CustomError(HttpRes.status.NOT_FOUND, HttpRes.message.NOT_FOUND, 'Booking not found');
         }
         // Check if tenant owns the property
         if (booking.property.user_id !== user.id) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.FORBIDDEN, http_response_1.HttpRes.message.FORBIDDEN, 'Access denied. You can only complete orders for your own properties.');
+            throw new CustomError(HttpRes.status.FORBIDDEN, HttpRes.message.FORBIDDEN, 'Access denied. You can only complete orders for your own properties.');
         }
         // Check if booking is in confirmed status
         if (booking.status !== 'confirmed') {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, `Cannot complete booking. Current status: ${booking.status}. Only confirmed bookings can be completed.`);
+            throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, `Cannot complete booking. Current status: ${booking.status}. Only confirmed bookings can be completed.`);
         }
         // Check if current date is on or after check-out date
         const currentDate = new Date();
         const checkOutDate = new Date(booking.check_out_date);
         if (currentDate < checkOutDate) {
-            throw new custom_error_1.CustomError(http_response_1.HttpRes.status.BAD_REQUEST, http_response_1.HttpRes.message.BAD_REQUEST, `Cannot complete booking before check-out date. Check-out date: ${checkOutDate.toISOString().split('T')[0]}, Current date: ${currentDate.toISOString().split('T')[0]}`);
+            throw new CustomError(HttpRes.status.BAD_REQUEST, HttpRes.message.BAD_REQUEST, `Cannot complete booking before check-out date. Check-out date: ${checkOutDate.toISOString().split('T')[0]}, Current date: ${currentDate.toISOString().split('T')[0]}`);
         }
         // Update booking status to completed
-        const updatedBooking = yield prisma_client_1.default.booking.update({
+        const updatedBooking = await database.booking.update({
             where: { uid: orderId },
             data: {
                 status: 'completed',
             },
         });
-        res.status(http_response_1.HttpRes.status.OK).json(response_handler_1.ResponseHandler.success('Booking completed successfully.', {
+        res.status(HttpRes.status.OK).json(ResponseHandler.success('Booking completed successfully.', {
             booking_id: updatedBooking.id,
             order_uid: updatedBooking.uid,
             status: updatedBooking.status,
@@ -82,5 +66,4 @@ const CompleteOrderController = (req, res, next) => __awaiter(void 0, void 0, vo
         console.error('Error in CompleteOrderController:', error);
         next(error);
     }
-});
-exports.CompleteOrderController = CompleteOrderController;
+};

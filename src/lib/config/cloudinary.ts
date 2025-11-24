@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
-import env from '../../env';
-import { CustomError } from '../utils/custom.error';
-import { HttpRes } from '../constant/http.response';
+import env from '../../env.js';
+import { CustomError } from '../utils/custom.error.js';
+import { HttpRes } from '../constant/http.response.js';
 
 cloudinary.config({
   cloud_name: env.CLOUD_NAME,

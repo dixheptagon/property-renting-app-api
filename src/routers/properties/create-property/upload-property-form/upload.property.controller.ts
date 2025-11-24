@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { UploadPropertySchema } from './upload.property.validation';
-import { uploadPropertyService } from './upload.property.service';
-import { sendPropertyUploadSuccessEmail } from './send.email.upload.successfull';
-import { sendPropertyUploadFailedEmail } from './send.email.upload.failed';
-import { ResponseHandler } from '../../../../lib/utils/response.handler';
-import { CustomError } from '../../../../lib/utils/custom.error';
-import { HttpRes } from '../../../../lib/constant/http.response';
-import database from '../../../../lib/config/prisma.client';
-import { InferType } from 'yup';
+import { UploadPropertySchema } from './upload.property.validation.js';
+import { uploadPropertyService } from './upload.property.service.js';
+import { sendPropertyUploadSuccessEmail } from './send.email.upload.successfull.js';
+import { sendPropertyUploadFailedEmail } from './send.email.upload.failed.js';
+import { ResponseHandler } from '../../../../lib/utils/response.handler.js';
+import { CustomError } from '../../../../lib/utils/custom.error.js';
+import { HttpRes } from '../../../../lib/constant/http.response.js';
+import database from '../../../../lib/config/prisma.client.js';
 
 export const uploadPropertyController = async (
   req: Request,
