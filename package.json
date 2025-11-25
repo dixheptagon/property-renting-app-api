@@ -12,7 +12,7 @@
   },
   "scripts": {
     "dev": "nodemon",
-    "build": "tsc",
+    "build": "tsc && cpx \"src/lib/template/**/*\" dist/lib/template",
     "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "ts-node prisma/seed.ts",
@@ -62,6 +62,7 @@
     "@typescript-eslint/parser": "^8.44.1",
     "commitizen": "^4.3.1",
     "commitlint": "^19.8.1",
+    "cpx": "^1.5.0",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^9.36.0",
     "husky": "^9.1.7",

@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Check-in Reminder</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+        Arial, sans-serif;
+      background-color: #f5f5f5;
+    "
+  >
+    <table
+      role="presentation"
+      style="
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #f5f5f5;
+        padding: 20px 0;
+      "
+    >
+      <tr>
+        <td style="padding: 0">
+          <table
+            role="presentation"
+            style="
+              max-width: 500px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              border-radius: 0;
+              overflow: hidden;
+            "
+          >
+            <!-- Header with Purple Border -->
+            <tr>
+              <td style="padding: 0">
+                <div style="height: 4px; background-color: #4338ca"></div>
+              </td>
+            </tr>
+
+            <!-- Logo -->
+            <tr>
+              <td style="padding: 30px 40px 20px 40px; text-align: center">
+                <img
+                  src="https://res.cloudinary.com/dzpcr6tzh/image/upload/v1759043682/Staysia_Logo_-_Property_Renting_App_CROP_t8n2dj.png"
+                  style="display: block; margin: 0 auto; max-width: 170px"
+                  alt=""
+                />
+              </td>
+            </tr>
+
+            <!-- Main Content -->
+            <tr>
+              <td style="padding: 10px 40px 30px 40px">
+                <h2
+                  style="
+                    margin: 0 0 20px 0;
+                    color: #1f2937;
+                    font-size: 20px;
+                    font-weight: 600;
+                  "
+                >
+                  Your Check-in is Tomorrow!
+                </h2>
+
+                <p
+                  style="
+                    margin: 0 0 8px 0;
+                    color: #4b5563;
+                    font-size: 14px;
+                    line-height: 1.6;
+                  "
+                >
+                  Dear
+                  <span style="color: #2563eb; font-weight: 500"
+                    >{{fullname}}</span
+                  >,
+                </p>
+
+                <p
+                  style="
+                    margin: 0 0 20px 0;
+                    color: #4b5563;
+                    font-size: 14px;
+                    line-height: 1.6;
+                  "
+                >
+                  This is a friendly reminder that your check-in is scheduled
+                  for tomorrow. We're excited to welcome you!
+                </p>
+
+                <p
+                  style="
+                    margin: 0 0 8px 0;
+                    color: #4b5563;
+                    font-size: 14px;
+                    line-height: 1.6;
+                  "
+                >
+                  To confirm your check-in, please review your booking details:
+                </p>
+              </td>
+            </tr>
+
+            <!-- Booking Details Box -->
+            <tr>
+              <td style="padding: 0 40px 25px 40px">
+                <div
+                  style="
+                    background-color: #f9fafb;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 4px;
+                    padding: 20px;
+                  "
+                >
+                  <table
+                    role="presentation"
+                    style="width: 100%; border-collapse: collapse"
+                  >
+                    <tr>
+                      <td
+                        style="
+                          padding: 6px 0;
+                          color: #6b7280;
+                          font-size: 13px;
+                          width: 45%;
+                        "
+                      >
+                        Booking ID:
+                      </td>
+                      <td
+                        style="
+                          padding: 6px 0;
+                          color: #1f2937;
+                          font-size: 13px;
+                          font-weight: 500;
+                        "
+                      >
+                        {{uid}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="padding: 6px 0; color: #6b7280; font-size: 13px"
+                      >
+                        Property:
+                      </td>
+                      <td
+                        style="
+                          padding: 6px 0;
+                          color: #1f2937;
+                          font-size: 13px;
+                          font-weight: 500;
+                        "
+                      >
+                        {{property_name}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="padding: 6px 0; color: #6b7280; font-size: 13px"
+                      >
+                        Room Type:
+                      </td>
+                      <td
+                        style="
+                          padding: 6px 0;
+                          color: #1f2937;
+                          font-size: 13px;
+                          font-weight: 500;
+                        "
+                      >
+                        {{room_name}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="padding: 6px 0; color: #6b7280; font-size: 13px"
+                      >
+                        Check-in Date:
+                      </td>
+                      <td
+                        style="
+                          padding: 6px 0;
+                          color: #1f2937;
+                          font-size: 13px;
+                          font-weight: 500;
+                        "
+                      >
+                        {{check_in_date}}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="padding: 6px 0; color: #6b7280; font-size: 13px"
+                      >
+                        Check-out Date:
+                      </td>
+                      <td
+                        style="
+                          padding: 6px 0;
+                          color: #1f2937;
+                          font-size: 13px;
+                          font-weight: 500;
+                        "
+                      >
+                        {{check_out_date}}
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </td>
+            </tr>
+
+            <!-- CTA Button -->
+            <tr>
+              <td style="padding: 0 40px 25px 40px">
+                <a
+                  href="{{booking_detail_url}}"
+                  style="
+                    display: block;
+                    width: 100%;
+                    padding: 12px 0;
+                    background-color: #ff6b35;
+                    color: #ffffff;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    text-align: center;
+                    box-sizing: border-box;
+                  "
+                >
+                  View Booking Details ›
+                </a>
+              </td>
+            </tr>
+
+            <!-- Important Notice -->
+            <tr>
+              <td style="padding: 0 40px 30px 40px">
+                <div
+                  style="
+                    background-color: #fef3c7;
+                    border-left: 3px solid #f59e0b;
+                    padding: 12px 15px;
+                    border-radius: 4px;
+                  "
+                >
+                  <p
+                    style="
+                      margin: 0 0 4px 0;
+                      color: #92400e;
+                      font-size: 12px;
+                      font-weight: 600;
+                    "
+                  >
+                    ⚠️ Important:
+                  </p>
+                  <p
+                    style="
+                      margin: 0;
+                      color: #92400e;
+                      font-size: 12px;
+                      line-height: 1.5;
+                    "
+                  >
+                    Check-in time is at <strong>{{check_in_time}}</strong>.
+                    Please bring a valid ID and your booking confirmation.
+                  </p>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  padding: 20px 40px 30px 40px;
+                  text-align: center;
+                  border-top: 1px solid #e5e7eb;
+                "
+              >
+                <p style="margin: 0; color: #9ca3af; font-size: 11px">
+                  © 2025 Staysia.id All rights reserved.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

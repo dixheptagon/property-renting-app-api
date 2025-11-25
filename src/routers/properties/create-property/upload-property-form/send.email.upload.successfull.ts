@@ -1,9 +1,15 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import * as Handlebars from 'handlebars';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import Handlebars from 'handlebars';
 import transporter from '../../../../lib/config/nodemailer.transporter.js';
 import database from '../../../../lib/config/prisma.client.js';
 import { UploadPropertyPayload } from './upload.property.types.js';
+import env from '../../../../env.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface SendPropertyUploadSuccessEmailParams {
   email: string;
@@ -73,7 +79,7 @@ export const sendPropertyUploadSuccessEmail = async ({
       property_base_price: Number(
         propertyRegularPrice || payload.rooms[0].base_price || 0,
       ).toLocaleString('id-ID'),
-      dashboard_link: `${process.env.DOMAIN_URL}/dashboard/properties/${property.id}`,
+      dashboard_link: `${env.DOMAIN_URL}/user/tenant/my-accomodation`,
       email_timestamp: currentTimestamp,
       current_year: new Date().getFullYear(),
     });

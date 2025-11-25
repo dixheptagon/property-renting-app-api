@@ -74,7 +74,7 @@ export const LoginController = async (
     // Send refresh token via HTTP-Only cookie
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days EXP

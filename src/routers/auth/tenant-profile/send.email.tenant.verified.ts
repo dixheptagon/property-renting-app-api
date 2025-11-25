@@ -1,8 +1,14 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import * as Handlebars from 'handlebars';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import Handlebars from 'handlebars';
 import transporter from '../../../lib/config/nodemailer.transporter.js';
 import database from '../../../lib/config/prisma.client.js';
+import env from '../../../env.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface SendTenantVerifiedEmailParams {
   email: string;
@@ -70,7 +76,7 @@ export const sendTenantVerifiedEmail = async ({
       country: tenantProfile.country,
       government_id_type: tenantProfile.government_id_type,
       verified_at: verifiedAt,
-      dashboard_link: `${process.env.DOMAIN_URL}/user`,
+      dashboard_link: `${env.DOMAIN_URL}/user`,
       email_timestamp: currentTimestamp,
       current_year: new Date().getFullYear(),
     });

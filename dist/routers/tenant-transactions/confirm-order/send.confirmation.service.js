@@ -1,8 +1,12 @@
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import Handlebars from 'handlebars';
 import transporter from '../../../lib/config/nodemailer.transporter.js';
 import database from '../../../lib/config/prisma.client.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 export class SendConfirmationService {
     static async sendEmail(to, subject, templateName, templateData, attachments = []) {
         try {

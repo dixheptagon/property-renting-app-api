@@ -1,6 +1,8 @@
 import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import Handlebars from 'handlebars';
 import transporter from '../../../lib/config/nodemailer.transporter.js';
 import { CustomError } from '../../../lib/utils/custom.error.js';
@@ -8,6 +10,9 @@ import { HttpRes } from '../../../lib/constant/http.response.js';
 import { ResponseHandler } from '../../../lib/utils/response.handler.js';
 import database from '../../../lib/config/prisma.client.js';
 import { SendEmailVerificationSchema } from './send.email.validation.js';
+import env from '../../../env.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 export const SendEmailVerificationController = async (req, res, next) => {
     try {
         const { email } = await SendEmailVerificationSchema.validate(req.body, {
@@ -61,8 +66,7 @@ export const SendEmailVerificationController = async (req, res, next) => {
             },
         });
         // Create verification link ( NEED TO CHANGE )
-        // const verificationLink = `http://localhost:8000/verify-email?verification_token=${verificationToken}`;
-        const verificationLink = `${process.env.ACTIVATION_ACCOUNT_URL}?verification_token=${verificationToken}`;
+        const verificationLink = `${env.ACTIVATION_ACCOUNT_URL}?verification_token=${verificationToken}`;
         // Generate timestamp
         const currentTimestamp = new Date().toLocaleDateString('en-US', {
             year: 'numeric',
