@@ -1,0 +1,44 @@
+import dotenv from 'dotenv';
+import * as Yup from 'yup';
+// config dotenv
+dotenv.config();
+// create schema for validation
+const schema = Yup.object().shape({
+    PORT: Yup.number().default(2000).required(),
+    NODE_ENV: Yup.string().default('development').required(),
+    CLIENT_URL: Yup.string().required('CLIENT_URL is required'),
+    LOCAL_DIRECT_URL: Yup.string().required('DIRECT_URL is required'),
+    JWT_ACCESS_SECRET: Yup.string().required('ACCESS_SECRET is required'),
+    JWT_REFRESH_SECRET: Yup.string().required('REFRESH_SECRET is required'),
+    DATABASE_URL: Yup.string().required('DATABASE_URL is required'),
+    SUPABASE_DIRECT_URL: Yup.string().required('SUPABASE_DIRECT_URL is required'),
+    DOMAIN_URL: Yup.string().required('DOMAIN_URL is required'),
+    ACTIVATION_ACCOUNT_URL: Yup.string().required('ACTIVATION_ACCOUNT_URL is required'),
+    NODEMAILER_APP_EMAIL: Yup.string().required('NODEMAILER_APP_EMAIL is required'),
+    NODEMAILER_APP_PASSWORD: Yup.string().required('NODEMAILER_APP_PASSWORD is required'),
+    CLOUD_NAME: Yup.string().required('CLOUD_NAME is required'),
+    CLOUD_API_KEY: Yup.string().required('CLOUD_API_KEY is required'),
+    CLOUD_API_SECRET: Yup.string().required('CLOUD_API_SECRET is required'),
+    CLOUD_PAYMENT_PROOF_FOLDER_PATH: Yup.string().required('CLOUD_PAYMENT_PROOF_FOLDER_PATH is required'),
+    CLOUD_TEMP_PROPERTIES_IMAGE_FOLDER_PATH: Yup.string().required('CLOUD_TEMP_PROPERTIES_IMAGE_FOLDER_PATH is required'),
+    CLOUD_TENANT_PROFILE_FOLDER_PATH: Yup.string().required('CLOUD_TENANT_PROFILE_FOLDER_PATH is required'),
+    MIDTRANS_SERVER_KEY: Yup.string().required('MIDTRANS_SERVER_KEY is required'),
+    MIDTRANS_CLIENT_KEY: Yup.string().required('MIDTRANS_CLIENT_KEY is required'),
+    FIREBASE_SERVICE_ACCOUNT: Yup.string().required('FIREBASE_SERVICE_ACCOUNT is required'),
+});
+// validate config
+try {
+    schema.validateSync(process.env, { abortEarly: false });
+}
+catch (error) {
+    console.error('Invalid config:', error.errors);
+    process.exit(1);
+}
+// load config
+const loadConfig = () => {
+    return schema.cast(process.env);
+};
+// export config
+export default Object.freeze({
+    ...loadConfig(),
+});

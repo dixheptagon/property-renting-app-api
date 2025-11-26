@@ -1,0 +1,38 @@
+[
+  {
+    "uid": "booking-1",
+    "user_uid": "guest-1",
+    "room_uid": "room-1-1-1",
+    "property_uid": "property-1-1",
+    "check_in_date": "2024-10-01",
+    "check_out_date": "2024-10-03",
+    "fullname": "John Doe",
+    "email": "john.doe@example.com",
+    "phone_number": "+1234567895",
+    "total_price": 300000,
+    "status": "completed",
+    "payment_method": "bank_transfer",
+    "payment_proof": "/uploads/proofs/booking1.jpg",
+    "transaction_id": "TXN123456",
+    "payment_deadline": "2024-09-30T23:59:59Z",
+    "paid_at": "2024-09-29T10:00:00Z"
+  },
+  {
+    "uid": "booking-2",
+    "user_uid": "guest-2",
+    "room_uid": "room-2-2-1",
+    "property_uid": "property-2-2",
+    "check_in_date": "2024-11-05",
+    "check_out_date": "2024-11-07",
+    "fullname": "Jane Smith",
+    "email": "jane.smith@example.com",
+    "phone_number": "+1234567896",
+    "total_price": 360000,
+    "status": "completed",
+    "payment_method": "credit_card",
+    "payment_proof": "/uploads/proofs/booking2.jpg",
+    "transaction_id": "TXN123457",
+    "payment_deadline": "2024-11-04T23:59:59Z",
+    "paid_at": "2024-11-03T14:00:00Z"
+  }
+]

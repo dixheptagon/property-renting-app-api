@@ -1,190 +1,116 @@
-# Purwadhika Final Project Repository
+# Property Renting App API
 
-This project uses Express.js and Prisma as the ORM. It is used to build both a mini-project and a final-project for students of the Job Connector Web Development program.
+## Project Goal
 
-📃 Rules
+This backend API handles the core logic for a property renting platform, including user authentication, payment processing, property management, booking systems, and scheduled background tasks to automate order reminders, completions, and cleanups.
 
-        ⌨️ Commit & Pull Request
+## Tech Stack
 
-            ✔️ Selalu gunakan `conventional commit message` saat melakukan commit atau pada saat `creating pull request`: https://www.conventionalcommits.org/en/v1.0.0/
+- **Node.js**: Runtime environment
+- **Express.js**: Web framework for building APIs
+- **TypeScript**: Typed superset of JavaScript
+- **Prisma**: ORM for database management
+- **PostgreSQL**: Relational database
+- **Cloudinary**: Cloud storage for images and files
+- **Midtrans**: Payment gateway integration
 
-            ✔️ `Squash and Merge` pull request menuju ke `branch main`
+## Local Setup Guide
 
+1. **Install Dependencies**:
 
-        🏷️ Standarisasi Penamaan
+   ```bash
+   npm install
+   ```
 
-            🌐 REST API
+2. **Set Up Environment Variables**:
+   - Copy `.env.example` to `.env` and fill in the required values (see Environment Variables section below).
 
-                ✔️ Selalu ikuti standarisasi `REST API naming convention` untuk penamaan endpoint URL: https://restfulapi.net/resource-naming/
+3. **Run Database Migrations**:
 
-            📂 Penamaan File
+   ```bash
+   npm run migrate:dev
+   ```
 
-                ✔️ Gunakan Format Penamaan yang Sama untuk Directory atau Files:
-                        ▪️Format penamaan directory dan file di dalam 1 project harus konsisten dan seragam antara 1 developer dengan developer lainnya.
-                        ▪️Untuk penamaan yang lebih dari 1 suku kata bisa menggunakan format `snake_case` atau `camelCase` atau `dot.case`.
-                        ▪️Example: index.ts, productsController.ts, productsService.ts
-                        ▪️Example: index.ts, products_controller.ts, products_service.ts
-                        ▪️Example: index.ts, products.controller.ts, products.service.ts
+4. **Start the Development Server**:
+   ```bash
+   npm run dev
+   ```
 
-                ✔️ Gunakan Nama File yang Deskriptif:
-                        ▪️Pilih nama yang secara akurat menggambarkan konten dari file tersebut.
-                        ▪️Hindari nama file yang terlalu umum seperti `utils.ts` atau `decode.ts`.
+The application will run on the port specified in your `.env` file (default: 2000).
 
-                ✔️ Ikuti Standarisasi Penamaan File untuk Jenis File Tertentu:
-                        ▪️Untuk file konfigurasi, gunakan nama seperti .env, config.js, atau settings.json.
-                        ▪️Gunakan penamaan yang konsisten untuk file test, seperti menambahkan .test.js atau .spec.js ke nama file yang sedang diuji.
+## Environment Variables
 
-<!--  -->
-<!--  -->
-<!--  -->
+Create a `.env` file in the root directory with the following variables:
 
-📦 Prisma ORM - Dokumentasi Penggunaan!
+```env
+PORT=2000
+NODE_ENV=development
+LOCAL_DIRECT_URL=your_local_direct_url
+JWT_ACCESS_SECRET=your_jwt_access_secret
+JWT_REFRESH_SECRET=your_jwt_refresh_secret
+DATABASE_URL=your_postgresql_database_url
+SUPABASE_DIRECT_URL=your_supabase_direct_url
+DOMAIN_URL=your_domain_url
+ACTIVATION_ACCOUNT_URL=your_activation_account_url
+NODEMAILER_APP_EMAIL=your_nodemailer_email
+NODEMAILER_APP_PASSWORD=your_nodemailer_password
+CLOUD_NAME=your_cloudinary_cloud_name
+CLOUD_API_KEY=your_cloudinary_api_key
+CLOUD_API_SECRET=your_cloudinary_api_secret
+CLOUD_PAYMENT_PROOF_FOLDER_PATH=your_payment_proof_folder
+CLOUD_TEMP_PROPERTIES_IMAGE_FOLDER_PATH=your_temp_properties_folder
+CLOUD_TENANT_PROFILE_FOLDER_PATH=your_tenant_profile_folder
+MIDTRANS_SERVER_KEY=your_midtrans_server_key
+MIDTRANS_CLIENT_KEY=your_midtrans_client_key
+```
 
-        🔧 Migrasi Database
+## Database Management
 
-            ✔️ Untuk membuat dan menjalankan migrasi selama fase development:
+This project uses Prisma as the ORM with PostgreSQL.
 
-                bash> npm run migrate:dev
+- **Run Migrations** (for development):
 
-            ✔️ Untuk migrasi di fase production
+  ```bash
+  npm run migrate:dev
+  ```
 
-                bash> npx prisma migrate deploy
+- **Generate Prisma Client** (after schema changes):
 
-# 📘 Git & GitHub Collaboration Guideline
+  ```bash
+  npx prisma generate
+  ```
 
-✨ Tujuan
+- **View Database** (optional, requires Prisma Studio):
+  ```bash
+  npx prisma studio
+  ```
 
-Panduan ini dibuat untuk membantu tim developer dalam berkolaborasi menggunakan Git dan GitHub secara efisien, rapi, dan terstruktur.
+## Cron Job Documentation
 
-📂 Struktur Branch
+Scheduled background tasks are implemented using `node-cron` and must run as a separate service on Railway's Cron Job Service. These tasks include:
 
-        ▪️main\*
-        Branch utama yang mencerminkan kode production atau versi yang sudah stable. Semua fitur yang rilis ditandai dari branch ini (misalnya dengan tag v.1.0.).
-        ⚠️ Developer tidak diperbolehkan melakukan development langsung di branch main.
+- Auto-cancel pending payments after 2 hours
+- Send order reminders for upcoming check-ins
+- Auto-complete orders after check-out
+- Delete temporary images daily
 
-        ▪️develop/\*
-        Branch untuk integrasi seluruh fitur baru sebelum di rilis ke production. Semua fitur dan bugfix digabung kesini terlebih dahulu melalui Pull Request. Bisa dianggap sebagai versi staging sebelum masuk ke branch main.
+**Important**: Do not run cron jobs in the main application process in production. Deploy them separately using Railway Cron Job Service with the following execution command:
 
-        ▪️feat/\*
-        Prefix untuk pengembangan fitur baru. Branch ini dibuat based on branch develop dan akan di-merge kembali ke branch develop setelah selesai.
+```bash
+node dist/src/cron/job.js
+```
 
-        Contoh: feat/login-page, feat/user-profile.
+This ensures background tasks run independently without affecting the main API performance.
 
-        ▪️ bugfix/\*
-        Digunakan untuk memperbaiki bug non-kritis yang ditemukan saat fase development. Dibuat based on branch
-        develop, dan setelah selesai diperbaiki akan di-merge kembali ke branch develop.
+## Example API Endpoints
 
-        Contoh: bugfix/fix-password-validation.
+| Method | Endpoint                | Description             |
+| ------ | ----------------------- | ----------------------- |
+| POST   | `/auth/login`           | User login              |
+| GET    | `/auth/tenant-profile`  | Get tenant profile      |
+| POST   | `/booking/create-order` | Create a booking order  |
+| GET    | `/booking/my-bookings`  | Get user's booking list |
 
-        ▪️hotfix/\*
-        Untuk perbaikan darurat terhadap masalah kritis di production. Dibuat based on branch main, dan setelah selesai, hasil perbaikan harus di-merge ke branch main dan branch develop untuk menjaga sinkronisasi.
+## Deployment
 
-        Contoh: hotfix/fix-crash-on-payment.
-
-🌱 Alur Kerja Git (Git Flow)
-
-        • Checkout ke branch develop
-                ➡️ git checkout develop
-
-        • Buat branch baru based on branch develop:
-
-                Format:
-                ➡️ git checkout -b branch-type/nama-fitur
-
-                Contoh:
-                ➡️ git checkout -b feat/login-page
-                ➡️ git checkout -b bugfix/fix-login-error
-
-        • Lakukan pengerjaan fitur ataupun perbaikan (bug fixing)
-        • Commit perubahan dengan format yang jelas. Gunakan format commit yang deskriptif, misalnya:
-
-                Format:
-                ➡️ git add .
-                ➡️ git commit -m “<type>: <deskripsi>”
-
-                Contoh:
-                ➡️ git commit -m “feat: implement login page layout”
-                                        ➡️ git commit -m “fix: fix axios error response”
-
-        • Push branch ke remote
-
-                Format:
-                ➡️ git push origin  branch-type/nama-fitur
-
-                Contoh:
-                ➡️ git push origin feat/login-page
-                ➡️ git push origin bugfix/fix-login-error
-
-        • Lakukan create Compare & Pull Request (PR) menuju ke branch develop
-        • Pull Request akan di review dan approve oleh Project Manager (PM)
-        • Apabila:
-
-                ❌ Pull Request belum mendapatkan approval oleh PM dan butuh perbaikan, lakukan perbaikan tersebut di local. Setelah perbaikan selesai, lakukan ulang commit dan push branch ke remote. ⚠️Tidak perlu melakukan `Compare and Pull Request` lagi!
-
-                ✅ Pull Request telah mendapatkan approval oleh PM, lakukan `Merge Pull Request`
-
-🔤 Format Commit Message (Conventional Commits)
-
-Conventional Commit adalah sebuah standar penulisan pesan commit (commit message) yang terstruktur dan konsisten, digunakan untuk mempermudah:
-
-• Membaca riwayat perubahan (changelog).
-
-• Review dan kolaborasi tim.
-
-        Format:
-        <type>(optional-scope): short description
-
-        Contoh:
-        ➡️ feat(auth): add JWT middleware
-        ➡️ fix(schedule): fix timezone bug
-        ➡️ docs(readme): update setup instruction
-
-⌨️ Commit Type:
-
-        ▪️feat
-        Menambahkan fitur baru pada code atau aplikasi.
-        Contoh: menambah halaman login, fitur notifikasi, filter pencarian, dll.
-
-        ▪️fix
-        Melakukan perbaikan bug/error yang memengaruhi fungsionalitas.
-        Contoh: memperbaiki validasi form, memperbaiki crash saat submit, dll.
-
-        ▪️docs
-        Perubahan pada dokumentasi saja, tidak menyentuh kode program.
-        Contoh: update README, komentar dokumentasi, wiki internal, dll.
-
-        ▪️style
-        Perubahan yang hanya menyangkut gaya penulisan kode tanpa mengubah logika atau perilaku.
-        Contoh: perbaikan indentasi, penyesuaian whitespace, penghapusan baris kosong.
-
-        ▪️refactor
-        Melakukan perubahan struktur kode tanpa menambah fitur atau memperbaiki bug.
-        Tujuannya untuk meningkatkan kualitas kode, readability, atau efisiensi.
-        test Menambahkan atau memodifikasi kode pengujian (unit/integration test).
-        Contoh: menambahkan test case baru, memperbaiki test yang gagal.
-
-        ▪️chore
-        Perubahan kecil atau non-kode yang tidak berdampak langsung ke aplikasi.
-        Contoh: instalasi dependensi, update dependensi, perubahan script, konfigurasi CI/CD, rename file, dll.
-
-🔀 Pull Request (PR) Rules
-
-        • Judul PR harus jelas, contoh: feat(auth): implement login endpoint
-        • Deskripsikan perubahan dan tujuan PR
-        • Tambahkan screenshot (jika relevan)
-        • Assign minimal 1 reviewer
-        • Hindari PR besar; jika perlu, pecah menjadi beberapa PR kecil
-
-⛔ Hal yang Harus Dihindari
-
-        • Push langsung ke branch main maupun branch develop
-        • Pesan commit tanpa deskripsi jelas
-        • PR besar tanpa penjelasan
-        • Menghapus branch orang lain tanpa izin
-
-✅ Checklist Sebelum Merge
-
-        • Apakah sudah lulus testing?
-        • Apakah telah di review oleh rekan satu tim?
-        • Apakah sudah tidak ada confilcit pada saat melakukan merge?
-        • Apakah sudah melakukan update dokumentasi (jika perlu)?
+The application is configured for deployment on Railway. Ensure all environment variables are set in your Railway project settings, and configure the separate Cron Job Service for background tasks as described above.

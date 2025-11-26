@@ -1,0 +1,57 @@
+[
+  {
+    "tenant_uid": "tenant-1",
+    "balance": 0,
+    "contact": "+1234567890",
+    "government_id_type": "KTP",
+    "government_id_path": "/uploads/ktp/alice_brown.pdf",
+    "address": "123 Main St",
+    "city": "Jakarta",
+    "country": "Indonesia",
+    "verified": true
+  },
+  {
+    "tenant_uid": "tenant-2",
+    "balance": 0,
+    "contact": "+1234567891",
+    "government_id_type": "KTP",
+    "government_id_path": "/uploads/ktp/charlie_miller.pdf",
+    "address": "456 Elm St",
+    "city": "Surabaya",
+    "country": "Indonesia",
+    "verified": true
+  },
+  {
+    "tenant_uid": "tenant-3",
+    "balance": 0,
+    "contact": "+1234567892",
+    "government_id_type": "Passport",
+    "government_id_path": "/uploads/passport/diana_garcia.pdf",
+    "address": "789 Oak St",
+    "city": "Bandung",
+    "country": "Indonesia",
+    "verified": true
+  },
+  {
+    "tenant_uid": "tenant-4",
+    "balance": 0,
+    "contact": "+1234567893",
+    "government_id_type": "KTP",
+    "government_id_path": "/uploads/ktp/eve_lopez.pdf",
+    "address": "101 Pine St",
+    "city": "Yogyakarta",
+    "country": "Indonesia",
+    "verified": true
+  },
+  {
+    "tenant_uid": "tenant-5",
+    "balance": 0,
+    "contact": "+1234567894",
+    "government_id_type": "KTP",
+    "government_id_path": "/uploads/ktp/frank_rodriguez.pdf",
+    "address": "202 Maple St",
+    "city": "Medan",
+    "country": "Indonesia",
+    "verified": true
+  }
+]
