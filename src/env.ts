@@ -18,6 +18,8 @@ export interface Config {
   ACTIVATION_ACCOUNT_URL: string;
   NODEMAILER_APP_EMAIL: string;
   NODEMAILER_APP_PASSWORD: string;
+  RESEND_API_KEY: string;
+  RESEND_CLIENT_DOMAIN_APP: string;
   CLOUD_NAME: string;
   CLOUD_API_KEY: string;
   CLOUD_API_SECRET: string;
@@ -48,6 +50,10 @@ const schema = Yup.object().shape({
   ),
   NODEMAILER_APP_PASSWORD: Yup.string().required(
     'NODEMAILER_APP_PASSWORD is required',
+  ),
+  RESEND_API_KEY: Yup.string().required('RESEND_API_KEY is required'),
+  RESEND_CLIENT_DOMAIN_APP: Yup.string().required(
+    'RESEND_CLIENT_DOMAIN_APP is required',
   ),
   CLOUD_NAME: Yup.string().required('CLOUD_NAME is required'),
   CLOUD_API_KEY: Yup.string().required('CLOUD_API_KEY is required'),

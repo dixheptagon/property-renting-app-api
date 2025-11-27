@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import Handlebars from 'handlebars';
-import transporter from '../../../lib/config/nodemailer.transporter.js';
+import { resend } from '../../../lib/config/resend.client.js';
 import database from '../../../lib/config/prisma.client.js';
 import env from '../../../env.js';
 
@@ -82,8 +82,8 @@ export const sendTenantVerifiedEmail = async ({
     });
 
     // Send email
-    await transporter.sendMail({
-      from: 'Staysia <admin@gmail.com>',
+    await resend.emails.send({
+      from: `Staysia <${env.RESEND_CLIENT_DOMAIN_APP}>`,
       to: email,
       subject: 'Tenant Verification Successful - staysia.id',
       html: htmlToSend,

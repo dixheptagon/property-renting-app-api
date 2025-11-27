@@ -4,7 +4,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import Handlebars from 'handlebars';
-import transporter from '../../../lib/config/nodemailer.transporter.js';
+import { resend } from '../../../lib/config/resend.client.js';
 import { CustomError } from '../../../lib/utils/custom.error.js';
 import { HttpRes } from '../../../lib/constant/http.response.js';
 import { ResponseHandler } from '../../../lib/utils/response.handler.js';
@@ -90,8 +90,8 @@ export const SendEmailVerificationController = async (req, res, next) => {
             email_timestamp: currentTimestamp,
             current_year: new Date().getFullYear(),
         });
-        await transporter.sendMail({
-            from: 'Staysia <admin@gmail.com>',
+        await resend.emails.send({
+            from: `Staysia <${env.RESEND_CLIENT_DOMAIN_APP}>`,
             to: email,
             subject: 'Email Verification - staysia.id',
             html: htmlToSend,

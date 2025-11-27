@@ -16,6 +16,8 @@ const schema = Yup.object().shape({
     ACTIVATION_ACCOUNT_URL: Yup.string().required('ACTIVATION_ACCOUNT_URL is required'),
     NODEMAILER_APP_EMAIL: Yup.string().required('NODEMAILER_APP_EMAIL is required'),
     NODEMAILER_APP_PASSWORD: Yup.string().required('NODEMAILER_APP_PASSWORD is required'),
+    RESEND_API_KEY: Yup.string().required('RESEND_API_KEY is required'),
+    RESEND_CLIENT_DOMAIN_APP: Yup.string().required('RESEND_CLIENT_DOMAIN_APP is required'),
     CLOUD_NAME: Yup.string().required('CLOUD_NAME is required'),
     CLOUD_API_KEY: Yup.string().required('CLOUD_API_KEY is required'),
     CLOUD_API_SECRET: Yup.string().required('CLOUD_API_SECRET is required'),

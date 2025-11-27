@@ -3,7 +3,8 @@ import * as fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import Handlebars from 'handlebars';
-import transporter from '../../../../lib/config/nodemailer.transporter.js';
+import { resend } from '../../../../lib/config/resend.client.js';
+import env from '../../../../env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -43,8 +44,8 @@ export const sendPropertyUploadFailedEmail = async ({
     });
 
     // Send email
-    await transporter.sendMail({
-      from: 'Staysia <admin@gmail.com>',
+    await resend.emails.send({
+      from: `Staysia <${env.RESEND_CLIENT_DOMAIN_APP}>`,
       to: email,
       subject: 'Property Upload Failed - staysia.id',
       html: htmlToSend,
