@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { cloudinaryUploadTempPropertyImage, cloudinaryDeleteTempPropertyImage, } from '../../../../lib/config/cloudinary.js';
 import { ResponseHandler } from '../../../../lib/utils/response.handler.js';
 import { HttpRes } from '../../../../lib/constant/http.response.js';

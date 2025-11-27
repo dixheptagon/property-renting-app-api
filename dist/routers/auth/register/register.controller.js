@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import env from '../../../env.js';
 import { RegisterSchema } from './register.validation.js';
 import database from '../../../lib/config/prisma.client.js';
