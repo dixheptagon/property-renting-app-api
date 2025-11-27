@@ -1,0 +1,92 @@
+[
+  {
+    "uid": "guest-1",
+    "email": "john.doe@example.com",
+    "password": "guest123",
+    "first_name": "John",
+    "last_name": "Doe",
+    "role": "guest",
+    "is_verified": true
+  },
+  {
+    "uid": "guest-2",
+    "email": "jane.smith@example.com",
+    "password": "guest123",
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "role": "guest",
+    "is_verified": true
+  },
+  {
+    "uid": "guest-3",
+    "email": "bob.johnson@example.com",
+    "password": "guest123",
+    "first_name": "Bob",
+    "last_name": "Johnson",
+    "role": "guest",
+    "is_verified": true
+  },
+  {
+    "uid": "guest-4",
+    "email": "emily.davis@example.com",
+    "password": "guest123",
+    "first_name": "Emily",
+    "last_name": "Davis",
+    "role": "guest",
+    "is_verified": true
+  },
+  {
+    "uid": "guest-5",
+    "email": "michael.wilson@example.com",
+    "password": "guest123",
+    "first_name": "Michael",
+    "last_name": "Wilson",
+    "role": "guest",
+    "is_verified": true
+  },
+  {
+    "uid": "tenant-1",
+    "email": "alice.brown@example.com",
+    "password": "tenant123",
+    "first_name": "Alice",
+    "last_name": "Brown",
+    "role": "tenant",
+    "is_verified": true
+  },
+  {
+    "uid": "tenant-2",
+    "email": "charlie.miller@example.com",
+    "password": "tenant123",
+    "first_name": "Charlie",
+    "last_name": "Miller",
+    "role": "tenant",
+    "is_verified": true
+  },
+  {
+    "uid": "tenant-3",
+    "email": "diana.garcia@example.com",
+    "password": "tenant123",
+    "first_name": "Diana",
+    "last_name": "Garcia",
+    "role": "tenant",
+    "is_verified": true
+  },
+  {
+    "uid": "tenant-4",
+    "email": "eve.lopez@example.com",
+    "password": "tenant123",
+    "first_name": "Eve",
+    "last_name": "Lopez",
+    "role": "tenant",
+    "is_verified": true
+  },
+  {
+    "uid": "tenant-5",
+    "email": "frank.rodriguez@example.com",
+    "password": "tenant123",
+    "first_name": "Frank",
+    "last_name": "Rodriguez",
+    "role": "tenant",
+    "is_verified": true
+  }
+]

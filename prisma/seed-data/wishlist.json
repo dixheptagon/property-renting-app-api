@@ -1,0 +1,14 @@
+[
+  {
+    "user_uid": "guest-1",
+    "property_uid": "property-2-1"
+  },
+  {
+    "user_uid": "guest-2",
+    "property_uid": "property-3-1"
+  },
+  {
+    "user_uid": "guest-3",
+    "property_uid": "property-4-1"
+  }
+]

@@ -4,22 +4,383 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// --- ENUMS ---
+enum UserRole {
+  guest
+  tenant
+}
+
+enum PropertyCategory {
+  house
+  apartment
+  hotel
+  villa
+  room
+}
+
+enum PropertyStatus {
+  draft
+  active
+  deleted
+}
+
+enum ImageStatus {
+  temp
+  draft
+  active
+  deleted
+}
+
+enum BookingStatus {
+  pending_payment
+  processing
+  confirmed
+  cancelled
+  completed
+}
+
+enum RateAdjustmentType {
+  percentage
+  nominal
+}
+// --- END ENUMS ---
+
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql" // Asumsi database menggunakan PostgreSQL. Ganti jika menggunakan MySQL/SQLite.
   url      = env("DATABASE_URL")
+  directUrl = env("SUPABASE_DIRECT_URL")
 }
 
-model Sample {
-  id        Int      @id @default(autoincrement())
-  name      String
-  code      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model User {
+  id                Int                  @id @default(autoincrement())
+  uid               String               @unique
 
-  @@map("samples") // if you want to use snake_case format
+  email             String               @unique
+  is_verified       Boolean              @default(false)
+
+  password          String? // optional if user register with Oauth 
+  refresh_token     String?
+
+  first_name        String
+  last_name         String?
+  display_name      String?              @unique
+  role              UserRole            @default(guest)// tenant or guest
+
+  image             String?
+
+  created_at        DateTime             @default(now())
+  updated_at        DateTime?            @updatedAt
+  deleted_at        DateTime?
+
+  // Relations
+  user_providers      UserProvider[]
+  tenant_profiles     TenantProfile?
+  properties          Property[]
+  bookings            Booking[]
+  reviews             Review[]
+  wishlists           Wishlist[]
+}
+
+model EmailVerification {
+  id                   Int       @id @default(autoincrement())
+  email                String     @unique
+
+  verification_code    String?
+  verification_token   String    @unique // link verification email
+  expires_at           DateTime?
+
+  is_used              Boolean @default(false)
+  used_at              DateTime?
+
+  created_at           DateTime  @default(now())
+  updated_at           DateTime? @updatedAt
+  deleted_at           DateTime?
+
+}
+
+model UserProvider {
+  id                 Int       @id @default(autoincrement())
+  user_id            Int
+
+  provider           String    // example: 'google', 'facebook', 'github'
+  provider_user_id   String    // ID unique from provider
+
+  created_at         DateTime  @default(now())
+  updated_at         DateTime? @updatedAt
+  deleted_at         DateTime?
+
+  // Relations
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model TenantProfile {
+  id                    Int       @id @default(autoincrement())
+  user_id               Int       @unique
+
+  balance               Decimal   @default(0) @db.Decimal(12, 2) // Menggunakan Decimal untuk saldo
+
+  contact               String    @db.VarChar(20) //phone number
+  government_id_type    String    // e.g., KTP, Passport
+  government_id_path    String    // simpan path file upload //dalam bentuk 1 file pdf
+
+  address               String
+  city                  String
+  country               String
+
+  verified              Boolean   @default(false)
+  verified_at           DateTime?
+
+  banned                Boolean   @default(false)
+
+  created_at            DateTime  @default(now())
+  updated_at            DateTime? @updatedAt
+  deleted_at            DateTime?
+
+  // Relations
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model Property {
+  id                    Int                  @id @default(autoincrement())
+  uid                   String               @unique
+  user_id               Int // tenant id
+
+  category              PropertyCategory
+  title                 String
+  description           String               @db.Text
+  
+  address               String
+  city                  String
+  country               String
+  postal_code           String
+
+  //Gmaps synchronization 
+  latitude              Decimal?             @db.Decimal(10, 8) //untuk integrasi google maps
+  longitude             Decimal?             @db.Decimal(11, 8) 
+  place_id              String?              // Google Place ID
+  map_url               String?              // optional direct link
+
+  amenities             Json?
+  custom_amenities      Json?
+  rules                 Json?
+  custom_rules          Json?
+
+  rating_avg            Decimal?             @db.Decimal(2, 1)
+  rating_count          Int?
+
+  base_price            Decimal              @db.Decimal(12, 2)
+
+  status                PropertyStatus
+
+  created_at            DateTime             @default(now())
+  updated_at            DateTime?            @updatedAt
+  deleted_at            DateTime?
+
+  // Relations
+  tenant                User                 @relation(fields: [user_id], references: [id])
+  images                PropertyImage[]
+  rooms                 Room[]
+  room_unavailabilities RoomUnavailability[]
+  peak_season_rates     PeakSeasonRate[]
+  bookings              Booking[]
+  reviews               Review[]
+  wishlists             Wishlist[]
+}
+
+model PropertyImage {
+  id            Int       @id @default(autoincrement())
+  property_id   Int?
+
+  url           String
+  is_main       Boolean   @default(false) // main  image
+  order_index   Int       @default(0)     // urutan gambar yang ditampilkan
+
+  public_id     String?
+  temp_group_id String?   
+  status                  ImageStatus
+
+  created_at    DateTime  @default(now())
+  updated_at    DateTime? @updatedAt
+  deleted_at    DateTime?
+
+  // Relations
+  property Property? @relation(fields: [property_id], references: [id])
+}
+
+model Room {
+  id                    Int                  @id @default(autoincrement())
+  uid                   String               @unique
+  property_id           Int
+
+  name                  String
+  description           String               @db.Text
+
+  base_price            Decimal              @db.Decimal(12, 2)
+
+  max_guest             Int
+  bedrooms              Int
+  bathrooms             Int
+  beds                  Int
+
+  highlight             Json? // room privalage // keunggulan kamar // kalau mau buat others juga bisa
+  custom_highlight      Json?
+
+  total_units           Int
+
+  created_at            DateTime             @default(now())
+  updated_at            DateTime?            @updatedAt
+  deleted_at            DateTime?
+
+  // Relations
+  property              Property             @relation(fields: [property_id], references: [id])
+  images                RoomImage[]
+  room_unavailabilities RoomUnavailability[]
+  peak_season_rates     PeakSeasonRate[]
+  bookings              Booking[]
+}
+
+model RoomImage {
+  id          Int       @id @default(autoincrement())
+  room_id     Int?
+
+  url         String
+  is_main     Boolean   @default(false)  // main image
+  order_index Int       @default(0) // urutan gambar yang ditampilkan
+
+  public_id     String?
+  temp_group_id String?   
+  status                ImageStatus
+
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+  deleted_at  DateTime?
+
+  // Relations
+  room Room? @relation(fields: [room_id], references: [id])
+}
+
+model RoomUnavailability {
+  id            Int       @id @default(autoincrement())
+  property_id   Int
+  room_id       Int
+  booking_id    Int?
+
+  start_date    DateTime  @db.Date
+  end_date      DateTime  @db.Date // Menggunakan DateTime dengan tipe Date // rentang waktu
+  reason        String?   @db.VarChar(255)
+
+  created_at    DateTime  @default(now())
+  updated_at    DateTime? @updatedAt
+  deleted_at    DateTime?
+
+  // Relations
+  property Property  @relation(fields: [property_id], references: [id])
+  room     Room      @relation(fields: [room_id], references: [id])
+  booking  Booking?  @relation(fields: [booking_id], references: [id])
+
+  // Batasan unik (tidak ada overlap) akan diimplementasikan di logic backend.
+}
+
+model PeakSeasonRate {
+  id                Int                @id @default(autoincrement())
+  property_id       Int
+  room_id           Int?
+
+  start_date        DateTime           @db.Date
+  end_date          DateTime           @db.Date
+
+  adjustment_type   RateAdjustmentType // 'percentage' | 'nominal'
+  adjustment_value  Decimal            @db.Decimal(12, 2)
+
+  created_at        DateTime           @default(now())
+  updated_at        DateTime?          @updatedAt
+  deleted_at        DateTime?
+
+  // Relations
+  property Property @relation(fields: [property_id], references: [id])
+  room     Room?    @relation(fields: [room_id], references: [id])
+}
+
+model Booking {
+  id                  Int                 @id @default(autoincrement())
+  uid                 String?             @unique
+
+  user_id             Int // guest
+  room_id             Int
+  property_id         Int
+
+  check_in_date       DateTime            @db.Date
+  check_out_date      DateTime            @db.Date
+
+  fullname            String
+  email               String
+  phone_number        String              @db.VarChar(20)
+
+// Transaction
+  total_price         Decimal             @db.Decimal(12, 2)
+  status              BookingStatus       @default(pending_payment)
+
+  payment_method      String?
+  payment_proof       String?             @db.VarChar(255) // URL bukti transfer
+  transaction_id      String?
+
+  payment_deadline    DateTime
+  paid_at             DateTime?
+
+  cancellation_reason String?
+
+  created_at          DateTime            @default(now())
+  updated_at          DateTime?           @updatedAt
+  deleted_at          DateTime?
+
+  // Relations
+  user                User                @relation(fields: [user_id], references: [id])
+  room                Room                @relation(fields: [room_id], references: [id])
+  property            Property            @relation(fields: [property_id], references: [id])
+  room_unavailabilities RoomUnavailability[]
+  review              Review?
+}
+
+model Review {
+  id          Int       @id @default(autoincrement())
+  booking_id  Int       @unique
+  user_id     Int
+  property_id Int
+  
+  rating      Decimal   @db.Decimal(2, 1) // misal 4.5
+  comment     String    @db.Text
+  reply       String?   @db.Text // opsional, jawaban host
+
+  is_public   Boolean   @default(true) // antisipasi unbehavioral comment
+
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+  deleted_at  DateTime?
+
+  // Relations
+  booking  Booking  @relation(fields: [booking_id], references: [id])
+  user     User     @relation(fields: [user_id], references: [id])
+  property Property @relation(fields: [property_id], references: [id])
+}
+
+model Wishlist {
+  id          Int       @id @default(autoincrement())
+
+  user_id     Int
+  property_id Int
+
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+  deleted_at  DateTime?
+
+  // Relations
+  user     User     @relation(fields: [user_id], references: [id])
+  property Property @relation(fields: [property_id], references: [id])
+
+  // Composite Unique Index: memastikan user hanya bisa menambahkan satu properti sekali
+  @@unique([user_id, property_id])
 }
