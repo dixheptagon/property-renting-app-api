@@ -2,7 +2,7 @@ import database from '../../../lib/config/prisma.client.js';
 import { CustomError } from '../../../lib/utils/custom.error.js';
 import { HttpRes } from '../../../lib/constant/http.response.js';
 import { ResponseHandler } from '../../../lib/utils/response.handler.js';
-export const GetBookingController = async (req, res, next) => {
+export const GetBookingByTenantController = async (req, res, next) => {
     try {
         const { orderId } = req.params;
         // Get user from verifyToken middleware
@@ -18,9 +18,9 @@ export const GetBookingController = async (req, res, next) => {
         if (!user?.id) {
             throw new CustomError(HttpRes.status.UNAUTHORIZED, HttpRes.message.UNAUTHORIZED, 'User ID required');
         }
-        // Find booking by uid
+        // Find booking by uid and owned property by tenant
         const booking = await database.booking.findUnique({
-            where: { uid: orderId, user_id: user.id },
+            where: { uid: orderId, property: { user_id: user.id } },
             include: {
                 room: {
                     include: {
