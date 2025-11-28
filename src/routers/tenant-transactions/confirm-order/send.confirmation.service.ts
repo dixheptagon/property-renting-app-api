@@ -110,13 +110,17 @@ export class SendConfirmationService {
       current_year: new Date().getFullYear(),
     };
 
+    const filePath = path.join(
+      __dirname,
+      '../../../lib/template/assets/guest-guidelines.pdf',
+    );
+
+    const pdfBuffer = fs.readFileSync(filePath);
+
     const attachment = [
       {
         filename: 'guest-guidelines.pdf',
-        path: path.join(
-          __dirname,
-          '../../../lib/template/assets/guest-guidelines.pdf',
-        ),
+        content: pdfBuffer,
         contentType: 'application/pdf',
       },
     ];

@@ -12,7 +12,8 @@ export const RegisterSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Email is required'),
     password: Yup.string()
         .required('Password is required')
-        .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, 'Password must be at least 8 characters long and contain at least one letter and one number'),
+        .min(8, 'Password must be at least 8 characters')
+        .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{}\[\]|;:'",.<>/?`~\\]).{8,}$/, 'Password must contain at least one letter, one number, and one special charater'),
     role: Yup.mixed()
         .oneOf([UserRole.guest, UserRole.tenant], 'Invalid role')
         .optional(),

@@ -4,7 +4,7 @@ import { CustomError } from '../../../lib/utils/custom.error.js';
 import { HttpRes } from '../../../lib/constant/http.response.js';
 import { ResponseHandler } from '../../../lib/utils/response.handler.js';
 
-export const GetBookingController = async (
+export const GetBookingByTenantController = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -37,9 +37,9 @@ export const GetBookingController = async (
       );
     }
 
-    // Find booking by uid
+    // Find booking by uid and owned property by tenant
     const booking = await database.booking.findUnique({
-      where: { uid: orderId, user_id: user.id },
+      where: { uid: orderId, property: { user_id: user.id } },
       include: {
         room: {
           include: {

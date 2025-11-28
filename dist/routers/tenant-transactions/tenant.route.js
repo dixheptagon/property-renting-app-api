@@ -5,6 +5,7 @@ import { ConfirmOrderController } from './confirm-order/confirm.order.controller
 import { RejectOrderController } from './reject-order/reject.order.controller.js';
 import { CancelOrderByTenantController } from './cancel-order/cancel.order.controller.js';
 import { CompleteOrderController } from './complete-order/complete.order.controller.js';
+import { GetBookingByTenantController } from './get-booking-by-tenant/get.booking.by.tenant.controller.js';
 import { verifyToken } from '../../lib/middlewares/verify.token.js';
 import { verifyTenant } from '../../lib/middlewares/verify.role.js';
 const tenantRouter = Router();
@@ -20,4 +21,6 @@ tenantRouter.post('/tenant/:orderId/reject-order', verifyToken, verifyTenant, Re
 tenantRouter.post('/tenant/:orderId/cancel-order', verifyToken, verifyTenant, CancelOrderByTenantController);
 // Complete Order by Tenant
 tenantRouter.post('/tenant/:orderId/complete-order', verifyToken, verifyTenant, CompleteOrderController);
+// Get Booking by Tenant
+tenantRouter.get('/tenant/:orderId/get-booking', verifyToken, verifyTenant, GetBookingByTenantController);
 export default tenantRouter;
